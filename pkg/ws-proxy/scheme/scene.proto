@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package scheme;
+option go_package = "pkg/ws-proxy/scheme";
+
+import "google/protobuf/empty.proto";
+
+service SceneService {
+  rpc ListScene(ListSceneRequest) returns (ListSceneResponse) {}
+  rpc MoveSceneToNext(MoveSceneToNextRequest) returns (google.protobuf.Empty) {}
+}
+
+message Scene {
+  string name = 1;
+  int32 sceneIndex = 2;
+  bool is_current_program = 3;
+}
+
+message ListSceneRequest { int32 trackId = 1; }
+message ListSceneResponse { repeated Scene scene = 1; }
+
+message MoveSceneToNextRequest { int32 trackId = 1; }

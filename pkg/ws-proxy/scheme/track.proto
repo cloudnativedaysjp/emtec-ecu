@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package scheme;
+option go_package = "pkg/ws-proxy/scheme";
+
+import "google/protobuf/empty.proto";
+
+service TrackService {
+  rpc GetTrack(GetTrackRequest) returns (GetTrackResponse) {}
+  rpc ListTrack(google.protobuf.Empty) returns (ListTrackResponse) {}
+  rpc EnableAutomation(SwitchAutomationRequest)
+      returns (google.protobuf.Empty) {}
+  rpc DisableAutomation(SwitchAutomationRequest)
+      returns (google.protobuf.Empty) {}
+}
+
+message Track {
+  int32 trackId = 1;
+  string obsHost = 2;
+  bool enabled = 3;
+}
+
+message GetTrackRequest { int32 trackId = 1; }
+message GetTrackResponse { Track track = 1; }
+
+message ListTrackResponse { repeated Track track = 1; }
+
+message SwitchAutomationRequest { int32 trackId = 1; }
