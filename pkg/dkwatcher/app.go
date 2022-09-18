@@ -13,6 +13,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
+const componentName = "dkwatcher"
+
 type Config struct {
 	EventAbbr                 string
 	DkEndpointUrl             string
@@ -36,8 +38,7 @@ func Run(ctx context.Context, conf Config) error {
 	if err != nil {
 		return err
 	}
-	logger := zapr.NewLogger(zapLogger).WithName("dkwatcher")
-
+	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
 	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
@@ -48,13 +49,13 @@ func Run(ctx context.Context, conf Config) error {
 
 	mw := sharedmem.Writer{UseStorageForTalks: true}
 
-	tick := time.Tick(syncPeriod)
+	tick := time.NewTicker(syncPeriod)
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Info("context was done.")
 			return nil
-		case <-tick:
+		case <-tick.C:
 			talks, err := dkClient.ListTalks(ctx)
 			if err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")

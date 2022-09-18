@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/go-logr/logr"
 	emptypb "github.com/golang/protobuf/ptypes/empty"
-	"go.uber.org/zap"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/scheme"
@@ -16,7 +16,7 @@ type Controller struct {
 	pb.UnimplementedTrackServiceServer
 	pb.UnimplementedSceneServiceServer
 
-	Logger *zap.Logger
+	Logger logr.Logger
 	ObsWs  map[int32]obsws.ObsWebSocketApi
 }
 
@@ -46,6 +46,7 @@ func (c *Controller) ListTrack(ctx context.Context, in *emptypb.Empty) (*pb.List
 }
 
 func (c *Controller) ListScene(ctx context.Context, in *pb.ListSceneRequest) (*pb.ListSceneResponse, error) {
+	ctx = logr.NewContext(ctx, c.Logger)
 	ws, ok := c.ObsWs[in.TrackId]
 	if !ok {
 		return nil, fmt.Errorf("no such trackId %d", in.TrackId)
@@ -67,6 +68,7 @@ func (c *Controller) ListScene(ctx context.Context, in *pb.ListSceneRequest) (*p
 }
 
 func (c *Controller) MoveSceneToNext(ctx context.Context, in *pb.MoveSceneToNextRequest) (*emptypb.Empty, error) {
+	ctx = logr.NewContext(ctx, c.Logger)
 	ws, ok := c.ObsWs[in.TrackId]
 	if !ok {
 		return nil, fmt.Errorf("no such trackId %d", in.TrackId)

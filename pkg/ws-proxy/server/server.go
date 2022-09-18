@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/go-logr/zapr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
@@ -14,6 +15,8 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/scheme"
 )
+
+const componentName = "ws-proxy"
 
 type Config struct {
 	Debug    bool
@@ -31,10 +34,11 @@ func Run(conf Config) error {
 	// setup logger
 	zapConf := zap.NewProductionConfig()
 	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
-	logger, err := zapConf.Build()
+	zapLogger, err := zapConf.Build()
 	if err != nil {
 		return err
 	}
+	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 
 	obswsClientMap := make(map[int32]obsws.ObsWebSocketApi)
 	for _, obs := range conf.Obs {
@@ -53,7 +57,7 @@ func Run(conf Config) error {
 	s := grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
-			grpc_zap.UnaryServerInterceptor(logger),
+			grpc_zap.UnaryServerInterceptor(zapLogger.Named(componentName)),
 		),
 	)
 	pb.RegisterSceneServiceServer(s, controller)
