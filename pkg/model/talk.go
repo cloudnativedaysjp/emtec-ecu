@@ -15,11 +15,13 @@ const (
 type Talks []Talk
 
 func (ts Talks) WillStartNextTalkSince(d time.Duration) bool {
-	// TODO
+	// TODO (#10)
+	return false
 }
 
 func (ts Talks) GetNextTalk() Talk {
-	// TODO
+	// TODO (#10)
+	return Talk{}
 }
 
 type Talk struct {
