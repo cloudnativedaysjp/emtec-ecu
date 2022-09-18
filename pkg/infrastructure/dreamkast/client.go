@@ -42,7 +42,7 @@ func (c *Client) ListTalks(ctx context.Context) (model.Talks, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("message: %w", err)
 	}
-	var result []model.Talk
+	var result model.Talks
 	for _, track := range tracks {
 		talks, err := c.client.ListTalks(ctx, c.eventAbbr, track.ID)
 		if err != nil {
@@ -62,6 +62,7 @@ func (c *Client) ListTalks(ctx context.Context) (model.Talks, error) {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)
 			}
 
+			// TODO (#11)
 			// response is as below, so calcurate YYYY-MM-DDThh:mm:ss from these fields
 			// - "conferenceDayDate": "2022-08-05"
 			// - "actualStartTime": "2000-01-01T13:05:00.000+09:00"
@@ -71,6 +72,7 @@ func (c *Client) ListTalks(ctx context.Context) (model.Talks, error) {
 			result = append(result, t)
 		}
 	}
+	result.FillCommercial()
 	return result, nil
 }
 

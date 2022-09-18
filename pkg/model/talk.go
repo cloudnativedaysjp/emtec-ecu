@@ -14,9 +14,18 @@ const (
 
 type Talks []Talk
 
+func (ts *Talks) FillCommercial() {
+	// TODO (#10)
+}
+
 func (ts Talks) WillStartNextTalkSince(d time.Duration) bool {
 	// TODO (#10)
 	return false
+}
+
+func (ts Talks) GetCurrentTalk() Talk {
+	// TODO (#10)
+	return Talk{}
 }
 
 func (ts Talks) GetNextTalk() Talk {
