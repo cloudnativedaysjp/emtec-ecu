@@ -13,7 +13,8 @@ import (
 
 type ClientIface interface {
 	ListTalks(ctx context.Context) (model.Talks, error)
-	UpdateToOnAir(ctx context.Context, talkId int32) error
+	SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error
+	SetNextTalkOnAir(ctx context.Context, trackId int32) error
 }
 
 type Client struct {
@@ -76,11 +77,11 @@ func (c *Client) ListTalks(ctx context.Context) (model.Talks, error) {
 	return result, nil
 }
 
-func (c *Client) UpdateToOnAir(ctx context.Context, trackId int32) error {
+func (c *Client) SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
 	// If Auth0Token has been expired, retry only once.
 	err := retry.Do(
 		func() (err error) {
-			err = c.updateToOnAir(ctx, trackId)
+			err = c.setSpecifiedTalkOnAir(ctx, talkId)
 			return
 		},
 		retry.RetryIf(func(err error) bool {
@@ -92,12 +93,64 @@ func (c *Client) UpdateToOnAir(ctx context.Context, trackId int32) error {
 	return err
 }
 
-func (c *Client) updateToOnAir(ctx context.Context, trackId int32) error {
+func (c *Client) setSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
 	if err := c.client.GenerateAuth0Token(
 		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
 	); err != nil {
-		return err
+		return xerrors.Errorf("message: %w", err)
 	}
-	// TODO
+
+	if err := c.client.UpdateTalks(ctx, talkId, true); err != nil {
+		return xerrors.Errorf("message: %w", err)
+	}
+	return nil
+}
+
+func (c *Client) SetNextTalkOnAir(ctx context.Context, trackId int32) error {
+	// If Auth0Token has been expired, retry only once.
+	err := retry.Do(
+		func() (err error) {
+			err = c.setNextTalkOnAir(ctx, trackId)
+			return
+		},
+		retry.RetryIf(func(err error) bool {
+			return errors.As(err, &lib.ErrorUnauthorized{})
+		}),
+		retry.Attempts(1),
+		retry.Context(ctx),
+	)
+	return err
+}
+
+func (c *Client) setNextTalkOnAir(ctx context.Context, trackId int32) error {
+	if err := c.client.GenerateAuth0Token(
+		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
+	); err != nil {
+		return xerrors.Errorf("message: %w", err)
+	}
+
+	talks, err := c.client.ListTalks(ctx, c.eventAbbr, trackId)
+	if err != nil {
+		return xerrors.Errorf("message: %w", err)
+	}
+
+	var nextTalkId int32
+	onAirFlag := false
+	for idx, talk := range talks {
+		if onAirFlag {
+			nextTalkId = talk.ID
+			break
+		}
+		if idx == len(talks)-1 {
+			return xerrors.Errorf("message: Talks on specified track is the end. Next one is none.")
+		}
+		if talk.OnAir {
+			onAirFlag = true
+		}
+	}
+
+	if err := c.client.UpdateTalks(ctx, nextTalkId, true); err != nil {
+		return xerrors.Errorf("message: %w", err)
+	}
 	return nil
 }

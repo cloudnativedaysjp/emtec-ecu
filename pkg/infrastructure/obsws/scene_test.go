@@ -1,7 +1,7 @@
 //go:build obsws
 
 // This test is for checking behavior.
-// If you run this test, you should prepare OBS with obs-websocket &
+// If you want to execute this test, you need to prepare OBS with obs-websocket &
 // expose tcp/4455 port with no password.
 
 package obsws
@@ -10,14 +10,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
 	"github.com/k0kubun/pp"
 )
 
 func TestObsWebSocketClient_ListScenes(t *testing.T) {
-	const (
-		host = "127.0.0.1:4455"
-	)
 	var (
+		host = testutils.Getenv(t, "OBS_HOST")
+
 		ctx = context.Background()
 	)
 
@@ -34,10 +34,9 @@ func TestObsWebSocketClient_ListScenes(t *testing.T) {
 }
 
 func TestObsWebSocketClient_MoveSceneToNext(t *testing.T) {
-	const (
-		host = "127.0.0.1:4455"
-	)
 	var (
+		host = testutils.Getenv(t, "OBS_HOST")
+
 		ctx = context.Background()
 	)
 

@@ -59,6 +59,10 @@ type Speaker struct {
 	Name string `json:"name"`
 }
 
+type UpdateTalksReq struct {
+	OnAir bool
+}
+
 //
 // Error Types
 //
