@@ -6,7 +6,7 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/server"
 )
 
-// TODO
+// TODO (#2)
 func main() {
 	if err := server.Run(server.Config{
 		Debug: true,

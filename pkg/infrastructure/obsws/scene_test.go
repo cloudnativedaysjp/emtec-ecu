@@ -1,4 +1,4 @@
-//TODO go:build obsws
+//go:build obsws
 
 // This test is for checking behavior.
 // If you run this test, you should prepare OBS with obs-websocket &

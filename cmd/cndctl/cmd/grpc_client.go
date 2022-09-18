@@ -15,7 +15,7 @@ var (
 func createClient(addr string) error {
 	conn, err := grpc.Dial(
 		addr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO
+		grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO (#7)
 	)
 	if err != nil {
 		return err
