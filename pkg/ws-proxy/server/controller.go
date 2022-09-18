@@ -35,7 +35,6 @@ func (c *Controller) GetTrack(ctx context.Context, in *pb.GetTrackRequest) (*pb.
 func (c *Controller) ListTrack(ctx context.Context, in *emptypb.Empty) (*pb.ListTrackResponse, error) {
 	var tracks []*pb.Track
 	for trackId, ws := range c.ObsWs {
-		fmt.Println(trackId)
 		tracks = append(tracks, &pb.Track{
 			TrackId: trackId,
 			ObsHost: ws.GetHost(),
