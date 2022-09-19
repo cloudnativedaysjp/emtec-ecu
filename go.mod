@@ -10,6 +10,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/k0kubun/pp v3.0.1+incompatible
+	github.com/slack-go/slack v0.11.3
 	github.com/spf13/cobra v1.5.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1

@@ -7,7 +7,6 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
-	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -26,8 +25,8 @@ type Config struct {
 }
 
 const (
-	syncPeriod           = 30 * time.Second
-	howManyMinutesNotify = 5 * time.Minute
+	syncPeriod                = 30 * time.Second
+	howManyMinutesUntilNotify = 5 * time.Minute
 )
 
 func Run(ctx context.Context, conf Config) error {
@@ -39,7 +38,6 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
-	ctx = logr.NewContext(ctx, logger)
 
 	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
 		conf.Auth0Domain, conf.Auth0ClientId, conf.Auth0ClientSecret, conf.Auth0ClientAudience)
@@ -63,7 +61,7 @@ func Run(ctx context.Context, conf Config) error {
 			if err := mw.SetTalks(talks); err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
 			}
-			if talks.WillStartNextTalkSince(howManyMinutesNotify) {
+			if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
 				conf.NotificationEventSendChan <- talks.GetNextTalk()
 			}
 		}
