@@ -57,9 +57,11 @@ func Run(ctx context.Context, conf Config) error {
 			talks, err := dkClient.ListTalks(ctx)
 			if err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
+				continue
 			}
 			if err := mw.SetTalks(talks); err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
+				continue
 			}
 			if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
 				conf.NotificationEventSendChan <- talks.GetNextTalk()
