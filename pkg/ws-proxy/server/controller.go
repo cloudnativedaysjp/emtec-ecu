@@ -17,7 +17,7 @@ type Controller struct {
 	pb.UnimplementedSceneServiceServer
 
 	Logger logr.Logger
-	ObsWs  map[int32]obsws.ObsWebSocketApi
+	ObsWs  map[int32]obsws.ClientIface
 }
 
 func (c *Controller) GetTrack(ctx context.Context, in *pb.GetTrackRequest) (*pb.GetTrackResponse, error) {

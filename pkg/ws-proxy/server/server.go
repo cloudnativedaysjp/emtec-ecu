@@ -40,7 +40,7 @@ func Run(conf Config) error {
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 
-	obswsClientMap := make(map[int32]obsws.ObsWebSocketApi)
+	obswsClientMap := make(map[int32]obsws.ClientIface)
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
 		if err != nil {

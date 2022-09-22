@@ -2,43 +2,169 @@ package obsws
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/andreykaipov/goobs"
+	"github.com/andreykaipov/goobs/api/requests/mediainputs"
+	"github.com/andreykaipov/goobs/api/requests/sceneitems"
+	"github.com/andreykaipov/goobs/api/requests/scenes"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws/lib"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
-type ObsWebSocketApi interface {
+type ClientIface interface {
 	GetHost() string
 	ListScenes(ctx context.Context) ([]Scene, error)
 	MoveSceneToNext(ctx context.Context) error
+	GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationAndCursor, error)
 }
 
-type ObsWebSocketClient struct {
-	client *goobs.Client
+type Client struct {
+	client lib.ObsWsApi
 
 	host     string
 	password string
 }
 
-func NewObsWebSocketClient(host, password string) (ObsWebSocketApi, error) {
-	c := &ObsWebSocketClient{host: host, password: password}
-	if err := c.setClient(); err != nil {
+func NewObsWebSocketClient(host, password string) (ClientIface, error) {
+	c := lib.NewClient()
+	if err := c.GenerateClient(host, password); err != nil {
 		return nil, err
 	}
-	return c, nil
+	return &Client{c, host, password}, nil
 }
 
-func (c *ObsWebSocketClient) GetHost() string {
+func (c *Client) GetHost() string {
 	return c.host
 }
 
-func (c *ObsWebSocketClient) setClient() error {
-	if c.client != nil {
-		return nil
+type Scene struct {
+	Name             string
+	SceneIndex       int
+	IsCurrentProgram bool
+}
+
+// ListScenes is output list of scenes. It is sorted order by as shown in OBS.
+func (c *Client) ListScenes(ctx context.Context) ([]Scene, error) {
+	_ = utils.GetLogger(ctx)
+	if err := c.client.GenerateClient(c.host, c.password); err != nil {
+		return nil, err
 	}
-	client, err := goobs.New(c.host, goobs.WithPassword(c.password))
+
+	resp, err := c.client.Scenes().GetSceneList()
+	if err != nil {
+		c.client = nil
+		return nil, err
+	}
+
+	var scenes []Scene
+	for _, s := range resp.Scenes {
+		scene := Scene{Name: s.SceneName, SceneIndex: s.SceneIndex}
+		if s.SceneName == resp.CurrentProgramSceneName {
+			scene.IsCurrentProgram = true
+		}
+		scenes = append(scenes, scene)
+	}
+
+	// reverse
+	for i := 0; i < len(scenes)/2; i++ {
+		scenes[i], scenes[len(scenes)-i-1] = scenes[len(scenes)-i-1], scenes[i]
+	}
+
+	return scenes, nil
+}
+
+func (c *Client) MoveSceneToNext(ctx context.Context) error {
+	logger := utils.GetLogger(ctx)
+	if err := c.client.GenerateClient(c.host, c.password); err != nil {
+		return err
+	}
+
+	_scenes, err := c.ListScenes(ctx)
 	if err != nil {
 		return err
 	}
-	c.client = client
+
+	var nextSceneName string
+	var currentProgramFlag, nextProgramFlag bool
+	for _, scene := range _scenes {
+		if scene.IsCurrentProgram {
+			currentProgramFlag = true
+			continue
+		}
+		if currentProgramFlag {
+			currentProgramFlag = false
+			nextProgramFlag = true
+			nextSceneName = scene.Name
+			break
+		}
+	}
+	if currentProgramFlag {
+		logger.Info("current scene is tha last scene.")
+		nextSceneName = _scenes[0].Name
+	} else if !nextProgramFlag {
+		return fmt.Errorf("CurrentProgram is nothing")
+	}
+
+	if _, err := c.client.Scenes().SetCurrentProgramScene(&scenes.SetCurrentProgramSceneParams{
+		SceneName: nextSceneName,
+	}); err != nil {
+		c.client = nil
+		return err
+	}
 	return nil
+}
+
+type DurationAndCursor struct {
+	Duration float64
+	Cursor   float64
+}
+
+func (c *Client) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationAndCursor, error) {
+	_ = utils.GetLogger(ctx)
+	if err := c.client.GenerateClient(c.host, c.password); err != nil {
+		return nil, err
+	}
+
+	listScenesResp, err := c.client.Scenes().GetSceneList()
+	if err != nil {
+		c.client = nil
+		return nil, err
+	}
+
+	var currentSceneName string
+	for _, s := range listScenesResp.Scenes {
+		if s.SceneName == listScenesResp.CurrentProgramSceneName {
+			currentSceneName = s.SceneName
+		}
+	}
+	if currentSceneName == "" {
+		return nil, fmt.Errorf("TODO")
+	}
+
+	listSceneItemsResp, err := c.client.SceneItems().GetSceneItemList(
+		&sceneitems.GetSceneItemListParams{SceneName: currentSceneName})
+	if err != nil {
+		c.client = nil
+		return nil, err
+	}
+
+	var mediaInputName string
+	for _, si := range listSceneItemsResp.SceneItems {
+		if si.SourceType == "TODO" {
+			mediaInputName = si.SourceName
+		}
+	}
+	if mediaInputName == "" {
+		return nil, fmt.Errorf("TODO")
+	}
+
+	resp, err := c.client.MediaInputs().GetMediaInputStatus(&mediainputs.GetMediaInputStatusParams{InputName: mediaInputName})
+	if err != nil {
+		c.client = nil
+		return nil, err
+	}
+	if resp.MediaState != "OBS_MEDIA_STATE_PLAYING" {
+		return nil, fmt.Errorf("TODO")
+	}
+	return &DurationAndCursor{resp.MediaDuration, resp.MediaCursor}, nil
 }

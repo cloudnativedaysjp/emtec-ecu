@@ -16,7 +16,7 @@ type Reader struct {
 	UseStorageForTalks             bool
 }
 
-func (w Writer) DisableAutomation(trackId int32) (bool, error) {
+func (w Reader) DisableAutomation(trackId int32) (bool, error) {
 	if !w.UseStorageForDisableAutomation {
 		return false, fmt.Errorf("UseStorageForDisableAutomation was false")
 	}
@@ -29,7 +29,7 @@ func (w Writer) DisableAutomation(trackId int32) (bool, error) {
 	return disabled, nil
 }
 
-func (w Writer) Talks(trackId int32) (model.Talk, error) {
+func (w Reader) Talks(trackId int32) (model.Talk, error) {
 	if !w.UseStorageForTalks {
 		return model.Talk{}, fmt.Errorf("UseStorageForTalks was false")
 	}
