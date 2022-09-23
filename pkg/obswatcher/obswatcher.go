@@ -13,6 +13,7 @@ import (
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
 const (
@@ -63,11 +64,7 @@ func watch(ctx context.Context, trackId int32,
 	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
 ) func() error {
 	return func() error {
-		logger, err := logr.FromContext(ctx)
-		if err != nil {
-			return err
-		}
-		logger = logger.WithValues("trackId", trackId)
+		logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 		tick := time.NewTicker(syncPeriod)
 
 		for {
@@ -87,11 +84,7 @@ func watch(ctx context.Context, trackId int32,
 func procedure(ctx context.Context, trackId int32,
 	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
 ) error {
-	logger, err := logr.FromContext(ctx)
-	if err != nil {
-		return err
-	}
-	logger = logger.WithValues("trackId", trackId)
+	logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 
 	if ok, err := mr.DisableAutomation(trackId); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")

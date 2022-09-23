@@ -45,7 +45,6 @@ type Scene struct {
 
 // ListScenes is output list of scenes. It is sorted order by as shown in OBS.
 func (c *Client) ListScenes(ctx context.Context) ([]Scene, error) {
-	_ = utils.GetLogger(ctx)
 	if err := c.client.GenerateClient(c.host, c.password); err != nil {
 		return nil, err
 	}

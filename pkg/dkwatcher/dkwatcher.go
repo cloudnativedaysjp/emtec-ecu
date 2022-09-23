@@ -7,6 +7,7 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
@@ -60,7 +61,6 @@ func Run(ctx context.Context, conf Config) error {
 			if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
 				return err
 			}
-
 		}
 	}
 }
@@ -69,10 +69,7 @@ func procedure(ctx context.Context,
 	dkClient dreamkast.ClientIface, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
 	notificationEventSendChan chan<- model.Talk,
 ) error {
-	logger, err := logr.FromContext(ctx)
-	if err != nil {
-		return err
-	}
+	logger := utils.GetLogger(ctx)
 
 	talksList, err := dkClient.ListTalks(ctx)
 	if err != nil {
