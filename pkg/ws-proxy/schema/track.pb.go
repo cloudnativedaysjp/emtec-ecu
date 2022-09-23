@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.28.1
 // 	protoc        v3.21.6
-// source: pkg/ws-proxy/scheme/track.proto
+// source: pkg/ws-proxy/schema/track.proto
 
-package scheme
+package schema
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -34,7 +34,7 @@ type Track struct {
 func (x *Track) Reset() {
 	*x = Track{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[0]
+		mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -47,7 +47,7 @@ func (x *Track) String() string {
 func (*Track) ProtoMessage() {}
 
 func (x *Track) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[0]
+	mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +60,7 @@ func (x *Track) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Track.ProtoReflect.Descriptor instead.
 func (*Track) Descriptor() ([]byte, []int) {
-	return file_pkg_ws_proxy_scheme_track_proto_rawDescGZIP(), []int{0}
+	return file_pkg_ws_proxy_schema_track_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Track) GetTrackId() int32 {
@@ -95,7 +95,7 @@ type GetTrackRequest struct {
 func (x *GetTrackRequest) Reset() {
 	*x = GetTrackRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[1]
+		mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -108,7 +108,7 @@ func (x *GetTrackRequest) String() string {
 func (*GetTrackRequest) ProtoMessage() {}
 
 func (x *GetTrackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[1]
+	mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +121,7 @@ func (x *GetTrackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTrackRequest.ProtoReflect.Descriptor instead.
 func (*GetTrackRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_ws_proxy_scheme_track_proto_rawDescGZIP(), []int{1}
+	return file_pkg_ws_proxy_schema_track_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetTrackRequest) GetTrackId() int32 {
@@ -142,7 +142,7 @@ type GetTrackResponse struct {
 func (x *GetTrackResponse) Reset() {
 	*x = GetTrackResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[2]
+		mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -155,7 +155,7 @@ func (x *GetTrackResponse) String() string {
 func (*GetTrackResponse) ProtoMessage() {}
 
 func (x *GetTrackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[2]
+	mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -168,7 +168,7 @@ func (x *GetTrackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTrackResponse.ProtoReflect.Descriptor instead.
 func (*GetTrackResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_ws_proxy_scheme_track_proto_rawDescGZIP(), []int{2}
+	return file_pkg_ws_proxy_schema_track_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetTrackResponse) GetTrack() *Track {
@@ -189,7 +189,7 @@ type ListTrackResponse struct {
 func (x *ListTrackResponse) Reset() {
 	*x = ListTrackResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[3]
+		mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -202,7 +202,7 @@ func (x *ListTrackResponse) String() string {
 func (*ListTrackResponse) ProtoMessage() {}
 
 func (x *ListTrackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[3]
+	mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,7 +215,7 @@ func (x *ListTrackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTrackResponse.ProtoReflect.Descriptor instead.
 func (*ListTrackResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_ws_proxy_scheme_track_proto_rawDescGZIP(), []int{3}
+	return file_pkg_ws_proxy_schema_track_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListTrackResponse) GetTrack() []*Track {
@@ -236,7 +236,7 @@ type SwitchAutomationRequest struct {
 func (x *SwitchAutomationRequest) Reset() {
 	*x = SwitchAutomationRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[4]
+		mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -249,7 +249,7 @@ func (x *SwitchAutomationRequest) String() string {
 func (*SwitchAutomationRequest) ProtoMessage() {}
 
 func (x *SwitchAutomationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_ws_proxy_scheme_track_proto_msgTypes[4]
+	mi := &file_pkg_ws_proxy_schema_track_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -262,7 +262,7 @@ func (x *SwitchAutomationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SwitchAutomationRequest.ProtoReflect.Descriptor instead.
 func (*SwitchAutomationRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_ws_proxy_scheme_track_proto_rawDescGZIP(), []int{4}
+	return file_pkg_ws_proxy_schema_track_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SwitchAutomationRequest) GetTrackId() int32 {
@@ -272,12 +272,12 @@ func (x *SwitchAutomationRequest) GetTrackId() int32 {
 	return 0
 }
 
-var File_pkg_ws_proxy_scheme_track_proto protoreflect.FileDescriptor
+var File_pkg_ws_proxy_schema_track_proto protoreflect.FileDescriptor
 
-var file_pkg_ws_proxy_scheme_track_proto_rawDesc = []byte{
+var file_pkg_ws_proxy_schema_track_proto_rawDesc = []byte{
 	0x0a, 0x1f, 0x70, 0x6b, 0x67, 0x2f, 0x77, 0x73, 0x2d, 0x70, 0x72, 0x6f, 0x78, 0x79, 0x2f, 0x73,
-	0x63, 0x68, 0x65, 0x6d, 0x65, 0x2f, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x12, 0x06, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x65, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x63, 0x68, 0x65, 0x6d, 0x61, 0x2f, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x12, 0x06, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x55, 0x0a, 0x05, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x12,
 	0x18, 0x0a, 0x07, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
@@ -290,70 +290,73 @@ var file_pkg_ws_proxy_scheme_track_proto_rawDesc = []byte{
 	0x05, 0x52, 0x07, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x49, 0x64, 0x22, 0x37, 0x0a, 0x10, 0x47, 0x65,
 	0x74, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x23,
 	0x0a, 0x05, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e,
-	0x73, 0x63, 0x68, 0x65, 0x6d, 0x65, 0x2e, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x05, 0x74, 0x72,
+	0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x05, 0x74, 0x72,
 	0x61, 0x63, 0x6b, 0x22, 0x38, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x72, 0x61, 0x63, 0x6b,
 	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x23, 0x0a, 0x05, 0x74, 0x72, 0x61, 0x63,
-	0x6b, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x65,
+	0x6b, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61,
 	0x2e, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x05, 0x74, 0x72, 0x61, 0x63, 0x6b, 0x22, 0x33, 0x0a,
 	0x17, 0x53, 0x77, 0x69, 0x74, 0x63, 0x68, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x69, 0x6f,
 	0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x74, 0x72, 0x61, 0x63,
 	0x6b, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x74, 0x72, 0x61, 0x63, 0x6b,
 	0x49, 0x64, 0x32, 0xb0, 0x02, 0x0a, 0x0c, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x53, 0x65, 0x72, 0x76,
 	0x69, 0x63, 0x65, 0x12, 0x3f, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x12,
-	0x17, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x65, 0x2e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x63,
+	0x17, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x63,
 	0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d,
-	0x65, 0x2e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x61, 0x2e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
 	0x73, 0x65, 0x22, 0x00, 0x12, 0x40, 0x0a, 0x09, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x72, 0x61, 0x63,
 	0x6b, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x19, 0x2e, 0x73, 0x63, 0x68, 0x65,
-	0x6d, 0x65, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70,
+	0x6d, 0x61, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70,
 	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4d, 0x0a, 0x10, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65,
 	0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1f, 0x2e, 0x73, 0x63, 0x68,
-	0x65, 0x6d, 0x65, 0x2e, 0x53, 0x77, 0x69, 0x74, 0x63, 0x68, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61,
+	0x65, 0x6d, 0x61, 0x2e, 0x53, 0x77, 0x69, 0x74, 0x63, 0x68, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61,
 	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f,
 	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d,
 	0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x4e, 0x0a, 0x11, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65,
 	0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1f, 0x2e, 0x73, 0x63, 0x68,
-	0x65, 0x6d, 0x65, 0x2e, 0x53, 0x77, 0x69, 0x74, 0x63, 0x68, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61,
+	0x65, 0x6d, 0x61, 0x2e, 0x53, 0x77, 0x69, 0x74, 0x63, 0x68, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61,
 	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f,
 	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d,
-	0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x15, 0x5a, 0x13, 0x70, 0x6b, 0x67, 0x2f, 0x77, 0x73, 0x2d,
-	0x70, 0x72, 0x6f, 0x78, 0x79, 0x2f, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x65, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x47, 0x5a, 0x45, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x6e, 0x61, 0x74, 0x69, 0x76, 0x65, 0x64,
+	0x61, 0x79, 0x73, 0x6a, 0x70, 0x2f, 0x63, 0x6e, 0x64, 0x2d, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x2d, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x77,
+	0x73, 0x2d, 0x70, 0x72, 0x6f, 0x78, 0x79, 0x2f, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_pkg_ws_proxy_scheme_track_proto_rawDescOnce sync.Once
-	file_pkg_ws_proxy_scheme_track_proto_rawDescData = file_pkg_ws_proxy_scheme_track_proto_rawDesc
+	file_pkg_ws_proxy_schema_track_proto_rawDescOnce sync.Once
+	file_pkg_ws_proxy_schema_track_proto_rawDescData = file_pkg_ws_proxy_schema_track_proto_rawDesc
 )
 
-func file_pkg_ws_proxy_scheme_track_proto_rawDescGZIP() []byte {
-	file_pkg_ws_proxy_scheme_track_proto_rawDescOnce.Do(func() {
-		file_pkg_ws_proxy_scheme_track_proto_rawDescData = protoimpl.X.CompressGZIP(file_pkg_ws_proxy_scheme_track_proto_rawDescData)
+func file_pkg_ws_proxy_schema_track_proto_rawDescGZIP() []byte {
+	file_pkg_ws_proxy_schema_track_proto_rawDescOnce.Do(func() {
+		file_pkg_ws_proxy_schema_track_proto_rawDescData = protoimpl.X.CompressGZIP(file_pkg_ws_proxy_schema_track_proto_rawDescData)
 	})
-	return file_pkg_ws_proxy_scheme_track_proto_rawDescData
+	return file_pkg_ws_proxy_schema_track_proto_rawDescData
 }
 
-var file_pkg_ws_proxy_scheme_track_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_pkg_ws_proxy_scheme_track_proto_goTypes = []interface{}{
-	(*Track)(nil),                   // 0: scheme.Track
-	(*GetTrackRequest)(nil),         // 1: scheme.GetTrackRequest
-	(*GetTrackResponse)(nil),        // 2: scheme.GetTrackResponse
-	(*ListTrackResponse)(nil),       // 3: scheme.ListTrackResponse
-	(*SwitchAutomationRequest)(nil), // 4: scheme.SwitchAutomationRequest
+var file_pkg_ws_proxy_schema_track_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_pkg_ws_proxy_schema_track_proto_goTypes = []interface{}{
+	(*Track)(nil),                   // 0: schema.Track
+	(*GetTrackRequest)(nil),         // 1: schema.GetTrackRequest
+	(*GetTrackResponse)(nil),        // 2: schema.GetTrackResponse
+	(*ListTrackResponse)(nil),       // 3: schema.ListTrackResponse
+	(*SwitchAutomationRequest)(nil), // 4: schema.SwitchAutomationRequest
 	(*emptypb.Empty)(nil),           // 5: google.protobuf.Empty
 }
-var file_pkg_ws_proxy_scheme_track_proto_depIdxs = []int32{
-	0, // 0: scheme.GetTrackResponse.track:type_name -> scheme.Track
-	0, // 1: scheme.ListTrackResponse.track:type_name -> scheme.Track
-	1, // 2: scheme.TrackService.GetTrack:input_type -> scheme.GetTrackRequest
-	5, // 3: scheme.TrackService.ListTrack:input_type -> google.protobuf.Empty
-	4, // 4: scheme.TrackService.EnableAutomation:input_type -> scheme.SwitchAutomationRequest
-	4, // 5: scheme.TrackService.DisableAutomation:input_type -> scheme.SwitchAutomationRequest
-	2, // 6: scheme.TrackService.GetTrack:output_type -> scheme.GetTrackResponse
-	3, // 7: scheme.TrackService.ListTrack:output_type -> scheme.ListTrackResponse
-	5, // 8: scheme.TrackService.EnableAutomation:output_type -> google.protobuf.Empty
-	5, // 9: scheme.TrackService.DisableAutomation:output_type -> google.protobuf.Empty
+var file_pkg_ws_proxy_schema_track_proto_depIdxs = []int32{
+	0, // 0: schema.GetTrackResponse.track:type_name -> schema.Track
+	0, // 1: schema.ListTrackResponse.track:type_name -> schema.Track
+	1, // 2: schema.TrackService.GetTrack:input_type -> schema.GetTrackRequest
+	5, // 3: schema.TrackService.ListTrack:input_type -> google.protobuf.Empty
+	4, // 4: schema.TrackService.EnableAutomation:input_type -> schema.SwitchAutomationRequest
+	4, // 5: schema.TrackService.DisableAutomation:input_type -> schema.SwitchAutomationRequest
+	2, // 6: schema.TrackService.GetTrack:output_type -> schema.GetTrackResponse
+	3, // 7: schema.TrackService.ListTrack:output_type -> schema.ListTrackResponse
+	5, // 8: schema.TrackService.EnableAutomation:output_type -> google.protobuf.Empty
+	5, // 9: schema.TrackService.DisableAutomation:output_type -> google.protobuf.Empty
 	6, // [6:10] is the sub-list for method output_type
 	2, // [2:6] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -361,13 +364,13 @@ var file_pkg_ws_proxy_scheme_track_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_pkg_ws_proxy_scheme_track_proto_init() }
-func file_pkg_ws_proxy_scheme_track_proto_init() {
-	if File_pkg_ws_proxy_scheme_track_proto != nil {
+func init() { file_pkg_ws_proxy_schema_track_proto_init() }
+func file_pkg_ws_proxy_schema_track_proto_init() {
+	if File_pkg_ws_proxy_schema_track_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_pkg_ws_proxy_scheme_track_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_pkg_ws_proxy_schema_track_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Track); i {
 			case 0:
 				return &v.state
@@ -379,7 +382,7 @@ func file_pkg_ws_proxy_scheme_track_proto_init() {
 				return nil
 			}
 		}
-		file_pkg_ws_proxy_scheme_track_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_pkg_ws_proxy_schema_track_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetTrackRequest); i {
 			case 0:
 				return &v.state
@@ -391,7 +394,7 @@ func file_pkg_ws_proxy_scheme_track_proto_init() {
 				return nil
 			}
 		}
-		file_pkg_ws_proxy_scheme_track_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_pkg_ws_proxy_schema_track_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetTrackResponse); i {
 			case 0:
 				return &v.state
@@ -403,7 +406,7 @@ func file_pkg_ws_proxy_scheme_track_proto_init() {
 				return nil
 			}
 		}
-		file_pkg_ws_proxy_scheme_track_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_pkg_ws_proxy_schema_track_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListTrackResponse); i {
 			case 0:
 				return &v.state
@@ -415,7 +418,7 @@ func file_pkg_ws_proxy_scheme_track_proto_init() {
 				return nil
 			}
 		}
-		file_pkg_ws_proxy_scheme_track_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_pkg_ws_proxy_schema_track_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SwitchAutomationRequest); i {
 			case 0:
 				return &v.state
@@ -432,18 +435,18 @@ func file_pkg_ws_proxy_scheme_track_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_pkg_ws_proxy_scheme_track_proto_rawDesc,
+			RawDescriptor: file_pkg_ws_proxy_schema_track_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_pkg_ws_proxy_scheme_track_proto_goTypes,
-		DependencyIndexes: file_pkg_ws_proxy_scheme_track_proto_depIdxs,
-		MessageInfos:      file_pkg_ws_proxy_scheme_track_proto_msgTypes,
+		GoTypes:           file_pkg_ws_proxy_schema_track_proto_goTypes,
+		DependencyIndexes: file_pkg_ws_proxy_schema_track_proto_depIdxs,
+		MessageInfos:      file_pkg_ws_proxy_schema_track_proto_msgTypes,
 	}.Build()
-	File_pkg_ws_proxy_scheme_track_proto = out.File
-	file_pkg_ws_proxy_scheme_track_proto_rawDesc = nil
-	file_pkg_ws_proxy_scheme_track_proto_goTypes = nil
-	file_pkg_ws_proxy_scheme_track_proto_depIdxs = nil
+	File_pkg_ws_proxy_schema_track_proto = out.File
+	file_pkg_ws_proxy_schema_track_proto_rawDesc = nil
+	file_pkg_ws_proxy_schema_track_proto_goTypes = nil
+	file_pkg_ws_proxy_schema_track_proto_depIdxs = nil
 }

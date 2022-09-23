@@ -27,6 +27,11 @@ include cmd/**/*.mk
 
 ##@ Development
 
+.PHONY: generate
+generate:  ## Generate code
+	# TODO: add "Install Tools"
+	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./pkg/ws-proxy/schema/*.proto
+
 .PHONY: fmt
 fmt: ## Run go fmt against code.
 	go fmt ./...

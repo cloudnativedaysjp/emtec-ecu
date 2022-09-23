@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/scheme"
+	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
 const componentName = "ws-proxy"

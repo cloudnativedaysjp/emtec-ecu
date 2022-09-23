@@ -7,6 +7,7 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -38,6 +39,7 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
+	ctx = logr.NewContext(ctx, logger)
 
 	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
 		conf.Auth0Domain, conf.Auth0ClientId, conf.Auth0ClientSecret, conf.Auth0ClientAudience)
@@ -55,30 +57,47 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Info("context was done.")
 			return nil
 		case <-tick.C:
-
-			talksList, err := dkClient.ListTalks(ctx)
-			if err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
-				continue
+			if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+				return err
 			}
-			for _, talks := range talksList {
-				if ok, err := mr.DisableAutomation(talks.GetCurrentTalk().TrackId); err != nil {
-					err = xerrors.Errorf("message: %w", err)
-					logger.Error(err, "mr.DisableAutomation() was failed")
-					return err
-				} else if ok {
-					logger.Info("DisableAutomation was true, skipped")
-					continue
-				}
 
-				if err := mw.SetTalks(talks); err != nil {
-					logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
-					continue
-				}
-				if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
-					conf.NotificationEventSendChan <- talks.GetNextTalk()
-				}
-			}
 		}
 	}
+}
+
+func procedure(ctx context.Context,
+	dkClient dreamkast.ClientIface, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
+	notificationEventSendChan chan<- model.Talk,
+) error {
+	logger, err := logr.FromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	talksList, err := dkClient.ListTalks(ctx)
+	if err != nil {
+		logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
+		return nil
+	}
+	for _, talks := range talksList {
+		trackId := talks.GetCurrentTalk().TrackId
+		logger = logger.WithValues("trackId", trackId)
+
+		if ok, err := mr.DisableAutomation(trackId); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
+			return nil
+		} else if ok {
+			logger.Info("DisableAutomation was true, skipped")
+			continue
+		}
+
+		if err := mw.SetTalks(trackId, talks); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
+			continue
+		}
+		if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
+			notificationEventSendChan <- talks.GetNextTalk()
+		}
+	}
+	return nil
 }

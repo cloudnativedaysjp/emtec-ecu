@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.6
-// source: pkg/ws-proxy/scheme/track.proto
+// source: pkg/ws-proxy/schema/track.proto
 
-package scheme
+package schema
 
 import (
 	context "context"
@@ -39,7 +39,7 @@ func NewTrackServiceClient(cc grpc.ClientConnInterface) TrackServiceClient {
 
 func (c *trackServiceClient) GetTrack(ctx context.Context, in *GetTrackRequest, opts ...grpc.CallOption) (*GetTrackResponse, error) {
 	out := new(GetTrackResponse)
-	err := c.cc.Invoke(ctx, "/scheme.TrackService/GetTrack", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/schema.TrackService/GetTrack", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *trackServiceClient) GetTrack(ctx context.Context, in *GetTrackRequest, 
 
 func (c *trackServiceClient) ListTrack(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListTrackResponse, error) {
 	out := new(ListTrackResponse)
-	err := c.cc.Invoke(ctx, "/scheme.TrackService/ListTrack", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/schema.TrackService/ListTrack", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *trackServiceClient) ListTrack(ctx context.Context, in *emptypb.Empty, o
 
 func (c *trackServiceClient) EnableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/scheme.TrackService/EnableAutomation", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/schema.TrackService/EnableAutomation", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *trackServiceClient) EnableAutomation(ctx context.Context, in *SwitchAut
 
 func (c *trackServiceClient) DisableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/scheme.TrackService/DisableAutomation", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/schema.TrackService/DisableAutomation", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func _TrackService_GetTrack_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/scheme.TrackService/GetTrack",
+		FullMethod: "/schema.TrackService/GetTrack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TrackServiceServer).GetTrack(ctx, req.(*GetTrackRequest))
@@ -141,7 +141,7 @@ func _TrackService_ListTrack_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/scheme.TrackService/ListTrack",
+		FullMethod: "/schema.TrackService/ListTrack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TrackServiceServer).ListTrack(ctx, req.(*emptypb.Empty))
@@ -159,7 +159,7 @@ func _TrackService_EnableAutomation_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/scheme.TrackService/EnableAutomation",
+		FullMethod: "/schema.TrackService/EnableAutomation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TrackServiceServer).EnableAutomation(ctx, req.(*SwitchAutomationRequest))
@@ -177,7 +177,7 @@ func _TrackService_DisableAutomation_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/scheme.TrackService/DisableAutomation",
+		FullMethod: "/schema.TrackService/DisableAutomation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TrackServiceServer).DisableAutomation(ctx, req.(*SwitchAutomationRequest))
@@ -189,7 +189,7 @@ func _TrackService_DisableAutomation_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TrackService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "scheme.TrackService",
+	ServiceName: "schema.TrackService",
 	HandlerType: (*TrackServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -210,5 +210,5 @@ var TrackService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pkg/ws-proxy/scheme/track.proto",
+	Metadata: "pkg/ws-proxy/schema/track.proto",
 }

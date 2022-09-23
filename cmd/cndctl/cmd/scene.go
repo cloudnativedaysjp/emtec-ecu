@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/scheme"
+	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
 // sceneCmd represents the "scene" command

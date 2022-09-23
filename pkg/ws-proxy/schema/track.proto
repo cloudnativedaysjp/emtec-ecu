@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package scheme;
-option go_package = "pkg/ws-proxy/scheme";
+package schema;
+option go_package = "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema";
 
 import "google/protobuf/empty.proto";
 

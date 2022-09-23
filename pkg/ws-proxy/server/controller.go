@@ -9,7 +9,7 @@ import (
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/scheme"
+	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
 type Controller struct {

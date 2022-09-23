@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.6
-// source: pkg/ws-proxy/scheme/scene.proto
+// source: pkg/ws-proxy/schema/scene.proto
 
-package scheme
+package schema
 
 import (
 	context "context"
@@ -37,7 +37,7 @@ func NewSceneServiceClient(cc grpc.ClientConnInterface) SceneServiceClient {
 
 func (c *sceneServiceClient) ListScene(ctx context.Context, in *ListSceneRequest, opts ...grpc.CallOption) (*ListSceneResponse, error) {
 	out := new(ListSceneResponse)
-	err := c.cc.Invoke(ctx, "/scheme.SceneService/ListScene", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/schema.SceneService/ListScene", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *sceneServiceClient) ListScene(ctx context.Context, in *ListSceneRequest
 
 func (c *sceneServiceClient) MoveSceneToNext(ctx context.Context, in *MoveSceneToNextRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/scheme.SceneService/MoveSceneToNext", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/schema.SceneService/MoveSceneToNext", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func _SceneService_ListScene_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/scheme.SceneService/ListScene",
+		FullMethod: "/schema.SceneService/ListScene",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SceneServiceServer).ListScene(ctx, req.(*ListSceneRequest))
@@ -113,7 +113,7 @@ func _SceneService_MoveSceneToNext_Handler(srv interface{}, ctx context.Context,
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/scheme.SceneService/MoveSceneToNext",
+		FullMethod: "/schema.SceneService/MoveSceneToNext",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SceneServiceServer).MoveSceneToNext(ctx, req.(*MoveSceneToNextRequest))
@@ -125,7 +125,7 @@ func _SceneService_MoveSceneToNext_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SceneService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "scheme.SceneService",
+	ServiceName: "schema.SceneService",
 	HandlerType: (*SceneServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -138,5 +138,5 @@ var SceneService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pkg/ws-proxy/scheme/scene.proto",
+	Metadata: "pkg/ws-proxy/schema/scene.proto",
 }

@@ -76,36 +76,49 @@ func watch(ctx context.Context, trackId int32,
 				logger.Info("context was done.")
 				return nil
 			case <-tick.C:
-				if ok, err := mr.DisableAutomation(trackId); err != nil {
-					err = xerrors.Errorf("message: %w", err)
-					logger.Error(err, "mr.DisableAutomation() was failed")
+				if err := procedure(ctx, trackId, obswsClient, mr); err != nil {
 					return err
-				} else if ok {
-					logger.Info("DisableAutomation was true, skipped")
-					continue
 				}
-
-				t, err := obswsClient.GetRemainingTimeOnCurrentScene(ctx)
-				if err != nil {
-					err = xerrors.Errorf("message: %w", err)
-					logger.Error(err, "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
-					return nil
-				}
-				remainingTime := t.Duration - t.Cursor
-				if float64(startPreparetionPeriod) > remainingTime {
-					break
-				}
-				logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %d",
-					startPreparetionPeriod), "duration", t.Duration, "cursor", t.Cursor)
-
-				// sleep until MediaInput is finished
-				time.Sleep(time.Duration(remainingTime) * time.Second)
-				if err := obswsClient.MoveSceneToNext(context.Background()); err != nil {
-					logger.Error(err, "obswsClient.MoveSceneToNext() on automated task was failed")
-					return nil
-				}
-				logger.Info("automated task was completed. Scene should be to next.")
 			}
 		}
 	}
+}
+
+func procedure(ctx context.Context, trackId int32,
+	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
+) error {
+	logger, err := logr.FromContext(ctx)
+	if err != nil {
+		return err
+	}
+	logger = logger.WithValues("trackId", trackId)
+
+	if ok, err := mr.DisableAutomation(trackId); err != nil {
+		logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
+		return nil
+	} else if ok {
+		logger.Info("DisableAutomation was true, skipped")
+		return nil
+	}
+
+	t, err := obswsClient.GetRemainingTimeOnCurrentScene(ctx)
+	if err != nil {
+		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
+		return nil
+	}
+	remainingTime := t.Duration - t.Cursor
+	if float64(startPreparetionPeriod) > remainingTime {
+		return nil
+	}
+	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %d",
+		startPreparetionPeriod), "duration", t.Duration, "cursor", t.Cursor)
+
+	// sleep until MediaInput is finished
+	time.Sleep(time.Duration(remainingTime) * time.Second)
+	if err := obswsClient.MoveSceneToNext(context.Background()); err != nil {
+		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.MoveSceneToNext() on automated task was failed")
+		return nil
+	}
+	logger.Info("automated task was completed. Scene should be to next.")
+	return nil
 }

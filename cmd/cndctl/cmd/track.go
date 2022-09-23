@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/scheme"
+	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
 // trackCmd represents the track command
