@@ -15,6 +15,6 @@ type StorageForTalks map[int32]model.Talk
 var (
 	storageForDisableAutomation      = make(map[int32]bool)
 	storageForDisableAutomationMutex sync.RWMutex
-	storageForTalks                  = make(map[int32]model.Talk)
+	storageForTalks                  = make(map[int32]model.Talks)
 	storageForTalksMutex             sync.RWMutex
 )

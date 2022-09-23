@@ -8,7 +8,7 @@ import (
 
 type WriterIface interface {
 	SetDisableAutomation(trackId int32, disabled bool) error
-	SetTalks(trackId int32, talk model.Talk) error
+	SetTalks(trackId int32, talk model.Talks) error
 }
 
 type Writer struct {
@@ -26,14 +26,12 @@ func (w Writer) SetDisableAutomation(trackId int32, disabled bool) error {
 	return nil
 }
 
-func (w Writer) SetTalks(talks []model.Talk) error {
+func (w Writer) SetTalks(talks model.Talks) error {
 	if !w.UseStorageForTalks {
 		return fmt.Errorf("UseStorageForTalks was false")
 	}
 	storageForTalksMutex.Lock()
 	defer storageForTalksMutex.Unlock()
-	for _, talk := range talks {
-		storageForTalks[talk.TrackId] = talk
-	}
+	storageForTalks[talks.GetCurrentTalk().TrackId] = talks
 	return nil
 }

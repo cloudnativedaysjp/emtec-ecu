@@ -46,6 +46,7 @@ func Run(ctx context.Context, conf Config) error {
 	}
 
 	mw := sharedmem.Writer{UseStorageForTalks: true}
+	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	tick := time.NewTicker(syncPeriod)
 	for {
@@ -54,17 +55,29 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Info("context was done.")
 			return nil
 		case <-tick.C:
-			talks, err := dkClient.ListTalks(ctx)
+
+			talksList, err := dkClient.ListTalks(ctx)
 			if err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
 				continue
 			}
-			if err := mw.SetTalks(talks); err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
-				continue
-			}
-			if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
-				conf.NotificationEventSendChan <- talks.GetNextTalk()
+			for _, talks := range talksList {
+				if ok, err := mr.DisableAutomation(talks.GetCurrentTalk().TrackId); err != nil {
+					err = xerrors.Errorf("message: %w", err)
+					logger.Error(err, "mr.DisableAutomation() was failed")
+					return err
+				} else if ok {
+					logger.Info("DisableAutomation was true, skipped")
+					continue
+				}
+
+				if err := mw.SetTalks(talks); err != nil {
+					logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
+					continue
+				}
+				if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
+					conf.NotificationEventSendChan <- talks.GetNextTalk()
+				}
 			}
 		}
 	}
