@@ -17,6 +17,7 @@ import (
 const componentName = "dkwatcher"
 
 type Config struct {
+	Debug                     bool
 	EventAbbr                 string
 	DkEndpointUrl             string
 	Auth0Domain               string

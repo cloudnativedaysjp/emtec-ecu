@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"context"
 	"net"
 
 	"github.com/go-logr/zapr"
@@ -21,8 +21,8 @@ const componentName = "ws-proxy"
 
 type Config struct {
 	Debug    bool
-	Obs      []ConfigObs
 	BindAddr string
+	Obs      []ConfigObs
 }
 
 type ConfigObs struct {
@@ -31,7 +31,7 @@ type ConfigObs struct {
 	DkTrackId int32
 }
 
-func Run(conf Config) error {
+func Run(ctx context.Context, conf Config) error {
 	// setup logger
 	zapConf := zap.NewProductionConfig()
 	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
@@ -72,12 +72,24 @@ func Run(conf Config) error {
 	}
 
 	// Serve
-	lis, err := net.Listen("tcp", conf.BindAddr)
-	if err != nil {
+	serverErrStream := make(chan error)
+	{
+		lis, err := net.Listen("tcp", conf.BindAddr)
+		if err != nil {
+			return err
+		}
+		go func() {
+			if err := s.Serve(lis); err != nil {
+				serverErrStream <- err
+			}
+		}()
+	}
+	select {
+	case <-ctx.Done():
+		logger.Info("context was done.")
+		return nil
+	case err := <-serverErrStream:
+		logger.Error(err, "s.Serve() was failed")
 		return err
 	}
-	if err := s.Serve(lis); err != nil {
-		return fmt.Errorf("failed to serve: %v", err)
-	}
-	return nil
 }

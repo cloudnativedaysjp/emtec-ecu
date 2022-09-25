@@ -14,6 +14,7 @@ import (
 const componentName = "notifier"
 
 type Config struct {
+	Debug                        bool
 	Targets                      []Target
 	NotificationEventReceiveChan <-chan model.Talk
 }

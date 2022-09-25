@@ -1,0 +1,26 @@
+bindAddr: :20080
+dreamkast:
+  eventAbbr: cnsec2022
+  endpointUrl: https://event.cloudnativedays.jp/api/
+  auth0Domain: ${AUTH0_DOMAIN}
+  auth0ClientId: ${AUTH0_CLIENT_ID}
+  auth0ClientSecret: ${AUTH0_CLIENT_SECRET}
+tracks:
+  - dkTrackId: 29
+    obs:
+      host: ${SWITCHER01_HOSTNAME}
+      password: ${SWITCHER01_HOSTNAME}
+    slack:
+      webhookUrl: ${WEBHOOK_URL}
+  - dkTrackId: 30
+    obs:
+      host: ${SWITCHER02_HOSTNAME}
+      password: ${SWITCHER02_HOSTNAME}
+    slack:
+      webhookUrl: ${WEBHOOK_URL}
+  - dkTrackId: 31
+    obs:
+      host: ${SWITCHER03_HOSTNAME}
+      password: ${SWITCHER03_HOSTNAME}
+    slack:
+      webhookUrl: ${WEBHOOK_URL}
