@@ -9,6 +9,7 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -20,9 +21,10 @@ import (
 const componentName = "ws-proxy"
 
 type Config struct {
-	Debug    bool
-	BindAddr string
-	Obs      []ConfigObs
+	Development bool
+	Debug       bool
+	BindAddr    string
+	Obs         []ConfigObs
 }
 
 type ConfigObs struct {
@@ -34,6 +36,10 @@ type ConfigObs struct {
 func Run(ctx context.Context, conf Config) error {
 	// setup logger
 	zapConf := zap.NewProductionConfig()
+	if conf.Development {
+		zapConf = zap.NewDevelopmentConfig()
+	}
+
 	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
 	zapLogger, err := zapConf.Build()
 	if err != nil {
@@ -45,6 +51,8 @@ func Run(ctx context.Context, conf Config) error {
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
 		if err != nil {
+			err := xerrors.Errorf("message: %w", err)
+			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
 		obswsClientMap[obs.DkTrackId] = obswsClient
@@ -76,6 +84,8 @@ func Run(ctx context.Context, conf Config) error {
 	{
 		lis, err := net.Listen("tcp", conf.BindAddr)
 		if err != nil {
+			err := xerrors.Errorf("message: %w", err)
+			logger.Error(err, "net.Listen() was failed")
 			return err
 		}
 		go func() {

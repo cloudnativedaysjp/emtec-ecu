@@ -24,7 +24,7 @@ func (r Reader) DisableAutomation(trackId int32) (bool, error) {
 	defer storageForDisableAutomationMutex.RUnlock()
 	disabled, ok := storageForDisableAutomation[trackId]
 	if !ok {
-		return false, fmt.Errorf("trackId %d is not found", trackId)
+		return false, nil
 	}
 	return disabled, nil
 }

@@ -47,8 +47,9 @@ func main() {
 				})
 			}
 			return obswatcher.Run(ctx, obswatcher.Config{
-				Debug: conf.Debug.Debug,
-				Obs:   configObs,
+				Development: conf.Debug.Development,
+				Debug:       conf.Debug.Debug,
+				Obs:         configObs,
 			})
 		})
 	}
@@ -56,6 +57,7 @@ func main() {
 	if !conf.Debug.DisableDkWatcher {
 		eg.Go(func() error {
 			return dkwatcher.Run(ctx, dkwatcher.Config{
+				Development:               conf.Debug.Development,
 				Debug:                     conf.Debug.Debug,
 				EventAbbr:                 conf.Dreamkast.EventAbbr,
 				DkEndpointUrl:             conf.Dreamkast.EndpointUrl,
@@ -78,6 +80,7 @@ func main() {
 		}
 		eg.Go(func() error {
 			return notifier.Run(ctx, notifier.Config{
+				Development:                  conf.Debug.Development,
 				Debug:                        conf.Debug.Debug,
 				Targets:                      targets,
 				NotificationEventReceiveChan: talkStream,
@@ -96,9 +99,10 @@ func main() {
 				})
 			}
 			return server.Run(ctx, server.Config{
-				Debug:    conf.Debug.Debug,
-				BindAddr: conf.WsProxyBindAddr,
-				Obs:      configObs,
+				Development: conf.Debug.Development,
+				Debug:       conf.Debug.Debug,
+				BindAddr:    conf.WsProxyBindAddr,
+				Obs:         configObs,
 			})
 		})
 	}

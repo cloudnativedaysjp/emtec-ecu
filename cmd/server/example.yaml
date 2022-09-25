@@ -8,19 +8,19 @@ dreamkast:
 tracks:
   - dkTrackId: 29
     obs:
-      host: ${SWITCHER01_HOSTNAME}
-      password: ${SWITCHER01_HOSTNAME}
+      host: ${SWITCHER01_HOST}
+      password: ${SWITCHER01_PASSWORD}
     slack:
-      webhookUrl: ${WEBHOOK_URL}
-  - dkTrackId: 30
-    obs:
-      host: ${SWITCHER02_HOSTNAME}
-      password: ${SWITCHER02_HOSTNAME}
-    slack:
-      webhookUrl: ${WEBHOOK_URL}
-  - dkTrackId: 31
-    obs:
-      host: ${SWITCHER03_HOSTNAME}
-      password: ${SWITCHER03_HOSTNAME}
-    slack:
-      webhookUrl: ${WEBHOOK_URL}
+      webhookUrl: ""
+  #- dkTrackId: 30
+  #  obs:
+  #    host: ${SWITCHER02_HOST}
+  #    password: ${SWITCHER02_PASSWORD}
+  #  slack:
+  #    webhookUrl: ${WEBHOOK_URL}
+  #- dkTrackId: 31
+  #  obs:
+  #    host: ${SWITCHER03_HOST}
+  #    password: ${SWITCHER03_PASSWORD}
+  #  slack:
+  #    webhookUrl: ${WEBHOOK_URL}

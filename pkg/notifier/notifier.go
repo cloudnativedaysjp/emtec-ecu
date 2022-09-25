@@ -14,6 +14,7 @@ import (
 const componentName = "notifier"
 
 type Config struct {
+	Development                  bool
 	Debug                        bool
 	Targets                      []Target
 	NotificationEventReceiveChan <-chan model.Talk
@@ -27,6 +28,9 @@ type Target struct {
 func Run(ctx context.Context, conf Config) error {
 	// setup logger
 	zapConf := zap.NewProductionConfig()
+	if conf.Development {
+		zapConf = zap.NewDevelopmentConfig()
+	}
 	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
 	zapLogger, err := zapConf.Build()
 	if err != nil {

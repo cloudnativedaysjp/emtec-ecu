@@ -42,6 +42,7 @@ type Config struct {
 }
 
 type DebugConfig struct {
+	Development       bool `json:"development" default:"true"`
 	Debug             bool `json:"debug"`
 	DisableObsWatcher bool `json:"disableObsWatcher"`
 	DisableDkWatcher  bool `json:"disableDkWatcher"`
