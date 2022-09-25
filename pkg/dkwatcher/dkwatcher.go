@@ -4,14 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
 const componentName = "dkwatcher"

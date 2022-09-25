@@ -3,12 +3,13 @@ package notifier
 import (
 	"context"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slackwh"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slackwh"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
 const componentName = "notifier"

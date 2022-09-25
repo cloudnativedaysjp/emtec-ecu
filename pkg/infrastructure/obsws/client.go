@@ -7,9 +7,10 @@ import (
 	"github.com/andreykaipov/goobs/api/requests/mediainputs"
 	"github.com/andreykaipov/goobs/api/requests/sceneitems"
 	"github.com/andreykaipov/goobs/api/requests/scenes"
+	"golang.org/x/xerrors"
+
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws/lib"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
-	"golang.org/x/xerrors"
 )
 
 type ClientIface interface {
