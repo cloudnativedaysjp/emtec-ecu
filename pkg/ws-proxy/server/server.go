@@ -51,9 +51,10 @@ func Run(conf Config) error {
 	}
 
 	controller := &Controller{
-		Logger:    logger,
-		ObsWs:     obswsClientMap,
-		Sharedmem: sharedmem.Writer{UseStorageForDisableAutomation: true},
+		Logger:      logger,
+		ObsWsMap:    obswsClientMap,
+		MemWriter:   sharedmem.Writer{UseStorageForDisableAutomation: true},
+		MemDebugger: sharedmem.Debugger{},
 	}
 
 	// Initialize gRPC server
@@ -65,6 +66,7 @@ func Run(conf Config) error {
 	)
 	pb.RegisterSceneServiceServer(s, controller)
 	pb.RegisterTrackServiceServer(s, controller)
+	pb.RegisterDebugServiceServer(s, controller)
 	if conf.Debug {
 		reflection.Register(s)
 	}
