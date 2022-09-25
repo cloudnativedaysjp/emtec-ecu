@@ -80,10 +80,10 @@ func procedure(ctx context.Context,
 		trackId := talks.GetCurrentTalk().TrackId
 		logger = logger.WithValues("trackId", trackId)
 
-		if ok, err := mr.DisableAutomation(trackId); err != nil {
+		if disabled, err := mr.DisableAutomation(trackId); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
-		} else if ok {
+		} else if disabled {
 			logger.Info("DisableAutomation was true, skipped")
 			continue
 		}

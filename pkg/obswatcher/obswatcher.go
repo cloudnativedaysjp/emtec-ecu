@@ -86,10 +86,10 @@ func procedure(ctx context.Context, trackId int32,
 ) error {
 	logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 
-	if ok, err := mr.DisableAutomation(trackId); err != nil {
+	if disabled, err := mr.DisableAutomation(trackId); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 		return nil
-	} else if ok {
+	} else if disabled {
 		logger.Info("DisableAutomation was true, skipped")
 		return nil
 	}

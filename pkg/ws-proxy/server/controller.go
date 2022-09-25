@@ -9,6 +9,7 @@ import (
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
@@ -16,9 +17,12 @@ type Controller struct {
 	pb.UnimplementedTrackServiceServer
 	pb.UnimplementedSceneServiceServer
 
-	Logger logr.Logger
-	ObsWs  map[int32]obsws.ClientIface
+	Logger    logr.Logger
+	ObsWs     map[int32]obsws.ClientIface
+	Sharedmem sharedmem.WriterIface
 }
+
+/* TrackService */
 
 func (c *Controller) GetTrack(ctx context.Context, in *pb.GetTrackRequest) (*pb.GetTrackResponse, error) {
 	ws, ok := c.ObsWs[in.TrackId]
@@ -44,6 +48,22 @@ func (c *Controller) ListTrack(ctx context.Context, in *emptypb.Empty) (*pb.List
 
 	return &pb.ListTrackResponse{Track: tracks}, nil
 }
+
+func (c *Controller) EnableAutomation(ctx context.Context, in *pb.SwitchAutomationRequest) (*emptypb.Empty, error) {
+	if err := c.Sharedmem.SetDisableAutomation(in.TrackId, false); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}
+
+func (c *Controller) DisableAutomation(ctx context.Context, in *pb.SwitchAutomationRequest) (*emptypb.Empty, error) {
+	if err := c.Sharedmem.SetDisableAutomation(in.TrackId, true); err != nil {
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}
+
+/* SceneService */
 
 func (c *Controller) ListScene(ctx context.Context, in *pb.ListSceneRequest) (*pb.ListSceneResponse, error) {
 	ctx = logr.NewContext(ctx, c.Logger)
