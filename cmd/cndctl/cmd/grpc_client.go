@@ -10,6 +10,7 @@ import (
 var (
 	sceneClient pb.SceneServiceClient
 	trackClient pb.TrackServiceClient
+	debugClient pb.DebugServiceClient
 )
 
 func createClient(addr string) error {
@@ -23,5 +24,6 @@ func createClient(addr string) error {
 
 	sceneClient = pb.NewSceneServiceClient(conn)
 	trackClient = pb.NewTrackServiceClient(conn)
+	debugClient = pb.NewDebugServiceClient(conn)
 	return nil
 }

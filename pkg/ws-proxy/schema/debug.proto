@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package schema;
+option go_package = "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service DebugService {
+  rpc ListSharedmem(google.protobuf.Empty) returns (ListSharedmemResponse) {}
+}
+
+message ListSharedmemResponse {
+  map<int32, TalksModel> talksMap = 1;
+  map<int32, bool> disabledMap = 2;
+}
+
+// from pkg/model/talk.go
+message TalksModel { repeated TalkModel talks = 1; }
+message TalkModel {
+  int32 id = 1;
+  string talk_name = 2;
+  int32 track_id = 3;
+  string track_name = 4;
+  string event_abbr = 5;
+  repeated string speaker_names = 6;
+  int32 type = 7;
+  google.protobuf.Timestamp start_at = 8;
+  google.protobuf.Timestamp end_at = 9;
+}

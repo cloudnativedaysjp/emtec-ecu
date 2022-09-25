@@ -16,8 +16,8 @@ type Reader struct {
 	UseStorageForTalks             bool
 }
 
-func (w Reader) DisableAutomation(trackId int32) (bool, error) {
-	if !w.UseStorageForDisableAutomation {
+func (r Reader) DisableAutomation(trackId int32) (bool, error) {
+	if !r.UseStorageForDisableAutomation {
 		return false, fmt.Errorf("UseStorageForDisableAutomation was false")
 	}
 	storageForDisableAutomationMutex.RLock()
@@ -29,8 +29,8 @@ func (w Reader) DisableAutomation(trackId int32) (bool, error) {
 	return disabled, nil
 }
 
-func (w Reader) Talks(trackId int32) (model.Talks, error) {
-	if !w.UseStorageForTalks {
+func (r Reader) Talks(trackId int32) (model.Talks, error) {
+	if !r.UseStorageForTalks {
 		return nil, fmt.Errorf("UseStorageForTalks was false")
 	}
 	storageForTalksMutex.RLock()

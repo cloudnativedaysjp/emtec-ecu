@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type TalkType int
+type TalkType int32
 
 const (
 	TalkType_OnlineSession TalkType = iota
