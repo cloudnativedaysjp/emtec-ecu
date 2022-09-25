@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
@@ -48,9 +49,11 @@ func Run(conf Config) error {
 		}
 		obswsClientMap[obs.DkTrackId] = obswsClient
 	}
+
 	controller := &Controller{
-		Logger: logger,
-		ObsWs:  obswsClientMap,
+		Logger:    logger,
+		ObsWs:     obswsClientMap,
+		Sharedmem: sharedmem.Writer{UseStorageForDisableAutomation: true},
 	}
 
 	// Initialize gRPC server
