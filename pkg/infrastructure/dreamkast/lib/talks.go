@@ -35,6 +35,8 @@ func (c *PrimitiveClient) ListTalks(ctx context.Context, eventAbbr string, track
 	return result, nil
 }
 
+// TODO: set Token to header
+// TODO: write test
 func (c *PrimitiveClient) UpdateTalks(ctx context.Context, talkId int32, onAir bool) error {
 	url := c.dkEndpointUrl
 	url.Path = filepath.Join(url.Path, "/v1/talks", strconv.Itoa(int(talkId)))
