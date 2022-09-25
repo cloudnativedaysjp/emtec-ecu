@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/go-logr/logr"
-	"github.com/k0kubun/pp"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -37,7 +37,25 @@ var debugListLocalmemCmd = &cobra.Command{
 		//
 		// Print
 		//
-		pp.Print(resp) // TODO
+		for trackId, talks := range resp.TalksMap {
+			fmt.Printf("--- # track %d: ", trackId)
+			if disabled, ok := resp.DisabledMap[trackId]; !ok || !disabled {
+				fmt.Println("Enabled")
+			} else {
+				fmt.Println("Disabled")
+			}
+			for _, talk := range talks.Talks {
+				fmt.Printf("- Id: %v\n", talk.Id)
+				fmt.Printf("  TalkName: %v\n", talk.TalkName)
+				fmt.Printf("  TrackId: %v\n", talk.TrackId)
+				fmt.Printf("  TrackName: %v\n", talk.TrackName)
+				fmt.Printf("  EventAbbr: %v\n", talk.EventAbbr)
+				fmt.Printf("  SpeakerNames: %v\n", talk.SpeakerNames)
+				fmt.Printf("  Type: %v\n", talk.Type)
+				fmt.Printf("  StartAt: %v\n", talk.StartAt)
+				fmt.Printf("  EndAt: %v\n", talk.EndAt)
+			}
+		}
 	},
 }
 

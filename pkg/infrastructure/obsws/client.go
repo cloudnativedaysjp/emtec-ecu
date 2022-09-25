@@ -9,6 +9,7 @@ import (
 	"github.com/andreykaipov/goobs/api/requests/scenes"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws/lib"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+	"golang.org/x/xerrors"
 )
 
 type ClientIface interface {
@@ -137,7 +138,7 @@ func (c *Client) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationA
 		}
 	}
 	if currentSceneName == "" {
-		return nil, fmt.Errorf("TODO")
+		return nil, xerrors.Errorf("message: %w", fmt.Errorf("CurrentProgramSceneName is none in Scenes"))
 	}
 
 	listSceneItemsResp, err := c.client.SceneItems().GetSceneItemList(
@@ -147,15 +148,11 @@ func (c *Client) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationA
 		return nil, err
 	}
 
-	var mediaInputName string
-	for _, si := range listSceneItemsResp.SceneItems {
-		if si.SourceType == "TODO" {
-			mediaInputName = si.SourceName
-		}
+	if len(listSceneItemsResp.SceneItems) == 0 {
+		return nil, xerrors.Errorf("message: %w", fmt.Errorf("Source is none in Scene '%s'", currentSceneName))
 	}
-	if mediaInputName == "" {
-		return nil, fmt.Errorf("TODO")
-	}
+	// TODO: 決め打ちであるのを直す
+	mediaInputName := listSceneItemsResp.SceneItems[0].SourceName
 
 	resp, err := c.client.MediaInputs().GetMediaInputStatus(&mediainputs.GetMediaInputStatusParams{InputName: mediaInputName})
 	if err != nil {
@@ -163,7 +160,10 @@ func (c *Client) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationA
 		return nil, err
 	}
 	if resp.MediaState != "OBS_MEDIA_STATE_PLAYING" {
-		return nil, fmt.Errorf("TODO")
+		return nil, xerrors.Errorf("message: %w", fmt.Errorf("state of MediaInput '%s' isn't OBS_MEDIA_STATE_PLAYING: now is %s",
+			mediaInputName, resp.MediaState))
+	} else if resp.MediaDuration == 0 {
+		return nil, xerrors.Errorf("message: %w", fmt.Errorf("duration of MediaInput '%s' is zero", mediaInputName))
 	}
 	return &DurationAndCursor{resp.MediaDuration, resp.MediaCursor}, nil
 }

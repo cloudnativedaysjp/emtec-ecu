@@ -96,7 +96,7 @@ func (c *Client) SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error 
 }
 
 func (c *Client) setSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
-	if err := c.client.GenerateAuth0Token(
+	if err := c.client.GenerateAuth0Token(ctx,
 		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
 	); err != nil {
 		return xerrors.Errorf("message: %w", err)
@@ -125,7 +125,7 @@ func (c *Client) SetNextTalkOnAir(ctx context.Context, trackId int32) error {
 }
 
 func (c *Client) setNextTalkOnAir(ctx context.Context, trackId int32) error {
-	if err := c.client.GenerateAuth0Token(
+	if err := c.client.GenerateAuth0Token(ctx,
 		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
 	); err != nil {
 		return xerrors.Errorf("message: %w", err)

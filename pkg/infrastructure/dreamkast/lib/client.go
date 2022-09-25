@@ -1,11 +1,14 @@
 package lib
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
 type PrimitiveClient struct {
@@ -22,12 +25,19 @@ func NewClient(dkEndpointUrl string) (DreamkastApi, error) {
 	return &PrimitiveClient{client: http.DefaultClient, dkEndpointUrl: *dkUrl}, nil
 }
 
-func (c *PrimitiveClient) GenerateAuth0Token(
+func (c *PrimitiveClient) GenerateAuth0Token(ctx context.Context,
 	auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience string,
 ) error {
 	if c.auth0Token != "" {
 		return nil
 	}
+	logger := utils.GetLogger(ctx)
+	if auth0Domain == "" || auth0ClientId == "" || auth0ClientSecret == "" {
+		logger.Info("auth0Domain or auth0ClientId or auth0ClientSecret was not set. " +
+			"skipped to generate Auth0 Token")
+		return nil
+	}
+
 	url, err := url.Parse(fmt.Sprintf("https://%s/oauth/token", auth0Domain))
 	if err != nil {
 		return err

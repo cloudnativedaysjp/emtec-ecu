@@ -23,8 +23,9 @@ const (
 )
 
 type Config struct {
-	Debug bool
-	Obs   []ConfigObs
+	Development bool
+	Debug       bool
+	Obs         []ConfigObs
 }
 
 type ConfigObs struct {
@@ -36,6 +37,9 @@ type ConfigObs struct {
 func Run(ctx context.Context, conf Config) error {
 	// setup logger
 	zapConf := zap.NewProductionConfig()
+	if conf.Development {
+		zapConf = zap.NewDevelopmentConfig()
+	}
 	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
 	zapLogger, err := zapConf.Build()
 	if err != nil {
@@ -50,11 +54,15 @@ func Run(ctx context.Context, conf Config) error {
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
 		if err != nil {
+			err := xerrors.Errorf("message: %w", err)
+			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
 		eg.Go(watch(ctx, obs.DkTrackId, obswsClient, mr))
 	}
 	if err := eg.Wait(); err != nil {
+		err := xerrors.Errorf("message: %w", err)
+		logger.Error(err, "eg.Wait() was failed")
 		return err
 	}
 	return nil
@@ -74,7 +82,7 @@ func watch(ctx context.Context, trackId int32,
 				return nil
 			case <-tick.C:
 				if err := procedure(ctx, trackId, obswsClient, mr); err != nil {
-					return err
+					return xerrors.Errorf("message: %w", err)
 				}
 			}
 		}

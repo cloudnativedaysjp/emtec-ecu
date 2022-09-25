@@ -1,6 +1,9 @@
 package lib
 
-import "github.com/andreykaipov/goobs"
+import (
+	"github.com/andreykaipov/goobs"
+	"golang.org/x/xerrors"
+)
 
 type PrimitiveClient struct {
 	client *goobs.Client
@@ -16,7 +19,7 @@ func (c *PrimitiveClient) GenerateClient(host, password string) error {
 	}
 	client, err := goobs.New(host, goobs.WithPassword(password))
 	if err != nil {
-		return err
+		return xerrors.Errorf("message: %w", err)
 	}
 	c.client = client
 	return nil

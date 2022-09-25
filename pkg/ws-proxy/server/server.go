@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"context"
 	"net"
 
 	"github.com/go-logr/zapr"
@@ -9,6 +9,7 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -20,9 +21,10 @@ import (
 const componentName = "ws-proxy"
 
 type Config struct {
-	Debug    bool
-	Obs      []ConfigObs
-	BindAddr string
+	Development bool
+	Debug       bool
+	BindAddr    string
+	Obs         []ConfigObs
 }
 
 type ConfigObs struct {
@@ -31,9 +33,13 @@ type ConfigObs struct {
 	DkTrackId int32
 }
 
-func Run(conf Config) error {
+func Run(ctx context.Context, conf Config) error {
 	// setup logger
 	zapConf := zap.NewProductionConfig()
+	if conf.Development {
+		zapConf = zap.NewDevelopmentConfig()
+	}
+
 	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
 	zapLogger, err := zapConf.Build()
 	if err != nil {
@@ -45,6 +51,8 @@ func Run(conf Config) error {
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
 		if err != nil {
+			err := xerrors.Errorf("message: %w", err)
+			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
 		obswsClientMap[obs.DkTrackId] = obswsClient
@@ -72,12 +80,26 @@ func Run(conf Config) error {
 	}
 
 	// Serve
-	lis, err := net.Listen("tcp", conf.BindAddr)
-	if err != nil {
+	serverErrStream := make(chan error)
+	{
+		lis, err := net.Listen("tcp", conf.BindAddr)
+		if err != nil {
+			err := xerrors.Errorf("message: %w", err)
+			logger.Error(err, "net.Listen() was failed")
+			return err
+		}
+		go func() {
+			if err := s.Serve(lis); err != nil {
+				serverErrStream <- err
+			}
+		}()
+	}
+	select {
+	case <-ctx.Done():
+		logger.Info("context was done.")
+		return nil
+	case err := <-serverErrStream:
+		logger.Error(err, "s.Serve() was failed")
 		return err
 	}
-	if err := s.Serve(lis); err != nil {
-		return fmt.Errorf("failed to serve: %v", err)
-	}
-	return nil
 }
