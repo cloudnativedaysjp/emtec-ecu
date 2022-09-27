@@ -42,17 +42,20 @@ func (t Talk) GetTalkType(title string, presentationMethod *string) TalkType {
 }
 
 func (ts Talks) WillStartNextTalkSince() bool {
-	now := time.Now()
+	now := nowFunc()
 	for _, talk := range ts {
-		if now.After(talk.StartAt) && talk.EndAt.Sub(now) <= utils.HowManyMinutesUntilNotify {
-			return true
+		if now.After(talk.StartAt) {
+			diffTime := time.Duration(talk.EndAt.Sub(now).Minutes())
+			if 0 < diffTime && diffTime <= utils.HowManyMinutesUntilNotify {
+				return true
+			}
 		}
 	}
 	return false
 }
 
 func (ts Talks) GetCurrentTalk() (*Talk, int) {
-	now := time.Now()
+	now := nowFunc()
 	for i, talk := range ts {
 		if now.After(talk.StartAt) && now.Before(talk.EndAt) {
 			return &talk, i
