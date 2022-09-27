@@ -74,8 +74,9 @@ func main() {
 		var targets []notifier.Target
 		for _, track := range conf.Tracks {
 			targets = append(targets, notifier.Target{
-				TrackId:    track.DkTrackId,
-				WebhookUrl: track.Slack.WebhookUrl,
+				TrackId:        track.DkTrackId,
+				SlackBotToken:  track.Slack.BotToken,
+				SlackChannelId: track.Slack.ChannelId,
 			})
 		}
 		eg.Go(func() error {
