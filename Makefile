@@ -1,5 +1,5 @@
 ifndef REGISTRY_BASE
-	REGISTRY_BASE = public.ecr.aws/f5j9d0q5/
+	REGISTRY_BASE = public.ecr.aws/f5j9d0q5/cnd-operation-server
 endif
 
 
