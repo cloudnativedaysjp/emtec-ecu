@@ -58,8 +58,9 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 				TrackId:   track.ID,
 				TrackName: track.Name,
 				EventAbbr: c.eventAbbr,
-				// TODO (https://github.com/cloudnativedaysjp/dreamkast/issues/1490)
-				// Type         TalkType
+			}
+			if talkType := t.GetTalkType(talk.Title, talk.PresentationMethod); talkType != 0 {
+				t.Type = talkType
 			}
 			for _, speaker := range talk.Speakers {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)

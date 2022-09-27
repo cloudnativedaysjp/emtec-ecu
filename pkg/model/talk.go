@@ -9,7 +9,7 @@ import (
 type TalkType int32
 
 const (
-	TalkType_OnlineSession TalkType = iota
+	TalkType_OnlineSession TalkType = iota + 1
 	TalkType_RecordingSession
 	TalkType_Opening
 	TalkType_Ending
@@ -17,6 +17,29 @@ const (
 )
 
 type Talks []Talk
+
+func (t Talk) ConvertTalkType(title string, presentationMethod *string) TalkType {
+	switch {
+	case presentationMethod == nil:
+		switch title {
+		case "Opening":
+			return TalkType_Opening
+		case "休憩":
+			return TalkType_Commercial
+		case "Closing":
+			return TalkType_Ending
+		}
+	case *presentationMethod == "オンライン登壇":
+		return TalkType_OnlineSession
+	case *presentationMethod == "事前収録":
+		return TalkType_RecordingSession
+	}
+	return 0
+}
+
+func (t Talk) GetTalkType(title string, presentationMethod *string) TalkType {
+	return t.ConvertTalkType(title, presentationMethod)
+}
 
 func (ts Talks) WillStartNextTalkSince() bool {
 	now := time.Now()

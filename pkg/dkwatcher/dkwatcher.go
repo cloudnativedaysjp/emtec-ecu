@@ -82,12 +82,12 @@ func procedure(ctx context.Context,
 		return nil
 	}
 	for _, talks := range talksList {
-		track, currentTalkListNum := talks.GetCurrentTalk()
-		if track == nil {
+		currentTalk, currentTalkListNum := talks.GetCurrentTalk()
+		if currentTalk == nil {
 			logger.Info("Fail to GetCurrentTalk, skipped")
 			continue
 		}
-		trackId := track.TrackId
+		trackId := currentTalk.TrackId
 		logger = logger.WithValues("trackId", trackId)
 
 		if disabled, err := mr.DisableAutomation(trackId); err != nil {
