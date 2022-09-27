@@ -35,7 +35,8 @@ func NewClient(eventAbbr, dkEndpointUrl string,
 		return nil, err
 	}
 	return &Client{
-		c, eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience}, nil
+		c, eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience,
+	}, nil
 }
 
 func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
@@ -58,7 +59,7 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 				TrackName: track.Name,
 				EventAbbr: c.eventAbbr,
 				// TODO (https://github.com/cloudnativedaysjp/dreamkast/issues/1490)
-				//Type         TalkType
+				// Type         TalkType
 			}
 			for _, speaker := range talk.Speakers {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)
@@ -73,7 +74,6 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 
 			talksModel = append(talksModel, t)
 		}
-		talksModel.FillCommercial()
 		result = append(result, talksModel)
 	}
 	return result, nil

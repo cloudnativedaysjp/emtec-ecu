@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+)
 
 type TalkType int32
 
@@ -14,23 +18,28 @@ const (
 
 type Talks []Talk
 
-func (ts *Talks) FillCommercial() {
-	// TODO (#10)
-}
-
-func (ts Talks) WillStartNextTalkSince(d time.Duration) bool {
-	// TODO (#10)
+func (ts Talks) WillStartNextTalkSince() bool {
+	now := time.Now()
+	for _, talk := range ts {
+		if now.After(talk.StartAt) && talk.EndAt.Sub(now) <= utils.HowManyMinutesUntilNotify {
+			return true
+		}
+	}
 	return false
 }
 
-func (ts Talks) GetCurrentTalk() Talk {
-	// TODO (#10)
-	return Talk{}
+func (ts Talks) GetCurrentTalk() (*Talk, int) {
+	now := time.Now()
+	for i, talk := range ts {
+		if now.After(talk.StartAt) && now.Before(talk.EndAt) {
+			return &talk, i
+		}
+	}
+	return &Talk{}, 0
 }
 
-func (ts Talks) GetNextTalk() Talk {
-	// TODO (#10)
-	return Talk{}
+func (ts Talks) GetNextTalk(nextTalkListNum int) Talk {
+	return ts[nextTalkListNum]
 }
 
 type Talk struct {
