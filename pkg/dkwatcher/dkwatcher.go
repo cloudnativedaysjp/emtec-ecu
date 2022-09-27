@@ -82,7 +82,7 @@ func procedure(ctx context.Context,
 		return nil
 	}
 	for _, talks := range talksList {
-		track, talkListNum := talks.GetCurrentTalk()
+		track, currentTalkListNum := talks.GetCurrentTalk()
 		if track == nil {
 			logger.Info("Fail to GetCurrentTalk, skipped")
 			continue
@@ -103,7 +103,7 @@ func procedure(ctx context.Context,
 			continue
 		}
 		if talks.WillStartNextTalkSince() {
-			notificationEventSendChan <- talks.GetNextTalk(talkListNum + 1)
+			notificationEventSendChan <- talks.GetNextTalk(currentTalkListNum)
 		}
 	}
 	return nil

@@ -38,8 +38,8 @@ func (ts Talks) GetCurrentTalk() (*Talk, int) {
 	return &Talk{}, 0
 }
 
-func (ts Talks) GetNextTalk(nextTalkListNum int) Talk {
-	return ts[nextTalkListNum]
+func (ts Talks) GetNextTalk(currentTalkListNum int) Talk {
+	return ts[currentTalkListNum+1]
 }
 
 type Talk struct {
