@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slackwh"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slack"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
@@ -22,8 +22,9 @@ type Config struct {
 }
 
 type Target struct {
-	TrackId    int32
-	WebhookUrl string
+	TrackId        int32
+	SlackBotToken  string
+	SlackChannelId string
 }
 
 func Run(ctx context.Context, conf Config) error {
@@ -40,11 +41,16 @@ func Run(ctx context.Context, conf Config) error {
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
-	whClients := make(map[int32]slackwh.WebhookAPI)
+	slackClients := make(map[int32]slack.ClientIface)
+	channelIds := make(map[int32]string)
 	for _, target := range conf.Targets {
-		whClients[target.TrackId] = slackwh.NewClient(target.WebhookUrl)
+		slackClients[target.TrackId], err = slack.NewClient(target.SlackBotToken)
+		if err != nil {
+			return xerrors.Errorf("message: %w", err)
+		}
+		channelIds[target.TrackId] = target.SlackChannelId
 	}
-	c := NewController(logger, whClients)
+	c := NewController(logger, slackClients, channelIds)
 
 	for {
 		select {

@@ -6,27 +6,27 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
-func viewOnlineSession(talk model.Talk) slack.WebhookMessage {
+func viewOnlineSession(talk model.Talk) slack.Msg {
 	// TODO (#6)
-	return slack.WebhookMessage{Text: "online session"}
+	return slack.Msg{Text: "online session"}
 }
 
-func viewRecordingSession(talk model.Talk) slack.WebhookMessage {
+func viewRecordingSession(talk model.Talk) slack.Msg {
 	// TODO (#6)
-	return slack.WebhookMessage{Text: "recording session"}
+	return slack.Msg{Text: "recording session"}
 }
 
-func viewCommercial(talk model.Talk) slack.WebhookMessage {
+func viewCommercial(talk model.Talk) slack.Msg {
 	// TODO (#6)
-	return slack.WebhookMessage{Text: "commercial"}
+	return slack.Msg{Text: "commercial"}
 }
 
-func viewOpening(talk model.Talk) slack.WebhookMessage {
+func viewOpening(talk model.Talk) slack.Msg {
 	// TODO (#6)
-	return slack.WebhookMessage{Text: "opening"}
+	return slack.Msg{Text: "opening"}
 }
 
-func viewEnding(talk model.Talk) slack.WebhookMessage {
+func viewEnding(talk model.Talk) slack.Msg {
 	// TODO (#6)
-	return slack.WebhookMessage{Text: "ending"}
+	return slack.Msg{Text: "ending"}
 }

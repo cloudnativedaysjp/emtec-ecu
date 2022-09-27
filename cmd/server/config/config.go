@@ -71,7 +71,6 @@ type ObsConfig struct {
 }
 
 type SlackConfig struct {
-	WebhookUrl string
-	// BotToken  string `json:"botToken" validate:"required"`
-	// ChannelId string `json:"channelId" validate:"required"`
+	BotToken  string `json:"botToken" validate:"required"`
+	ChannelId string `json:"channelId" validate:"required"`
 }
