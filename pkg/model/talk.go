@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
@@ -18,27 +19,27 @@ const (
 
 type Talks []Talk
 
-func (t Talk) ConvertTalkType(title string, presentationMethod *string) TalkType {
+func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkType, error) {
 	switch {
 	case presentationMethod == nil:
 		switch title {
 		case "Opening":
-			return TalkType_Opening
+			return TalkType_Opening, nil
 		case "休憩":
-			return TalkType_Commercial
+			return TalkType_Commercial, nil
 		case "Closing":
-			return TalkType_Ending
+			return TalkType_Ending, nil
 		}
 	case *presentationMethod == "オンライン登壇":
-		return TalkType_OnlineSession
+		return TalkType_OnlineSession, nil
 	case *presentationMethod == "事前収録":
-		return TalkType_RecordingSession
+		return TalkType_RecordingSession, nil
 	}
-	return 0
+	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
 }
 
-func (t Talk) GetTalkType(title string, presentationMethod *string) TalkType {
-	return t.ConvertTalkType(title, presentationMethod)
+func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
+	return t.convertTalkType(title, presentationMethod)
 }
 
 func (ts Talks) WillStartNextTalkSince() bool {
@@ -54,18 +55,26 @@ func (ts Talks) WillStartNextTalkSince() bool {
 	return false
 }
 
-func (ts Talks) GetCurrentTalk() (*Talk, int) {
+func (ts Talks) GetCurrentTalk() (*Talk, error) {
 	now := nowFunc()
-	for i, talk := range ts {
+	for _, talk := range ts {
 		if now.After(talk.StartAt) && now.Before(talk.EndAt) {
-			return &talk, i
+			return &talk, nil
 		}
 	}
-	return &Talk{}, 0
+	return nil, fmt.Errorf("Current talk not found")
 }
 
-func (ts Talks) GetNextTalk(currentTalkListNum int) Talk {
-	return ts[currentTalkListNum+1]
+func (ts Talks) GetNextTalk(currentTalk *Talk) (*Talk, error) {
+	for i, talk := range ts {
+		if talk.Id == currentTalk.Id {
+			if i == len(ts) {
+				fmt.Errorf("This talk is last")
+			}
+			return &ts[i+1], nil
+		}
+	}
+	return nil, fmt.Errorf("Next talk not found")
 }
 
 type Talk struct {

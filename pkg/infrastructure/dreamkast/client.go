@@ -59,9 +59,12 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 				TrackName: track.Name,
 				EventAbbr: c.eventAbbr,
 			}
-			if talkType := t.GetTalkType(talk.Title, talk.PresentationMethod); talkType != 0 {
-				t.Type = talkType
+			talkType, err := t.GetTalkType(talk.Title, talk.PresentationMethod)
+			if err != nil {
+				xerrors.Errorf("message: %w", err)
+				continue
 			}
+			t.Type = talkType
 			for _, speaker := range talk.Speakers {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)
 			}

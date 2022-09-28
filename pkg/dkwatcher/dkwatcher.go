@@ -82,9 +82,9 @@ func procedure(ctx context.Context,
 		return nil
 	}
 	for _, talks := range talksList {
-		currentTalk, currentTalkListNum := talks.GetCurrentTalk()
-		if currentTalk == nil {
-			logger.Info("Fail to GetCurrentTalk, skipped")
+		currentTalk, err := talks.GetCurrentTalk()
+		if err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "dkClient.GetCurrentTalk was failed")
 			continue
 		}
 		trackId := currentTalk.TrackId
@@ -103,7 +103,12 @@ func procedure(ctx context.Context,
 			continue
 		}
 		if talks.WillStartNextTalkSince() {
-			notificationEventSendChan <- talks.GetNextTalk(currentTalkListNum)
+			nextTalk, err := talks.GetNextTalk(currentTalk)
+			if err != nil {
+				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")
+				continue
+			}
+			notificationEventSendChan <- *nextTalk
 		}
 	}
 	return nil
