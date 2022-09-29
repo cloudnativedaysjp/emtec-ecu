@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+)
 
 type TalkType int32
 
@@ -31,6 +35,15 @@ func (ts Talks) GetCurrentTalk() Talk {
 func (ts Talks) GetNextTalk() Talk {
 	// TODO (#10)
 	return Talk{}
+}
+
+func (ts Talk) GetActualStartAtAndEndAt(conferenceDayDate string, actualStartTime, actualEndTime time.Time) (*time.Time, *time.Time, error) {
+	cDate, err := utils.ParseDateFormat(conferenceDayDate)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return time.Time, time.Time
 }
 
 type Talk struct {

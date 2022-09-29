@@ -35,7 +35,8 @@ func NewClient(eventAbbr, dkEndpointUrl string,
 		return nil, err
 	}
 	return &Client{
-		c, eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience}, nil
+		c, eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience,
+	}, nil
 }
 
 func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
@@ -58,18 +59,13 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 				TrackName: track.Name,
 				EventAbbr: c.eventAbbr,
 				// TODO (https://github.com/cloudnativedaysjp/dreamkast/issues/1490)
-				//Type         TalkType
+				// Type         TalkType
 			}
 			for _, speaker := range talk.Speakers {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)
 			}
 
-			// TODO (#11)
-			// response is as below, so calcurate YYYY-MM-DDThh:mm:ss from these fields
-			// - "conferenceDayDate": "2022-08-05"
-			// - "actualStartTime": "2000-01-01T13:05:00.000+09:00"
-			t.StartAt = talk.StartTime
-			t.EndAt = talk.EndTime
+			t.StartAt, t.EndAt = talk.GetActualStartAtAndEndAt(talk.ConferenceDayDate, talk.ActualStartTime, talk.ActualEndTime)
 
 			talksModel = append(talksModel, t)
 		}
