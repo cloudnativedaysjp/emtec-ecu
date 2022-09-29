@@ -32,6 +32,10 @@ func (w Writer) SetTalks(trackId int32, talks model.Talks) error {
 	}
 	storageForTalksMutex.Lock()
 	defer storageForTalksMutex.Unlock()
-	storageForTalks[talks.GetCurrentTalk().TrackId] = talks
+	currentTalk, _ := talks.GetCurrentTalk()
+	if currentTalk == nil {
+		return fmt.Errorf("Fail to GetCurrentTalk")
+	}
+	storageForTalks[currentTalk.TrackId] = talks
 	return nil
 }

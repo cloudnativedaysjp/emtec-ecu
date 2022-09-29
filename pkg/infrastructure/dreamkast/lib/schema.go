@@ -30,28 +30,29 @@ type ListTalksResp []struct {
 }
 
 type GetTalksResp struct {
-	ID                int32       `json:"id"`
-	TrackID           int32       `json:"trackID"`
-	VideoPlatform     interface{} `json:"videoPlatform"`
-	VideoID           string      `json:"videoID"`
-	Title             string      `json:"title"`
-	Abstract          string      `json:"abstract"`
-	Speakers          []Speaker   `json:"speakers"`
-	DayID             int32       `json:"dayID"`
-	ShowOnTimetable   bool        `json:"showOnTimetable"`
-	StartTime         time.Time   `json:"startTime"`
-	EndTime           time.Time   `json:"endTime"`
-	TalkDuration      int32       `json:"talkDuration"`
-	TalkDifficulty    string      `json:"talkDifficulty"`
-	TalkCategory      string      `json:"talkCategory"`
-	OnAir             bool        `json:"onAir"`
-	DocumentURL       string      `json:"documentUrl"`
-	ConferenceDayID   int32       `json:"conferenceDayID"`
-	ConferenceDayDate string      `json:"conferenceDayDate"`
-	StartOffset       int32       `json:"startOffset"`
-	EndOffset         int32       `json:"endOffset"`
-	ActualStartTime   time.Time   `json:"actualStartTime"`
-	ActualEndTime     time.Time   `json:"actualEndTime"`
+	ID                 int32       `json:"id"`
+	TrackID            int32       `json:"trackID"`
+	VideoPlatform      interface{} `json:"videoPlatform"`
+	VideoID            string      `json:"videoID"`
+	Title              string      `json:"title"`
+	Abstract           string      `json:"abstract"`
+	Speakers           []Speaker   `json:"speakers"`
+	DayID              int32       `json:"dayID"`
+	ShowOnTimetable    bool        `json:"showOnTimetable"`
+	StartTime          time.Time   `json:"startTime"`
+	EndTime            time.Time   `json:"endTime"`
+	TalkDuration       int32       `json:"talkDuration"`
+	TalkDifficulty     string      `json:"talkDifficulty"`
+	TalkCategory       string      `json:"talkCategory"`
+	OnAir              bool        `json:"onAir"`
+	DocumentURL        string      `json:"documentUrl"`
+	ConferenceDayID    int32       `json:"conferenceDayID"`
+	ConferenceDayDate  string      `json:"conferenceDayDate"`
+	StartOffset        int32       `json:"startOffset"`
+	EndOffset          int32       `json:"endOffset"`
+	ActualStartTime    time.Time   `json:"actualStartTime"`
+	ActualEndTime      time.Time   `json:"actualEndTime"`
+	PresentationMethod *string     `json:"presentationMethod"`
 }
 
 type Speaker struct {

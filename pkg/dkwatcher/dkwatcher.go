@@ -30,8 +30,7 @@ type Config struct {
 }
 
 const (
-	syncPeriod                = 30 * time.Second
-	howManyMinutesUntilNotify = 5 * time.Minute
+	syncPeriod = 30 * time.Second
 )
 
 func Run(ctx context.Context, conf Config) error {
@@ -83,7 +82,12 @@ func procedure(ctx context.Context,
 		return nil
 	}
 	for _, talks := range talksList {
-		trackId := talks.GetCurrentTalk().TrackId
+		currentTalk, err := talks.GetCurrentTalk()
+		if err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "dkClient.GetCurrentTalk was failed")
+			continue
+		}
+		trackId := currentTalk.TrackId
 		logger = logger.WithValues("trackId", trackId)
 
 		if disabled, err := mr.DisableAutomation(trackId); err != nil {
@@ -98,8 +102,13 @@ func procedure(ctx context.Context,
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
 			continue
 		}
-		if talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
-			notificationEventSendChan <- talks.GetNextTalk()
+		if talks.WillStartNextTalkSince() {
+			nextTalk, err := talks.GetNextTalk(currentTalk)
+			if err != nil {
+				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")
+				continue
+			}
+			notificationEventSendChan <- *nextTalk
 		}
 	}
 	return nil
