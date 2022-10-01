@@ -487,6 +487,7 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		})
 	}
 }
+
 func TestTalk_GetActualStartAtAndEndAt(t *testing.T) {
 	talk := &Talk{}
 	tests := []struct {
