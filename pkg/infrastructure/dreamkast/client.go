@@ -69,8 +69,11 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)
 			}
 
-			t.StartAt, t.EndAt = talk.GetActualStartAtAndEndAt(talk.ConferenceDayDate, talk.ActualStartTime, talk.ActualEndTime)
+			t.StartAt, t.EndAt, err = t.GetActualStartAtAndEndAt(talk.ConferenceDayDate, talk.ActualStartTime, talk.ActualEndTime)
+			if err != nil {
+				xerrors.Errorf("message: %w", err)
 
+			}
 			talksModel = append(talksModel, t)
 		}
 		result = append(result, talksModel)
