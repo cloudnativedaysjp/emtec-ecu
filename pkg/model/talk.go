@@ -10,7 +10,7 @@ import (
 type TalkType int32
 
 const (
-	TalkType_OnlineSession TalkType = iota
+	TalkType_OnlineSession TalkType = iota + 1
 	TalkType_RecordingSession
 	TalkType_Opening
 	TalkType_Ending
