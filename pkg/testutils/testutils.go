@@ -12,3 +12,7 @@ func Getenv(t *testing.T, key string) string {
 	}
 	return v
 }
+
+func ToPointer(t *testing.T, str string) *string {
+	return &str
+}
