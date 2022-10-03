@@ -15,6 +15,8 @@ const (
 	TalkType_Opening
 	TalkType_Ending
 	TalkType_Commercial
+
+	dateLayout = "2006-01-02"
 )
 
 type Talks []Talk
@@ -46,7 +48,7 @@ func (ts Talks) WillStartNextTalkSince() bool {
 	now := nowFunc()
 	for _, talk := range ts {
 		if now.After(talk.StartAt) {
-			diffTime := time.Duration(talk.EndAt.Sub(now).Minutes())
+			diffTime := time.Duration(talk.EndAt.Sub(now))
 			if 0 < diffTime && diffTime <= utils.HowManyMinutesUntilNotify {
 				return true
 			}
@@ -68,13 +70,23 @@ func (ts Talks) GetCurrentTalk() (*Talk, error) {
 func (ts Talks) GetNextTalk(currentTalk *Talk) (*Talk, error) {
 	for i, talk := range ts {
 		if talk.Id == currentTalk.Id {
-			if i == len(ts) {
-				fmt.Errorf("This talk is last")
+			if i+1 == len(ts) {
+				return nil, fmt.Errorf("This talk is last")
 			}
 			return &ts[i+1], nil
 		}
 	}
 	return nil, fmt.Errorf("Next talk not found")
+}
+
+func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
+	cDate, err := time.Parse(dateLayout, conferenceDayDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	return cDate.Add(time.Duration(startAt.Hour()*int(time.Hour) + startAt.Minute()*int(time.Minute) + startAt.Second()*int(time.Second))),
+		cDate.Add(time.Duration(endAt.Hour()*int(time.Hour) + endAt.Minute()*int(time.Minute) + endAt.Second()*int(time.Second))),
+		nil
 }
 
 type Talk struct {

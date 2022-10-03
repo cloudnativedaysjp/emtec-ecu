@@ -9,6 +9,7 @@ import (
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast/lib"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
 type ClientIface interface {
@@ -40,6 +41,8 @@ func NewClient(eventAbbr, dkEndpointUrl string,
 }
 
 func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
+	logger := utils.GetLogger(ctx)
+
 	tracks, err := c.client.ListTracks(ctx, c.eventAbbr)
 	if err != nil {
 		return nil, xerrors.Errorf("message: %w", err)
@@ -61,7 +64,8 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 			}
 			talkType, err := t.GetTalkType(talk.Title, talk.PresentationMethod)
 			if err != nil {
-				xerrors.Errorf("message: %w", err)
+				err = xerrors.Errorf("message: %w", err)
+				logger.Error(err, "GetTalkType() was failed")
 				continue
 			}
 			t.Type = talkType
@@ -69,13 +73,10 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 				t.SpeakerNames = append(t.SpeakerNames, speaker.Name)
 			}
 
-			// TODO (#11)
-			// response is as below, so calcurate YYYY-MM-DDThh:mm:ss from these fields
-			// - "conferenceDayDate": "2022-08-05"
-			// - "actualStartTime": "2000-01-01T13:05:00.000+09:00"
-			t.StartAt = talk.StartTime
-			t.EndAt = talk.EndTime
-
+			t.StartAt, t.EndAt, err = t.GetActualStartAtAndEndAt(talk.ConferenceDayDate, talk.ActualStartTime, talk.ActualEndTime)
+			if err != nil {
+				return nil, xerrors.Errorf("message: %w", err)
+			}
 			talksModel = append(talksModel, t)
 		}
 		result = append(result, talksModel)
