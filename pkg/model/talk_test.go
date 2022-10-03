@@ -1,9 +1,10 @@
 package model
 
 import (
-	"fmt"
 	"testing"
 	"time"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
 )
 
 const ISO8601ExtendedLayout = "2006-01-02T15:04:05"
@@ -13,7 +14,7 @@ func TestTalk_GetTalkType(t *testing.T) {
 	tests := []struct {
 		name               string
 		title              string
-		presentationMethod interface{}
+		presentationMethod *string
 		want               TalkType
 		wantErr            bool
 	}{
@@ -41,46 +42,34 @@ func TestTalk_GetTalkType(t *testing.T) {
 		{
 			name:               "online session",
 			title:              "CNDT",
-			presentationMethod: "オンライン登壇",
+			presentationMethod: testutils.ToPointer(t, "オンライン登壇"),
 			want:               1,
 			wantErr:            false,
 		},
 		{
 			name:               "recording session",
 			title:              "recording",
-			presentationMethod: "事前収録",
+			presentationMethod: testutils.ToPointer(t, "事前収録"),
 			want:               2,
 			wantErr:            false,
 		},
 		{
 			name:               "error",
 			title:              "error",
-			presentationMethod: "error",
+			presentationMethod: testutils.ToPointer(t, "error"),
 			want:               0,
 			wantErr:            true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.presentationMethod == nil {
-				got, err := talk.GetTalkType(tt.title, nil)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("Talk.GetTalkType() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-				if got != tt.want {
-					t.Errorf("Talk.GetTalkType() = %v, want %v", got, tt.want)
-				}
-			} else {
-				str := fmt.Sprintf("%v", tt.presentationMethod)
-				got, err := talk.GetTalkType(tt.title, &str)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("Talk.GetTalkType() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-				if got != tt.want {
-					t.Errorf("Talk.GetTalkType() = %v, want %v", got, tt.want)
-				}
+			got, err := talk.GetTalkType(tt.title, tt.presentationMethod)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Talk.GetTalkType() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Talk.GetTalkType() = %v, want %v", got, tt.want)
 			}
 		})
 	}
