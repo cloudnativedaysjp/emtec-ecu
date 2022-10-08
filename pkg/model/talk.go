@@ -97,6 +97,10 @@ func (t Talk) GetTalkTypeName() string {
 	return typeName
 }
 
+func (t Talk) IsOnDemand() bool {
+	return t.Type == TalkType_OnlineSession || t.Type == TalkType_Opening || t.Type == TalkType_Ending
+}
+
 func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
 	cDate, err := time.Parse(dateLayout, conferenceDayDate)
 	if err != nil {
@@ -124,4 +128,17 @@ func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkTyp
 		return TalkType_RecordingSession, nil
 	}
 	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
+}
+
+//
+// CurrentAndNextTalk
+//
+
+type CurrentAndNextTalk struct {
+	Current Talk
+	Next    Talk
+}
+
+func (m CurrentAndNextTalk) TrackId() int32 {
+	return m.Current.TrackId
 }

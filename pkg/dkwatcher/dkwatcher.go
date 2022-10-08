@@ -26,7 +26,7 @@ type Config struct {
 	Auth0ClientId             string
 	Auth0ClientSecret         string
 	Auth0ClientAudience       string
-	NotificationEventSendChan chan<- model.Talk
+	NotificationEventSendChan chan<- model.CurrentAndNextTalk
 }
 
 const (
@@ -72,7 +72,7 @@ func Run(ctx context.Context, conf Config) error {
 
 func procedure(ctx context.Context,
 	dkClient dreamkast.ClientIface, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.Talk,
+	notificationEventSendChan chan<- model.CurrentAndNextTalk,
 ) error {
 	logger := utils.GetLogger(ctx)
 
@@ -112,7 +112,8 @@ func procedure(ctx context.Context,
 				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")
 				continue
 			}
-			notificationEventSendChan <- *nextTalk
+			notificationEventSendChan <- model.CurrentAndNextTalk{
+				Current: *currentTalk, Next: *nextTalk}
 		}
 	}
 	return nil

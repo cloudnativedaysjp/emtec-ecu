@@ -33,7 +33,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	eg, ctx := errgroup.WithContext(ctx)
-	talkStream := make(chan model.Talk, 16)
+	talkStream := make(chan model.CurrentAndNextTalk, 16)
 
 	// obswatcher
 	if !conf.Debug.DisableObsWatcher {
