@@ -520,19 +520,18 @@ func TestTalk_GetActualStartAtAndEndAt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			startAt, endAt, err := talk.GetActualStartAtAndEndAt(tt.conferenceDayDate, tt.startAt, tt.endAt)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
+			gotStartAt, gotEndAt, err := talk.GetActualStartAtAndEndAt(tt.conferenceDayDate, tt.startAt, tt.endAt)
+			if (err == nil && tt.wantErr) || (err != nil && !tt.wantErr) {
+				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if err != nil || startAt.Equal(tt.startAt) || endAt.Equal(tt.endAt) {
+			if err != nil {
+				return
+			}
+			if !gotStartAt.Equal(tt.wantStartAt) || !gotEndAt.Equal(tt.wantEndAt) {
 				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantStatAt = %v, wantEndAt = %v,", err, tt.wantStartAt, tt.wantEndAt)
 				return
 			}
-
 		})
 	}
 }
