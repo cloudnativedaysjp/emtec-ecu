@@ -298,6 +298,7 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		name    string
 		args    *Talk
 		talks   Talks
+		wantId  int32
 		wantErr bool
 	}{
 		{
@@ -466,13 +467,22 @@ func TestTalk_GetNextTalk(t *testing.T) {
 				},
 			},
 			wantErr: false,
+			wantId:  4,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := tt.talks.GetNextTalk(tt.args)
-			if err == nil && tt.wantErr {
+			got, err := tt.talks.GetNextTalk(tt.args)
+			if (err == nil && tt.wantErr) || (err != nil && !tt.wantErr) {
 				t.Errorf("Talk.GetTalkType() wantErr %v", tt.wantErr)
+				return
+			}
+			if err != nil {
+				return
+			}
+			if got.Id != int32(tt.wantId) {
+				t.Errorf("Talk.GetTalkType() wantId %v", tt.wantId)
+				return
 			}
 		})
 	}
