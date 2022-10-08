@@ -23,7 +23,7 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 	accessory := make(map[string]interface{})
 	if currentTalk.IsOnDemand() || nextTalk.IsOnDemand() {
 		accessory = map[string]interface{}{
-			"action_id": "multi_static_select-action",
+			"action_id": seaman_api.ActIdBroadcast_SceneNext,
 			"type":      "multi_static_select",
 			"placeholder": map[string]interface{}{
 				"text":  "switching",
@@ -37,7 +37,7 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 						"text":  "シーンを切り替える",
 						"emoji": true,
 					},
-					"value": seaman_api.ActIdBroadcast_SceneNext,
+					"value": seaman_api.Track{Id: m.TrackId(), Name: m.TrackName()}.String(),
 				},
 			},
 		}
