@@ -38,11 +38,16 @@ func (c *Controller) GetTrack(ctx context.Context, in *pb.GetTrackRequest) (*pb.
 		// TODO: not found を返す
 		return nil, err
 	}
+	disabled, err := c.MemReader.DisableAutomation(in.TrackId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &pb.Track{
 		TrackId:   in.TrackId,
 		TrackName: track.Name,
 		ObsHost:   ws.GetHost(),
+		Enabled:   !disabled,
 	}, nil
 }
 
@@ -54,10 +59,15 @@ func (c *Controller) ListTrack(ctx context.Context, in *emptypb.Empty) (*pb.List
 			// TODO: not found を返す
 			return nil, err
 		}
+		disabled, err := c.MemReader.DisableAutomation(trackId)
+		if err != nil {
+			return nil, err
+		}
 		tracks = append(tracks, &pb.Track{
 			TrackId:   trackId,
 			TrackName: track.Name,
 			ObsHost:   ws.GetHost(),
+			Enabled:   !disabled,
 		})
 	}
 	sort.SliceStable(tracks, func(i, j int) bool { return tracks[i].TrackId < tracks[j].TrackId })

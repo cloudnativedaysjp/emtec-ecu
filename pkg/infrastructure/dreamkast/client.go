@@ -13,7 +13,7 @@ import (
 )
 
 type ClientIface interface {
-	ListTalks(ctx context.Context) ([]model.Talks, error)
+	ListTracks(ctx context.Context) ([]model.Track, error)
 	SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error
 	SetNextTalkOnAir(ctx context.Context, trackId int32) error
 }
@@ -40,14 +40,14 @@ func NewClient(eventAbbr, dkEndpointUrl string,
 	}, nil
 }
 
-func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
+func (c *Client) ListTracks(ctx context.Context) ([]model.Track, error) {
 	logger := utils.GetLogger(ctx)
 
 	tracks, err := c.client.ListTracks(ctx, c.eventAbbr)
 	if err != nil {
 		return nil, xerrors.Errorf("message: %w", err)
 	}
-	var result []model.Talks
+	var result []model.Track
 	for _, track := range tracks {
 		var talksModel model.Talks
 		talks, err := c.client.ListTalks(ctx, c.eventAbbr, track.ID)
@@ -79,7 +79,11 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 			}
 			talksModel = append(talksModel, t)
 		}
-		result = append(result, talksModel)
+		result = append(result, model.Track{
+			Id:    track.ID,
+			Name:  track.Name,
+			Talks: talksModel,
+		})
 	}
 	return result, nil
 }

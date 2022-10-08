@@ -30,7 +30,8 @@ type Config struct {
 }
 
 const (
-	syncPeriod = 30 * time.Second
+	syncPeriod                = 30 * time.Second
+	howManyMinutesUntilNotify = 5 * time.Minute
 )
 
 func Run(ctx context.Context, conf Config) error {
@@ -76,21 +77,15 @@ func procedure(ctx context.Context,
 ) error {
 	logger := utils.GetLogger(ctx)
 
-	talksList, err := dkClient.ListTalks(ctx)
+	tracks, err := dkClient.ListTracks(ctx)
 	if err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
 		return nil
 	}
-	for _, talks := range talksList {
-		currentTalk, err := talks.GetCurrentTalk()
-		if err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "dkClient.GetCurrentTalk was failed")
-			continue
-		}
-		trackId := currentTalk.TrackId
-		logger = logger.WithValues("trackId", trackId)
+	for _, track := range tracks {
+		logger = logger.WithValues("trackId", track.Id)
 
-		if disabled, err := mr.DisableAutomation(trackId); err != nil {
+		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
 		} else if disabled {
@@ -98,16 +93,17 @@ func procedure(ctx context.Context,
 			continue
 		}
 
-		if err := mw.SetTrack(model.Track{
-			Id:    trackId,
-			Name:  currentTalk.TrackName,
-			Talks: talks,
-		}); err != nil {
+		if err := mw.SetTrack(track); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
-		if talks.WillStartNextTalkSince() {
-			nextTalk, err := talks.GetNextTalk(currentTalk)
+		if track.Talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
+			currentTalk, err := track.Talks.GetCurrentTalk()
+			if err != nil {
+				logger.Error(xerrors.Errorf("message: %w", err), "dkClient.GetCurrentTalk was failed")
+				continue
+			}
+			nextTalk, err := track.Talks.GetNextTalk(currentTalk)
 			if err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")
 				continue

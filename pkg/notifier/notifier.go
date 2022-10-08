@@ -46,6 +46,7 @@ func Run(ctx context.Context, conf Config) error {
 	for _, target := range conf.Targets {
 		slackClients[target.TrackId], err = slack.NewClient(target.SlackBotToken)
 		if err != nil {
+			logger.Error(err, "slack.NewClient() was failed")
 			return xerrors.Errorf("message: %w", err)
 		}
 		channelIds[target.TrackId] = target.SlackChannelId

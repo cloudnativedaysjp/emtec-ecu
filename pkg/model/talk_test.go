@@ -7,7 +7,10 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
 )
 
-const ISO8601ExtendedLayout = "2006-01-02T15:04:05"
+const (
+	test_ISO8601ExtendedLayout     = "2006-01-02T15:04:05"
+	test_howManyMinutesUntilNotify = 5 * time.Minute
+)
 
 func TestTalk_GetTalkType(t *testing.T) {
 	talk := &Talk{}
@@ -76,7 +79,7 @@ func TestTalk_GetTalkType(t *testing.T) {
 }
 
 func setTestTime(v string) time.Time {
-	pt, err := time.Parse(ISO8601ExtendedLayout, v)
+	pt, err := time.Parse(test_ISO8601ExtendedLayout, v)
 	if err != nil {
 		panic(err)
 	}
@@ -178,7 +181,7 @@ func TestTalk_WillStartNextTalkSince(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.talks.WillStartNextTalkSince()
+			got := tt.talks.WillStartNextTalkSince(test_howManyMinutesUntilNotify)
 			if got != tt.want {
 				t.Errorf("Talk.GetTalkType() want %v", tt.want)
 			}

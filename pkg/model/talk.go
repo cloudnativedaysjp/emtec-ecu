@@ -3,8 +3,6 @@ package model
 import (
 	"fmt"
 	"time"
-
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
 type TalkType int32
@@ -25,12 +23,12 @@ const (
 
 type Talks []Talk
 
-func (ts Talks) WillStartNextTalkSince() bool {
+func (ts Talks) WillStartNextTalkSince(untilNotify time.Duration) bool {
 	now := nowFunc()
 	for _, talk := range ts {
 		if now.After(talk.StartAt) {
 			diffTime := time.Duration(talk.EndAt.Sub(now))
-			if 0 < diffTime && diffTime <= utils.HowManyMinutesUntilNotify {
+			if 0 < diffTime && diffTime <= untilNotify {
 				return true
 			}
 		}
