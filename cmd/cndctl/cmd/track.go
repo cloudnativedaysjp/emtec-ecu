@@ -39,7 +39,7 @@ var trackListCmd = &cobra.Command{
 		//
 		// Print
 		//
-		for _, track := range resp.Track {
+		for _, track := range resp.Tracks {
 			fmt.Printf("%s (trackId: %d)\n", track.ObsHost, track.TrackId)
 		}
 	},

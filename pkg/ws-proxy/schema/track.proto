@@ -6,23 +6,21 @@ option go_package = "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-pr
 import "google/protobuf/empty.proto";
 
 service TrackService {
-  rpc GetTrack(GetTrackRequest) returns (GetTrackResponse) {}
+  rpc GetTrack(GetTrackRequest) returns (Track) {}
   rpc ListTrack(google.protobuf.Empty) returns (ListTrackResponse) {}
-  rpc EnableAutomation(SwitchAutomationRequest)
-      returns (google.protobuf.Empty) {}
-  rpc DisableAutomation(SwitchAutomationRequest)
-      returns (google.protobuf.Empty) {}
+  rpc EnableAutomation(SwitchAutomationRequest) returns (Track) {}
+  rpc DisableAutomation(SwitchAutomationRequest) returns (Track) {}
 }
 
 message Track {
   int32 trackId = 1;
-  string obsHost = 2;
-  bool enabled = 3;
+  string trackName = 2;
+  string obsHost = 3;
+  bool enabled = 4;
 }
 
 message GetTrackRequest { int32 trackId = 1; }
-message GetTrackResponse { Track track = 1; }
 
-message ListTrackResponse { repeated Track track = 1; }
+message ListTrackResponse { repeated Track tracks = 1; }
 
 message SwitchAutomationRequest { int32 trackId = 1; }

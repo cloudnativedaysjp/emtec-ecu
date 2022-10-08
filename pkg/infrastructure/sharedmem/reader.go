@@ -6,14 +6,16 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
+var _ ReaderIface = (*Reader)(nil)
+
 type ReaderIface interface {
 	DisableAutomation(trackId int32) (bool, error)
-	Talks(trackId int32) (model.Talks, error)
+	Track(trackId int32) (*model.Track, error)
 }
 
 type Reader struct {
 	UseStorageForDisableAutomation bool
-	UseStorageForTalks             bool
+	UseStorageForTrack             bool
 }
 
 func (r Reader) DisableAutomation(trackId int32) (bool, error) {
@@ -29,15 +31,15 @@ func (r Reader) DisableAutomation(trackId int32) (bool, error) {
 	return disabled, nil
 }
 
-func (r Reader) Talks(trackId int32) (model.Talks, error) {
-	if !r.UseStorageForTalks {
-		return nil, fmt.Errorf("UseStorageForTalks was false")
+func (r Reader) Track(trackId int32) (*model.Track, error) {
+	if !r.UseStorageForTrack {
+		return nil, fmt.Errorf("UseStorageForTrack was false")
 	}
-	storageForTalksMutex.RLock()
-	defer storageForTalksMutex.RUnlock()
-	talks, ok := storageForTalks[trackId]
+	storageForTrackMutex.RLock()
+	defer storageForTrackMutex.RUnlock()
+	track, ok := storageForTrack[trackId]
 	if !ok {
 		return nil, fmt.Errorf("trackId %d is not found", trackId)
 	}
-	return talks, nil
+	return &track, nil
 }

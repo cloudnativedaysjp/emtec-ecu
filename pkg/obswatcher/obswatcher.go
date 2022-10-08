@@ -48,7 +48,7 @@ func Run(ctx context.Context, conf Config) error {
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
-	mr := &sharedmem.Reader{UseStorageForTalks: true, UseStorageForDisableAutomation: true}
+	mr := &sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, obs := range conf.Obs {

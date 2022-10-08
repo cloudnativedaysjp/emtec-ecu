@@ -6,14 +6,16 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
+var _ WriterIface = (*Writer)(nil)
+
 type WriterIface interface {
 	SetDisableAutomation(trackId int32, disabled bool) error
-	SetTalks(ttrackId int32, alks model.Talks) error
+	SetTrack(track model.Track) error
 }
 
 type Writer struct {
 	UseStorageForDisableAutomation bool
-	UseStorageForTalks             bool
+	UseStorageForTrack             bool
 }
 
 func (w Writer) SetDisableAutomation(trackId int32, disabled bool) error {
@@ -26,16 +28,12 @@ func (w Writer) SetDisableAutomation(trackId int32, disabled bool) error {
 	return nil
 }
 
-func (w Writer) SetTalks(trackId int32, talks model.Talks) error {
-	if !w.UseStorageForTalks {
-		return fmt.Errorf("UseStorageForTalks was false")
+func (w Writer) SetTrack(track model.Track) error {
+	if !w.UseStorageForTrack {
+		return fmt.Errorf("UseStorageForTrack was false")
 	}
-	storageForTalksMutex.Lock()
-	defer storageForTalksMutex.Unlock()
-	currentTalk, _ := talks.GetCurrentTalk()
-	if currentTalk == nil {
-		return fmt.Errorf("Fail to GetCurrentTalk")
-	}
-	storageForTalks[currentTalk.TrackId] = talks
+	storageForTrackMutex.Lock()
+	defer storageForTrackMutex.Unlock()
+	storageForTrack[track.Id] = track
 	return nil
 }
