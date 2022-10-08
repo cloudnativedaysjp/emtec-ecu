@@ -19,30 +19,11 @@ const (
 	dateLayout = "2006-01-02"
 )
 
+//
+// Talks
+//
+
 type Talks []Talk
-
-func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkType, error) {
-	switch {
-	case presentationMethod == nil:
-		switch title {
-		case "Opening":
-			return TalkType_Opening, nil
-		case "休憩":
-			return TalkType_Commercial, nil
-		case "Closing":
-			return TalkType_Ending, nil
-		}
-	case *presentationMethod == "オンライン登壇":
-		return TalkType_OnlineSession, nil
-	case *presentationMethod == "事前収録":
-		return TalkType_RecordingSession, nil
-	}
-	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
-}
-
-func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
-	return t.convertTalkType(title, presentationMethod)
-}
 
 func (ts Talks) WillStartNextTalkSince() bool {
 	now := nowFunc()
@@ -79,15 +60,9 @@ func (ts Talks) GetNextTalk(currentTalk *Talk) (*Talk, error) {
 	return nil, fmt.Errorf("Next talk not found")
 }
 
-func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
-	cDate, err := time.Parse(dateLayout, conferenceDayDate)
-	if err != nil {
-		return time.Time{}, time.Time{}, err
-	}
-	return cDate.Add(time.Duration(startAt.Hour()*int(time.Hour) + startAt.Minute()*int(time.Minute) + startAt.Second()*int(time.Second))),
-		cDate.Add(time.Duration(endAt.Hour()*int(time.Hour) + endAt.Minute()*int(time.Minute) + endAt.Second()*int(time.Second))),
-		nil
-}
+//
+// Talk
+//
 
 type Talk struct {
 	Id           int32
@@ -99,4 +74,54 @@ type Talk struct {
 	Type         TalkType
 	StartAt      time.Time
 	EndAt        time.Time
+}
+
+func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
+	return t.convertTalkType(title, presentationMethod)
+}
+
+func (t Talk) GetTalkTypeName() string {
+	var typeName string
+	switch t.Type {
+	case TalkType_OnlineSession:
+		typeName = "オンライン登壇"
+	case TalkType_RecordingSession:
+		typeName = "事前収録"
+	case TalkType_Opening:
+		typeName = "Opening"
+	case TalkType_Ending:
+		typeName = "Closing"
+	case TalkType_Commercial:
+		typeName = "CM"
+	}
+	return typeName
+}
+
+func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
+	cDate, err := time.Parse(dateLayout, conferenceDayDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+	return cDate.Add(time.Duration(startAt.Hour()*int(time.Hour) + startAt.Minute()*int(time.Minute) + startAt.Second()*int(time.Second))),
+		cDate.Add(time.Duration(endAt.Hour()*int(time.Hour) + endAt.Minute()*int(time.Minute) + endAt.Second()*int(time.Second))),
+		nil
+}
+
+func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkType, error) {
+	switch {
+	case presentationMethod == nil:
+		switch title {
+		case "Opening":
+			return TalkType_Opening, nil
+		case "休憩":
+			return TalkType_Commercial, nil
+		case "Closing":
+			return TalkType_Ending, nil
+		}
+	case *presentationMethod == "オンライン登壇":
+		return TalkType_OnlineSession, nil
+	case *presentationMethod == "事前収録":
+		return TalkType_RecordingSession, nil
+	}
+	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
 }
