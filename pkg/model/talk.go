@@ -80,19 +80,19 @@ func (ts Talks) GetCurrentTalk() (*Talk, error) {
 			return &talk, nil
 		}
 	}
-	return nil, fmt.Errorf("Current talk not found")
+	return nil, fmt.Errorf("current talk not found")
 }
 
 func (ts Talks) GetNextTalk(currentTalk *Talk) (*Talk, error) {
 	for i, talk := range ts {
 		if talk.Id == currentTalk.Id {
 			if i+1 == len(ts) {
-				return nil, fmt.Errorf("This talk is last")
+				return nil, fmt.Errorf("this talk is last")
 			}
 			return &ts[i+1], nil
 		}
 	}
-	return nil, fmt.Errorf("Next talk not found")
+	return nil, fmt.Errorf("next talk not found")
 }
 
 func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
