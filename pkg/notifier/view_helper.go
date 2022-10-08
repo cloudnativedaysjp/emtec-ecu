@@ -2,7 +2,6 @@ package notifier
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/slack-go/slack"
 )
@@ -30,8 +29,4 @@ func castFromStringToMsg(s string) (slack.Msg, error) {
 		return slack.Msg{}, err
 	}
 	return result, nil
-}
-
-func replaceBackquote(s string) string {
-	return strings.ReplaceAll(s, "<backquote>", "`")
 }

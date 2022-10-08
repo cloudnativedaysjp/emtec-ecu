@@ -89,7 +89,7 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 					"type": "section",
 					"text": map[string]interface{}{
 						"type": "mrkdwn",
-						"text": fmt.Sprintf("<%s/%s/talks/%d|Title: %s>",
+						"text": fmt.Sprintf("Title: <%s/%s/talks/%d|%s>",
 							eventUrlBase, currentTalk.EventAbbr, currentTalk.Id, currentTalk.TalkName),
 					},
 				},
@@ -140,7 +140,7 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 					"type":      "section",
 					"text": map[string]interface{}{
 						"type": "mrkdwn",
-						"text": fmt.Sprintf("<%s/%s/talks/%d|Title: %s>",
+						"text": fmt.Sprintf("Title: <%s/%s/talks/%d|%s>",
 							eventUrlBase, nextTalk.EventAbbr, nextTalk.Id, nextTalk.TalkName),
 					},
 				},
