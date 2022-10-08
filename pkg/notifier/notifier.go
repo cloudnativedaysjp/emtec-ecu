@@ -18,7 +18,7 @@ type Config struct {
 	Development                  bool
 	Debug                        bool
 	Targets                      []Target
-	NotificationEventReceiveChan <-chan model.Talk
+	NotificationEventReceiveChan <-chan model.CurrentAndNextTalk
 }
 
 type Target struct {

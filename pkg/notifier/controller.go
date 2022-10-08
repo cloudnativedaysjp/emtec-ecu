@@ -2,7 +2,6 @@ package notifier
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/xerrors"
@@ -24,32 +23,11 @@ func NewController(logger logr.Logger,
 	return &Controller{logger, slackClients, channelIds}
 }
 
-func (c *Controller) Receive(talk model.Talk) error {
+func (c *Controller) Receive(m model.CurrentAndNextTalk) error {
 	ctx := logr.NewContext(context.Background(), c.logger)
-	slackClient := c.slackClients[talk.TrackId]
-	switch talk.Type {
-	case model.TalkType_OnlineSession:
-		if err := slackClient.PostMessage(ctx, c.channelIds[talk.TrackId], viewOnlineSession(talk)); err != nil {
-			return xerrors.Errorf("message: %w", err)
-		}
-	case model.TalkType_RecordingSession:
-		if err := slackClient.PostMessage(ctx, c.channelIds[talk.TrackId], viewRecordingSession(talk)); err != nil {
-			return xerrors.Errorf("message: %w", err)
-		}
-	case model.TalkType_Commercial:
-		if err := slackClient.PostMessage(ctx, c.channelIds[talk.TrackId], viewCommercial(talk)); err != nil {
-			return xerrors.Errorf("message: %w", err)
-		}
-	case model.TalkType_Opening:
-		if err := slackClient.PostMessage(ctx, c.channelIds[talk.TrackId], viewOpening(talk)); err != nil {
-			return xerrors.Errorf("message: %w", err)
-		}
-	case model.TalkType_Ending:
-		if err := slackClient.PostMessage(ctx, c.channelIds[talk.TrackId], viewEnding(talk)); err != nil {
-			return xerrors.Errorf("message: %w", err)
-		}
-	default:
-		return fmt.Errorf("unknown talk type")
+	slackClient := c.slackClients[m.TrackId()]
+	if err := slackClient.PostMessage(ctx, c.channelIds[m.TrackId()], ViewSession(m)); err != nil {
+		return xerrors.Errorf("message: %w", err)
 	}
 	return nil
 }
