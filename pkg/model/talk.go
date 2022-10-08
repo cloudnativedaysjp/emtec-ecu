@@ -1,9 +1,11 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
@@ -44,7 +46,7 @@ func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, e
 	return t.convertTalkType(title, presentationMethod)
 }
 
-func (ts Talks) WillStartNextTalkSince() bool {
+func (ts Talks) isStartNextTalkSoon() bool {
 	now := nowFunc()
 	for _, talk := range ts {
 		if now.After(talk.StartAt) {
@@ -55,6 +57,20 @@ func (ts Talks) WillStartNextTalkSince() bool {
 		}
 	}
 	return false
+}
+
+func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient) (bool, error) {
+	// 次のtalkがもうすぐ始まるか判定し,まだ通知が行われていない場合は通知を行う.
+	if ts.isStartNextTalkSoon() {
+		result := rc.Client.Get(ctx, db.NextTalkNotificationKey)
+		if result.Err() != nil {
+			return false, result.Err()
+		}
+		if result != nil {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 func (ts Talks) GetCurrentTalk() (*Talk, error) {

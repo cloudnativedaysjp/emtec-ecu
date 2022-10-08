@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
@@ -26,6 +27,7 @@ type Config struct {
 	Auth0ClientId             string
 	Auth0ClientSecret         string
 	Auth0ClientAudience       string
+	RedisHost                 string
 	NotificationEventSendChan chan<- model.Talk
 }
 
@@ -53,6 +55,11 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 
+	redisClient, err := db.NewRedisClient(conf.RedisHost)
+	if err != nil {
+		return err
+	}
+
 	mw := sharedmem.Writer{UseStorageForTalks: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
@@ -63,7 +70,9 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Info("context was done.")
 			return nil
 		case <-tick.C:
-			if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+			if err := procedure(ctx, dkClient, mw, mr,
+				conf.NotificationEventSendChan, redisClient,
+			); err != nil {
 				return err
 			}
 		}
@@ -72,7 +81,7 @@ func Run(ctx context.Context, conf Config) error {
 
 func procedure(ctx context.Context,
 	dkClient dreamkast.ClientIface, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.Talk,
+	notificationEventSendChan chan<- model.Talk, redisClient *db.RedisClient,
 ) error {
 	logger := utils.GetLogger(ctx)
 
@@ -102,7 +111,12 @@ func procedure(ctx context.Context,
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
 			continue
 		}
-		if talks.WillStartNextTalkSince() {
+		hasNotify, err := talks.HasNotify(ctx, redisClient)
+		if err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "talks.HasNotify() was failed")
+			continue
+		}
+		if !hasNotify {
 			nextTalk, err := talks.GetNextTalk(currentTalk)
 			if err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")

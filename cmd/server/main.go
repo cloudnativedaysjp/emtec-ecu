@@ -65,6 +65,7 @@ func main() {
 				Auth0ClientId:             conf.Dreamkast.Auth0ClientId,
 				Auth0ClientSecret:         conf.Dreamkast.Auth0ClientSecret,
 				Auth0ClientAudience:       conf.Dreamkast.Auth0ClientAudience,
+				RedisHost:                 conf.Redis.Host,
 				NotificationEventSendChan: talkStream,
 			})
 		})
@@ -83,6 +84,7 @@ func main() {
 			return notifier.Run(ctx, notifier.Config{
 				Development:                  conf.Debug.Development,
 				Debug:                        conf.Debug.Debug,
+				RedisHost:                    conf.Redis.Host,
 				Targets:                      targets,
 				NotificationEventReceiveChan: talkStream,
 			})

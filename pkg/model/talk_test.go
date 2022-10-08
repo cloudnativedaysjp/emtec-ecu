@@ -178,7 +178,7 @@ func TestTalk_WillStartNextTalkSince(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.talks.WillStartNextTalkSince()
+			got := tt.talks.isStartNextTalkSoon()
 			if got != tt.want {
 				t.Errorf("Talk.GetTalkType() want %v", tt.want)
 			}
@@ -193,6 +193,7 @@ func TestTalk_GetCurrentTalk(t *testing.T) {
 	tests := []struct {
 		name    string
 		talks   Talks
+		wantId  int
 		wantErr bool
 	}{
 		{

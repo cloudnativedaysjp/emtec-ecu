@@ -5,6 +5,8 @@ dreamkast:
   auth0Domain: ${AUTH0_DOMAIN}
   auth0ClientId: ${AUTH0_CLIENT_ID}
   auth0ClientSecret: ${AUTH0_CLIENT_SECRET}
+resids:
+  host: https://xxx.jp:6379  // TODO:reis作成後に設定する
 tracks:
   - dkTrackId: 29
     obs:

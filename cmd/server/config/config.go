@@ -38,6 +38,7 @@ type Config struct {
 	Debug           DebugConfig     `json:"debug"`
 	WsProxyBindAddr string          `json:"bindAddr" default:":20080"`
 	Dreamkast       DreamkastConfig `json:"dreamkast" validate:"required"`
+	Redis           RedisConfig     `json:"redis " validate:"required"`
 	Tracks          []TrackConfig   `json:"tracks" validate:"required"`
 }
 
@@ -73,4 +74,8 @@ type ObsConfig struct {
 type SlackConfig struct {
 	BotToken  string `json:"botToken" validate:"required"`
 	ChannelId string `json:"channelId" validate:"required"`
+}
+
+type RedisConfig struct {
+	Host string `json:"host" validate:"required"`
 }
