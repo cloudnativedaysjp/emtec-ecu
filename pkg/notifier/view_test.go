@@ -113,10 +113,10 @@ func Test_viewSession(t *testing.T) {
 							"text": "シーンを切り替える",
 							"emoji": true
 						},
-						"value": "broadcast_scenenext"
+						"value": "1__A"
 					}
 				],
-				"action_id": "multi_static_select-action"
+				"action_id": "broadcast_scenenext"
 			}
 		},
 		{
@@ -134,6 +134,7 @@ func Test_viewSession(t *testing.T) {
 			Current: model.Talk{
 				Id:           10001,
 				TalkName:     "ものすごい発表",
+				TrackId:      1,
 				TrackName:    "A",
 				StartAt:      time.Date(2022, 10, 1, 10, 0, 0, 0, time.FixedZone("Asia/Tokyo", 9*60*60)),
 				EndAt:        time.Date(2022, 10, 1, 11, 0, 0, 0, time.FixedZone("Asia/Tokyo", 9*60*60)),
@@ -144,6 +145,7 @@ func Test_viewSession(t *testing.T) {
 			Next: model.Talk{
 				Id:           10002,
 				TalkName:     "さらにものすごい発表",
+				TrackId:      1,
 				TrackName:    "A",
 				StartAt:      time.Date(2022, 10, 1, 11, 0, 0, 0, time.FixedZone("Asia/Tokyo", 9*60*60)),
 				EndAt:        time.Date(2022, 10, 1, 12, 30, 0, 0, time.FixedZone("Asia/Tokyo", 9*60*60)),
