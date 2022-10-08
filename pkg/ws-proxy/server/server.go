@@ -62,7 +62,7 @@ func Run(ctx context.Context, conf Config) error {
 		Logger:      logger,
 		ObsWsMap:    obswsClientMap,
 		MemWriter:   sharedmem.Writer{UseStorageForDisableAutomation: true},
-		MemReader:   sharedmem.Reader{UseStorageForTrack: true},
+		MemReader:   sharedmem.Reader{UseStorageForTrack: true, UseStorageForDisableAutomation: true},
 		MemDebugger: sharedmem.Debugger{},
 	}
 
@@ -76,7 +76,7 @@ func Run(ctx context.Context, conf Config) error {
 	pb.RegisterSceneServiceServer(s, controller)
 	pb.RegisterTrackServiceServer(s, controller)
 	pb.RegisterDebugServiceServer(s, controller)
-	if conf.Debug {
+	if conf.Development {
 		reflection.Register(s)
 	}
 

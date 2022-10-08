@@ -100,8 +100,8 @@ func (c *Client) MoveSceneToNext(ctx context.Context) error {
 		}
 	}
 	if currentProgramFlag {
-		logger.Info("current scene is tha last scene.")
-		nextSceneName = _scenes[0].Name
+		logger.Info("current scene is the last scene.")
+		return nil
 	} else if !nextProgramFlag {
 		return fmt.Errorf("CurrentProgram is nothing")
 	}
