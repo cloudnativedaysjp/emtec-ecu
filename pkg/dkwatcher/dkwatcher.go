@@ -53,7 +53,7 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 
-	mw := sharedmem.Writer{UseStorageForTalks: true}
+	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	tick := time.NewTicker(syncPeriod)
@@ -98,8 +98,12 @@ func procedure(ctx context.Context,
 			continue
 		}
 
-		if err := mw.SetTalks(trackId, talks); err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
+		if err := mw.SetTrack(model.Track{
+			Id:    trackId,
+			Name:  currentTalk.TrackName,
+			Talks: talks,
+		}); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
 		if talks.WillStartNextTalkSince() {

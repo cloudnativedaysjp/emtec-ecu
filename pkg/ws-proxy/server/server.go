@@ -62,6 +62,7 @@ func Run(ctx context.Context, conf Config) error {
 		Logger:      logger,
 		ObsWsMap:    obswsClientMap,
 		MemWriter:   sharedmem.Writer{UseStorageForDisableAutomation: true},
+		MemReader:   sharedmem.Reader{UseStorageForTrack: true},
 		MemDebugger: sharedmem.Debugger{},
 	}
 
