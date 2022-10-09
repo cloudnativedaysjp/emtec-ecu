@@ -1,4 +1,5 @@
-bindAddr: :20080
+wsProxy:
+  bindAddr: :20080
 dreamkast:
   eventAbbr: cnsec2022
   endpointUrl: ${DK_ENDPOINT_URL}
