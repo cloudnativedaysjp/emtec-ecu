@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func (c *PrimitiveClient) ListTracks(ctx context.Context, eventAbbr string) (ListTracksResp, error) {
+func (c *DreamkastClientImpl) ListTracks(ctx context.Context, eventAbbr string) (ListTracksResp, error) {
 	url := c.dkEndpointUrl
 	url.Path = filepath.Join(url.Path, "/v1/tracks")
 	req, err := http.NewRequest("GET", url.String(), nil)

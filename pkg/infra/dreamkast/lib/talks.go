@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (c *PrimitiveClient) ListTalks(ctx context.Context, eventAbbr string, trackId int32) (ListTalksResp, error) {
+func (c *DreamkastClientImpl) ListTalks(ctx context.Context, eventAbbr string, trackId int32) (ListTalksResp, error) {
 	url := c.dkEndpointUrl
 	url.Path = filepath.Join(url.Path, "/v1/talks")
 	req, err := http.NewRequest("GET", url.String(), nil)
@@ -37,7 +37,7 @@ func (c *PrimitiveClient) ListTalks(ctx context.Context, eventAbbr string, track
 
 // TODO: set Token to header
 // TODO: write test
-func (c *PrimitiveClient) UpdateTalks(ctx context.Context, talkId int32, onAir bool) error {
+func (c *DreamkastClientImpl) UpdateTalks(ctx context.Context, talkId int32, onAir bool) error {
 	url := c.dkEndpointUrl
 	url.Path = filepath.Join(url.Path, "/v1/talks", strconv.Itoa(int(talkId)))
 	reqBody, err := json.Marshal(&UpdateTalksReq{OnAir: onAir})

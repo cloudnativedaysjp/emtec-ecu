@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slack"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/slack"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
@@ -41,7 +41,7 @@ func Run(ctx context.Context, conf Config) error {
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
-	slackClients := make(map[int32]slack.ClientIface)
+	slackClients := make(map[int32]slack.Client)
 	channelIds := make(map[int32]string)
 	for _, target := range conf.Targets {
 		slackClients[target.TrackId], err = slack.NewClient(target.SlackBotToken)

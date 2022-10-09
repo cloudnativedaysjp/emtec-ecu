@@ -6,7 +6,7 @@ import (
 	"github.com/andreykaipov/goobs/api/requests/scenes"
 )
 
-type ObsWsApi interface {
+type ObsWsClient interface {
 	GenerateClient(host, password string) error
 	MediaInputs() ObsWsMediaInputsApi
 	Scenes() ObsWsScenesApi

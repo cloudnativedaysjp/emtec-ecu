@@ -9,8 +9,8 @@ import (
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
@@ -20,7 +20,7 @@ type Controller struct {
 	pb.UnimplementedDebugServiceServer
 
 	Logger      logr.Logger
-	ObsWsMap    map[int32]obsws.ClientIface
+	ObsWsMap    map[int32]obsws.Client
 	MemWriter   sharedmem.WriterIface
 	MemReader   sharedmem.ReaderIface
 	MemDebugger sharedmem.DebuggerIface
