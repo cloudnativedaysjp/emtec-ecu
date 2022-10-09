@@ -6,19 +6,19 @@ import (
 	"github.com/go-logr/logr"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slack"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/slack"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
 type Controller struct {
 	logger       logr.Logger
-	slackClients map[int32]slack.ClientIface
+	slackClients map[int32]slack.Client
 
 	channelIds map[int32]string
 }
 
 func NewController(logger logr.Logger,
-	slackClients map[int32]slack.ClientIface, channelIds map[int32]string,
+	slackClients map[int32]slack.Client, channelIds map[int32]string,
 ) *Controller {
 	return &Controller{logger, slackClients, channelIds}
 }

@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
@@ -75,7 +75,7 @@ func Run(ctx context.Context, conf Config) error {
 }
 
 func procedure(ctx context.Context,
-	dkClient dreamkast.ClientIface, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
+	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
 	notificationEventSendChan chan<- model.CurrentAndNextTalk,
 ) error {
 	logger := utils.GetLogger(ctx)

@@ -8,7 +8,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 

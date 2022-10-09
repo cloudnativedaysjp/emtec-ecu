@@ -30,7 +30,7 @@ func TestPrimitiveClient_ListTalks(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		c := &PrimitiveClient{
+		c := &DreamkastClientImpl{
 			client:        http.DefaultClient,
 			dkEndpointUrl: *u,
 		}
@@ -42,7 +42,7 @@ func TestPrimitiveClient_ListTalks(t *testing.T) {
 
 		got, err := c.ListTalks(ctx, dkEventAbbr, int32(trackId))
 		if err != nil {
-			t.Errorf("PrimitiveClient.ListTalks() error = %v", err)
+			t.Errorf("DreamkastClientImpl.ListTalks() error = %v", err)
 			return
 		}
 		pp.Print(got)
@@ -66,7 +66,7 @@ func TestPrimitiveClient_UpdateTalks(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		c := &PrimitiveClient{
+		c := &DreamkastClientImpl{
 			client:        http.DefaultClient,
 			dkEndpointUrl: *u,
 		}
@@ -80,7 +80,7 @@ func TestPrimitiveClient_UpdateTalks(t *testing.T) {
 		}
 
 		if err := c.UpdateTalks(ctx, int32(talkId), true); err != nil {
-			t.Errorf("PrimitiveClient.UpdateTalks() error = %v", err)
+			t.Errorf("DreamkastClientImpl.UpdateTalks() error = %v", err)
 		}
 	})
 }

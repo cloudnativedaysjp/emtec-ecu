@@ -7,26 +7,26 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type ClientIface interface {
+type Client interface {
 	PostMessage(ctx context.Context, channel string, msg slack.Msg) error
 }
 
-type Client struct {
+type ClientImpl struct {
 	client    *slack.Client
 	botUserId string
 }
 
-func NewClient(botToken string) (ClientIface, error) {
+func NewClient(botToken string) (Client, error) {
 	client := slack.New(botToken)
 	res, err := client.AuthTest()
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{client, res.UserID}, nil
+	return &ClientImpl{client, res.UserID}, nil
 }
 
-func (s *Client) PostMessage(ctx context.Context, channel string, msg slack.Msg) error {
+func (s *ClientImpl) PostMessage(ctx context.Context, channel string, msg slack.Msg) error {
 	_, _, err := s.client.PostMessageContext(ctx, channel,
 		slack.MsgOptionText(msg.Text, false),
 		slack.MsgOptionAttachments(msg.Attachments...),

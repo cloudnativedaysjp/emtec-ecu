@@ -11,8 +11,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
@@ -69,7 +69,7 @@ func Run(ctx context.Context, conf Config) error {
 }
 
 func watch(ctx context.Context, trackId int32,
-	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
+	obswsClient obsws.Client, mr sharedmem.ReaderIface,
 ) func() error {
 	return func() error {
 		logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
@@ -93,7 +93,7 @@ func watch(ctx context.Context, trackId int32,
 }
 
 func procedure(ctx context.Context, trackId int32,
-	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
+	obswsClient obsws.Client, mr sharedmem.ReaderIface,
 ) error {
 	logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 
