@@ -3,7 +3,7 @@ services:
   seaman:
     image: public.ecr.aws/f5j9d0q5/seaman:0.0.7
     command: --config=/mnt/seaman.yaml
-    network_mode: host # for connecting to local OBS
+    network_mode: host # for connecting to local cnd-operation-server
     volumes:
       - ./seaman.yaml:/mnt/seaman.yaml
     environment:
