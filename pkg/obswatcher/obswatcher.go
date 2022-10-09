@@ -73,8 +73,11 @@ func watch(ctx context.Context, trackId int32,
 ) func() error {
 	return func() error {
 		logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
-		tick := time.NewTicker(syncPeriod)
 
+		tick := time.NewTicker(syncPeriod)
+		if err := procedure(ctx, trackId, obswsClient, mr); err != nil {
+			return xerrors.Errorf("message: %w", err)
+		}
 		for {
 			select {
 			case <-ctx.Done():

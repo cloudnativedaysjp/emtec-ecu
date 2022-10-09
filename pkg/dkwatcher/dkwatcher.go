@@ -58,6 +58,9 @@ func Run(ctx context.Context, conf Config) error {
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	tick := time.NewTicker(syncPeriod)
+	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+		return err
+	}
 	for {
 		select {
 		case <-ctx.Done():
