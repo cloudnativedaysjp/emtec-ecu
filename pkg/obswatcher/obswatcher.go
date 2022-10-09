@@ -107,15 +107,18 @@ func procedure(ctx context.Context, trackId int32,
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
 		return nil
 	}
-	remainingTime := t.Duration - t.Cursor
-	if float64(startPreparetionPeriod) > remainingTime {
+	remainingMilliSecond := t.DurationMilliSecond - t.CursorMilliSecond
+
+	if float64(startPreparetionPeriod/time.Millisecond) < remainingMilliSecond {
+		logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is %ds: continue",
+			startPreparetionPeriod/time.Second))
 		return nil
 	}
-	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %d",
-		startPreparetionPeriod), "duration", t.Duration, "cursor", t.Cursor)
+	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %ds",
+		startPreparetionPeriod/time.Second), "duration", t.DurationMilliSecond, "cursor", t.CursorMilliSecond)
 
 	// sleep until MediaInput is finished
-	time.Sleep(time.Duration(remainingTime) * time.Second)
+	time.Sleep(time.Duration(remainingMilliSecond) * time.Millisecond)
 	if err := obswsClient.MoveSceneToNext(context.Background()); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.MoveSceneToNext() on automated task was failed")
 		return nil

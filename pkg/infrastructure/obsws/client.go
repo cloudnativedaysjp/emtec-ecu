@@ -116,8 +116,8 @@ func (c *Client) MoveSceneToNext(ctx context.Context) error {
 }
 
 type DurationAndCursor struct {
-	Duration float64
-	Cursor   float64
+	DurationMilliSecond float64
+	CursorMilliSecond   float64
 }
 
 func (c *Client) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationAndCursor, error) {
