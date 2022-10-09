@@ -1,7 +1,22 @@
 development
 ===
 
-## 起動方法
+## 事前準備
+
+手元で Websocket を有効化した OBS を立ち上げ、検証用にシーン・ソースを用意します。
+
+### Download
+
+* [Download OBS](https://obsproject.com/ja/download)
+* [Download obs-websocket](https://github.com/obsproject/obs-websocket/releases/)
+
+### 検証用シーン・ソースの準備
+
+TBW
+
+## 検証環境の起動
+
+Docker Compose を用い、cnd-operation-server, seaman (SlackBot), dk-mock-server (Dreamkast API の Mock Server) を立ち上げます。
 
 * `.env` ファイルの作成
 
