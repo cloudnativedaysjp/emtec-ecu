@@ -180,3 +180,223 @@
             "presentationMethod": "事前収録"
           }
         ]
+
+- request:
+    # Note: the method could be omitted because GET is the default
+    method: GET
+    path: /api/v1/talks
+    query_params:
+      eventAbbr: cnsec2022
+      trackId: 30
+  dynamic_response:
+    engine: go_template
+      # Note: the status could be omitted because 200 is the default
+    script: >
+      headers:
+        Content-Type: application/json
+      body: >
+        [
+          {
+            "id": 1441,
+            "conferenceId": 6,
+            "trackId": 30,
+            "videoPlatform": null,
+            "videoId": "https://d3pun3ptcv21q4.cloudfront.net/mediapackage/cnsec2022/talks/1441/16/playlist.m3u8",
+            "title": "セキュアなTerraformの使い方 ~ 機密情報をコードに含めず環境構築するにはどうしたらいいの？",
+            "abstract": "IaCの便利さ・メリットがよく知られるようになった昨今、Terraformでクラウド環境を構築するという選択肢はとても一般的です。\r\nしかし「構築内容をコード・文書として残す」というIaCの特性上、機密情報がコードやツールによる生成物に含まれないよう注意を払いながら開発していくことが求められます。\r\n本セッションではそのリスクを避けるためにはどのようにコードを記述すればいいのか、そもそもどのリソースをTerraformで扱っていくべきなのか、またどのようにチームでセキュアなTerraform運用をしていけばいいのかについて論じます。",
+            "speakers": [
+              {
+                "id": 1293,
+                "name": "Haruka Sakihara"
+              }
+            ],
+            "dayId": 16,
+            "showOnTimetable": true,
+            "startTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h1m") "UTC"}}",
+            "endTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "talkDuration": 0,
+            "talkDifficulty": "初級者",
+            "talkCategory": "",
+            "onAir": false,
+            "documentUrl": "https://speakerdeck.com/harukasakihara/sekiyuanaterraformfalseshi-ifang-ji-mi-qing-bao-wokodonihan-mezuhuan-jing-gou-zhu-surunihadousitaraiifalse",
+            "conferenceDayId": 16,
+            "conferenceDayDate": "{{now | date "2006-01-02"}}",
+            "startOffset": 0,
+            "endOffset": 0,
+            "actualStartTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h1m") "UTC"}}",
+            "actualEndTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "presentationMethod": "オンライン登壇"
+          },
+          {
+            "id": 1442,
+            "conferenceId": 6,
+            "trackId": 30,
+            "videoPlatform": null,
+            "videoId": "https://dreamkast-ivs-stream-archive-prd.s3.amazonaws.com/medialive/cnsec2022/talks/1442/1442.m3u8",
+            "title": "Istioを活用したセキュアなマイクロサービスの実現: アプリ透過型のユーザ及びサービス間の認証認可",
+            "abstract": "マイクロサービス型システムのセキュリティを高める上で、サービスやそれを構成するインスタンスの粒度での細かな認証認可は重要です。しかし、それには実装や管理に多くの手間がかかります。そこで、本講演ではOSSのサービスメッシュ実装であるIstioを用いて、アプリから透過的に認証認可を行う方法を紹介します。具体的にはmTLSを用いたサービス間認証、外部認証基盤を用いたユーザ認証、IstioとOpen Policy Agent(OPA)との連携方法、Keycloak連携によるWeb GUIのユーザ認証等を解説します。",
+            "speakers": [
+              {
+                "id": 1294,
+                "name": "Takaya Ide"
+              }
+            ],
+            "dayId": 16,
+            "showOnTimetable": true,
+            "startTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "endTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "talkDuration": 0,
+            "talkDifficulty": "中級者",
+            "talkCategory": "",
+            "onAir": false,
+            "documentUrl": "https://speakerdeck.com/ido_kara_deru/secure-microservices-with-istio",
+            "conferenceDayId": 16,
+            "conferenceDayDate": "{{now | date "2006-01-02"}}",
+            "startOffset": 0,
+            "endOffset": 0,
+            "actualStartTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "actualEndTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "presentationMethod": "事前収録"
+          },
+          {
+            "id": 1451,
+            "conferenceId": 6,
+            "trackId": 30,
+            "videoPlatform": null,
+            "videoId": "https://dreamkast-ivs-stream-archive-prd.s3.amazonaws.com/medialive/cnsec2022/talks/1451/1451.m3u8",
+            "title": "実践 SpiceDB - クラウドネイティブ時代をサバイブできるパーミッション管理の実装を目指して",
+            "abstract": "権限体系の設計や、認可処理の実装は往々にして複雑であり、とりわけ疎結合なアーキテクチャにおける複雑性はひとしおです。この課題を乗り越え、クライドネイティブ時代に耐える認可システムを実現するための手法としてOSS「SpiceDB」を詳解します。とりわけ、(1)SpiceDBスキーマ設計のベストプラクティスや、(2)Goコード生成器の実装等を通した実装上のベストプラクティス、(3)実運用により見えてきた採用時の注意点など、未だ世界的に報告例の少ない情報もシェアできればと思います。",
+            "speakers": [
+              {
+                "id": 1304,
+                "name": "Takashi Yoneuchi"
+              }
+            ],
+            "dayId": 16,
+            "showOnTimetable": true,
+            "startTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "endTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h10m") "UTC"}}",
+            "talkDuration": 0,
+            "talkDifficulty": "上級者",
+            "talkCategory": "",
+            "onAir": false,
+            "documentUrl": "",
+            "conferenceDayId": 16,
+            "conferenceDayDate": "{{now | date "2006-01-02"}}",
+            "startOffset": 0,
+            "endOffset": 0,
+            "actualStartTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "actualEndTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h10m") "UTC"}}",
+            "presentationMethod": "事前収録"
+          }
+        ]
+
+- request:
+    # Note: the method could be omitted because GET is the default
+    method: GET
+    path: /api/v1/talks
+    query_params:
+      eventAbbr: cnsec2022
+      trackId: 31
+  dynamic_response:
+    engine: go_template
+      # Note: the status could be omitted because 200 is the default
+    script: >
+      headers:
+        Content-Type: application/json
+      body: >
+        [
+          {
+            "id": 1436,
+            "conferenceId": 6,
+            "trackId": 31,
+            "videoPlatform": null,
+            "videoId": "https://dreamkast-ivs-stream-archive-prd.s3.amazonaws.com/medialive/cnsec2022/talks/1436/1436.m3u8",
+            "title": "なぜあなたのプロジェクトのDevSecOpsは形骸化するのか",
+            "abstract": "昨今、DevSecOpsを導入する企業が非常に増えています。しかし「実はツールの導入をしただけで、セキュリティを改善するまで至っていない」というお声を聞くことが多いことも事実です。DevSecOpsにはツールによって使いやすい・使いにくいの差はありますが、銀の弾丸は存在しません。本当に意味のあるDevSecOpsを実現するには、現状の自組織の課題と、DevSecOpsによってどのようなセキュアな開発体験を目指すのかを、明確に意識する必要があります。このアプローチのヒントになるお話を、複数のクライアントへのDevSecOps導入経験を元にして紹介していきます。",
+            "speakers": [
+              {
+                "id": 1288,
+                "name": "Masaya Tahara"
+              }
+            ],
+            "dayId": 16,
+            "showOnTimetable": true,
+            "startTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h1m") "UTC"}}",
+            "endTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "talkDuration": 0,
+            "talkDifficulty": "初級者",
+            "talkCategory": "",
+            "onAir": false,
+            "documentUrl": "https://www.slideshare.net/MasayaTahara/devsecopscloudnative-security-conference-2022",
+            "conferenceDayId": 16,
+            "conferenceDayDate": "{{now | date "2006-01-02"}}",
+            "startOffset": 0,
+            "endOffset": 0,
+            "actualStartTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h1m") "UTC"}}",
+            "actualEndTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "presentationMethod": "事前収録"
+          },
+          {
+            "id": 1445,
+            "conferenceId": 6,
+            "trackId": 31,
+            "videoPlatform": null,
+            "videoId": "https://d3pun3ptcv21q4.cloudfront.net/mediapackage/cnsec2022/talks/1445/13/playlist.m3u8",
+            "title": "SBOMを利用したソフトウェアサプライチェーンの保護",
+            "abstract": "近年、サプライチェーンセキュリティが大きな話題となっており、著名なnpm, rust, pythonパッケージに対する攻撃も観測されています。これらの対策には自社で開発したソフトウェアだけではなく、依存するOSSを含めた可視化と脆弱性検知が必要になります。\r\n本講演では、プロダクトを安全に開発/運用するための方法として、SBOMと呼ばれるソフトウェアの可視化方法についてご紹介します。SBOMとは何か、どのような課題を解決するのかを紹介した上で、SBOMを生成し脆弱性検知する方法をデモを交えて説明します。",
+            "speakers": [
+              {
+                "id": 1297,
+                "name": "Masahiro Fujimura"
+              }
+            ],
+            "dayId": 16,
+            "showOnTimetable": true,
+            "startTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "endTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "talkDuration": 0,
+            "talkDifficulty": "初級者",
+            "talkCategory": "",
+            "onAir": false,
+            "documentUrl": "",
+            "conferenceDayId": 16,
+            "conferenceDayDate": "{{now | date "2006-01-02"}}",
+            "startOffset": 0,
+            "endOffset": 0,
+            "actualStartTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h4m") "UTC"}}",
+            "actualEndTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "presentationMethod": "オンライン登壇"
+          },
+          {
+            "id": 1450,
+            "conferenceId": 6,
+            "trackId": 31,
+            "videoPlatform": null,
+            "videoId": "https://d3pun3ptcv21q4.cloudfront.net/mediapackage/cnsec2022/talks/1450/15/playlist.m3u8",
+            "title": "サイバー攻撃を想定したクラウドネイティブセキュリティガイドラインとCNAPP及びSecurity Observabilityの未来",
+            "abstract": "クラウドネイティブのセキュリティはレイヤーごとに考え、規定・実行・維持する必要があります。ワークロードがガイドラインどおりに継続実行されているか確認する必要がありますが、現状は脅威まで検討された可視化とはなっていません。\r\n本セッションでは、デファクトスタンダードなセキュリティの枠組みと脅威情報でガイドラインを作成した取り組みを紹介し、従来のCSPM/CWPPを越えたCNAPPとは何か、Security Observabilityをどうすべきかの一考察をご説明します。",
+            "speakers": [
+              {
+                "id": 1303,
+                "name": "Nobuaki Sako, Shun Yoshie"
+              }
+            ],
+            "dayId": 16,
+            "showOnTimetable": true,
+            "startTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "endTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h10m") "UTC"}}",
+            "talkDuration": 0,
+            "talkDifficulty": "初級者",
+            "talkCategory": "",
+            "onAir": false,
+            "documentUrl": "https://speakerdeck.com/syoshie/saibagong-ji-woxiang-ding-sitakuraudoneiteibusekiyuriteigaidoraintocnappji-bisecurity-observabilityfalsewei-lai",
+            "conferenceDayId": 16,
+            "conferenceDayDate": "{{now | date "2006-01-02"}}",
+            "startOffset": 0,
+            "endOffset": 0,
+            "actualStartTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h7m") "UTC"}}",
+            "actualEndTime": "2000-01-01T{{dateInZone "15:04:05.000+09:00" (now | date_modify "+9h10m") "UTC"}}",
+            "presentationMethod": "オンライン登壇"
+          }
+        ]
