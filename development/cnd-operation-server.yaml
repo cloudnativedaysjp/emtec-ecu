@@ -9,4 +9,4 @@ tracks:
       password: ${SWITCHER01_PASSWORD}
     slack:
       botToken: ${SLACK_BOT_TOKEN}
-      channelId: ${SWITHCER01_SLACK_CHANNEL_ID}
+      channelId: ${SWITCHER01_SLACK_CHANNEL_ID}
