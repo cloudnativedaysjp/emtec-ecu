@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
@@ -47,6 +48,7 @@ func Run(ctx context.Context, conf Config) error {
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
+	ctx = metrics.SetDreamkastMetricsToCtx(ctx, metrics.NewDreamkastMetricsDao(conf.DkEndpointUrl))
 
 	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
 		conf.Auth0Domain, conf.Auth0ClientId, conf.Auth0ClientSecret, conf.Auth0ClientAudience)

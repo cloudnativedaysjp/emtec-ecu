@@ -37,7 +37,7 @@ func (c *DreamkastClientImpl) ListTalks(ctx context.Context, eventAbbr string, t
 
 // TODO: set Token to header
 // TODO: write test
-func (c *DreamkastClientImpl) UpdateTalks(ctx context.Context, talkId int32, onAir bool) error {
+func (c *DreamkastClientImpl) UpdateTalk(ctx context.Context, talkId int32, onAir bool) error {
 	url := c.dkEndpointUrl
 	url.Path = filepath.Join(url.Path, "/v1/talks", strconv.Itoa(int(talkId)))
 	reqBody, err := json.Marshal(&UpdateTalksReq{OnAir: onAir})

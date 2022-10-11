@@ -111,7 +111,7 @@ func (c *ClientImpl) setSpecifiedTalkOnAir(ctx context.Context, talkId int32) er
 		return xerrors.Errorf("message: %w", err)
 	}
 
-	if err := c.client.UpdateTalks(ctx, talkId, true); err != nil {
+	if err := c.client.UpdateTalk(ctx, talkId, true); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 	return nil
@@ -160,7 +160,7 @@ func (c *ClientImpl) setNextTalkOnAir(ctx context.Context, trackId int32) error 
 		}
 	}
 
-	if err := c.client.UpdateTalks(ctx, nextTalkId, true); err != nil {
+	if err := c.client.UpdateTalk(ctx, nextTalkId, true); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 	return nil
