@@ -25,18 +25,17 @@ type Talks []Talk
 
 func (ts Talks) WillStartNextTalkSince(untilNotify time.Duration) bool {
 	now := nowFunc()
-	for _, talk := range ts {
-		if now.After(talk.StartAt) {
-			diffTime := time.Duration(talk.EndAt.Sub(now))
-			if 0 < diffTime && diffTime <= untilNotify {
-				return true
-			}
-		}
+	nextTalk, err := ts.GetNextTalk()
+	if err != nil {
+		return false
 	}
-	return false
+	return nextTalk.StartAt.Sub(now) <= untilNotify
 }
 
 func (ts Talks) GetCurrentTalk() (*Talk, error) {
+	if len(ts) == 0 {
+		return nil, fmt.Errorf("Talks is empty")
+	}
 	now := nowFunc()
 	for _, talk := range ts {
 		if now.After(talk.StartAt) && now.Before(talk.EndAt) {
@@ -46,16 +45,31 @@ func (ts Talks) GetCurrentTalk() (*Talk, error) {
 	return nil, fmt.Errorf("Current talk not found")
 }
 
-func (ts Talks) GetNextTalk(currentTalk *Talk) (*Talk, error) {
+func (ts Talks) GetNextTalk() (*Talk, error) {
+	if len(ts) == 0 {
+		return nil, fmt.Errorf("Talks is empty")
+	}
+
+	currentTalk, err := ts.GetCurrentTalk()
+	if err != nil {
+		// When currentTalk is none,
+		// if now is before event then return Talks[0] else raise an error
+		now := nowFunc()
+		lastTalk := ts[len(ts)-1]
+		if now.After(lastTalk.EndAt) {
+			return nil, fmt.Errorf("talks has already finished")
+		}
+		return &ts[0], nil
+	}
 	for i, talk := range ts {
 		if talk.Id == currentTalk.Id {
 			if i+1 == len(ts) {
-				return nil, fmt.Errorf("This talk is last")
+				return nil, fmt.Errorf("Current talk is last")
 			}
 			return &ts[i+1], nil
 		}
 	}
-	return nil, fmt.Errorf("Next talk not found")
+	return nil, fmt.Errorf("Something Wrong")
 }
 
 //

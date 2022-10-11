@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/xerrors"
@@ -26,7 +27,12 @@ func NewController(logger logr.Logger,
 func (c *Controller) Receive(m model.CurrentAndNextTalk) error {
 	ctx := logr.NewContext(context.Background(), c.logger)
 	slackClient := c.slackClients[m.TrackId()]
-	if err := slackClient.PostMessage(ctx, c.channelIds[m.TrackId()], ViewSession(m)); err != nil {
+	slackChannelId, ok := c.channelIds[m.TrackId()]
+	if !ok {
+		c.logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", m.TrackId()))
+		return nil
+	}
+	if err := slackClient.PostMessage(ctx, slackChannelId, ViewSession(m)); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 	return nil

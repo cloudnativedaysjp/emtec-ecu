@@ -80,15 +80,15 @@ func procedure(ctx context.Context,
 	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
 	notificationEventSendChan chan<- model.CurrentAndNextTalk,
 ) error {
-	logger := utils.GetLogger(ctx)
+	rootLogger := utils.GetLogger(ctx)
 
 	tracks, err := dkClient.ListTracks(ctx)
 	if err != nil {
-		logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
+		rootLogger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
 		return nil
 	}
 	for _, track := range tracks {
-		logger = logger.WithValues("trackId", track.Id)
+		logger := rootLogger.WithValues("trackId", track.Id)
 
 		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
@@ -105,13 +105,13 @@ func procedure(ctx context.Context,
 		if track.Talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
 			currentTalk, err := track.Talks.GetCurrentTalk()
 			if err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "dkClient.GetCurrentTalk was failed")
-				continue
+				logger.Info("currentTalk is none")
+				currentTalk = &model.Talk{}
 			}
-			nextTalk, err := track.Talks.GetNextTalk(currentTalk)
+			nextTalk, err := track.Talks.GetNextTalk()
 			if err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")
-				continue
+				logger.Info("nextTalk is none")
+				nextTalk = &model.Talk{}
 			}
 			notificationEventSendChan <- model.CurrentAndNextTalk{
 				Current: *currentTalk, Next: *nextTalk}
