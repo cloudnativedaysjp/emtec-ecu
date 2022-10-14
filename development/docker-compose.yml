@@ -17,7 +17,7 @@ services:
       SWITCHER01_SLACK_CHANNEL_ID: ${SWITCHER01_SLACK_CHANNEL_ID}
 
   seaman:
-    image: public.ecr.aws/f5j9d0q5/seaman:0.0.7
+    image: public.ecr.aws/f5j9d0q5/seaman:0.0.9
     command: --config=/mnt/seaman.yaml
     volumes:
       - ./seaman.yaml:/mnt/seaman.yaml
