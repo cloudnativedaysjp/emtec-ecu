@@ -1,9 +1,12 @@
 package model
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
 )
 
@@ -83,19 +86,27 @@ func setTestTime(v string) time.Time {
 	return pt
 }
 
-func TestTalk_WillStartNextTalkSince(t *testing.T) {
+func TestTalk_HasNotify(t *testing.T) {
 	nowFunc = func() time.Time {
 		return time.Date(2022, 10, 01, 12, 27, 00, 0, time.UTC)
 	}
+	ctx := context.Background()
+	rcClient, err := db.NewRedisClient("http://localhost:6379")
+	if err != nil {
+		fmt.Errorf("message: %w", err)
+		return
+	}
 	tests := []struct {
-		name  string
-		talks Talks
-		want  bool
+		name    string
+		talks   Talks
+		want    bool
+		wantErr bool
 	}{
 		{
-			name:  "no talk",
-			talks: Talks{},
-			want:  false,
+			name:    "no talk",
+			talks:   Talks{},
+			want:    false,
+			wantErr: true,
 		},
 		{
 			name: "not found next talk",
@@ -134,7 +145,8 @@ func TestTalk_WillStartNextTalkSince(t *testing.T) {
 					EndAt:        setTestTime("2022-10-01T14:00:00"),
 				},
 			},
-			want: false,
+			want:    false,
+			wantErr: true,
 		},
 		{
 			name: "found next talk",
@@ -173,14 +185,24 @@ func TestTalk_WillStartNextTalkSince(t *testing.T) {
 					EndAt:        setTestTime("2022-10-01T12:30:00"),
 				},
 			},
-			want: true,
+			want:    true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.talks.isStartNextTalkSoon()
+			got, err := tt.talks.HasNotify(ctx, rcClient)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Talk.HasNotify() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 			if got != tt.want {
-				t.Errorf("Talk.GetTalkType() want %v", tt.want)
+				t.Errorf("Talk.HasNotify() = %v, want %v", got, tt.want)
+				return
+			}
+			if got {
+				cmd := rcClient.Client.Get(ctx, db.NextTalkNotificationKey)
+				fmt.Println(cmd.Bool())
 			}
 		})
 	}
