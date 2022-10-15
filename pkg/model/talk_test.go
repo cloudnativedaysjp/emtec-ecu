@@ -205,7 +205,7 @@ func TestTalk_HasNotify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.talks.HasNotify(ctx, rcClient)
+			got, err := tt.talks.HasNotify(ctx, rcClient, 5*time.Minute)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Talk.HasNotify() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -475,7 +475,7 @@ func TestTalk_GetNextTalk(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.talks.GetNextTalk(tt.args)
+			got, err := tt.talks.GetNextTalk()
 			if (err == nil && tt.wantErr) || (err != nil && !tt.wantErr) {
 				t.Errorf("Talk.GetTalkType() wantErr %v", tt.wantErr)
 				return

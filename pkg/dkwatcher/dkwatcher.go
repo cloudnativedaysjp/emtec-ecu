@@ -67,7 +67,7 @@ func Run(ctx context.Context, conf Config) error {
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	tick := time.NewTicker(syncPeriod)
-	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan, redisClient); err != nil {
 		return err
 	}
 	for {
@@ -111,13 +111,13 @@ func procedure(ctx context.Context,
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
-		hasNotify, err := talks.HasNotify(ctx, redisClient)
+		hasNotify, err := track.Talks.HasNotify(ctx, redisClient, howManyMinutesUntilNotify)
 		if err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "talks.HasNotify() was failed")
 			continue
 		}
 		if !hasNotify {
-			nextTalk, err := talks.GetNextTalk(currentTalk)
+			currentTalk, err := track.Talks.GetCurrentTalk()
 			if err != nil {
 				logger.Info("currentTalk is none")
 				currentTalk = &model.Talk{}

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
 type TalkType int32
@@ -27,30 +26,7 @@ const (
 
 type Talks []Talk
 
-func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkType, error) {
-	switch {
-	case presentationMethod == nil:
-		switch title {
-		case "Opening":
-			return TalkType_Opening, nil
-		case "休憩":
-			return TalkType_Commercial, nil
-		case "Closing":
-			return TalkType_Ending, nil
-		}
-	case *presentationMethod == "オンライン登壇":
-		return TalkType_OnlineSession, nil
-	case *presentationMethod == "事前収録":
-		return TalkType_RecordingSession, nil
-	}
-	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
-}
-
-func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
-	return t.convertTalkType(title, presentationMethod)
-}
-
-func (ts Talks) isStartNextTalkSoon() bool {
+func (ts Talks) isStartNextTalkSoon(untilNotify time.Duration) bool {
 	now := nowFunc()
 	nextTalk, err := ts.GetNextTalk()
 	if err != nil {
@@ -59,23 +35,9 @@ func (ts Talks) isStartNextTalkSoon() bool {
 	return nextTalk.StartAt.Sub(now) <= untilNotify
 }
 
-func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient) (bool, error) {
+func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient, untilNotify time.Duration) (bool, error) {
 	// 次のtalkがもうすぐ始まるか判定し,まだ通知が行われていない場合は通知を行う.
-	if ts.isStartNextTalkSoon() {
-		result := rc.Client.Get(ctx, db.NextTalkNotificationKey)
-		if result.Err() != nil {
-			return false, result.Err()
-		}
-		if result != nil {
-			return false, nil
-		}
-	}
-	return true, nil
-}
-
-func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient) (bool, error) {
-	// 次のtalkがもうすぐ始まるか判定し,まだ通知が行われていない場合は通知を行う.
-	if ts.isStartNextTalkSoon() {
+	if ts.isStartNextTalkSoon(untilNotify) {
 		result := rc.Client.Get(ctx, db.NextTalkNotificationKey)
 		if result.Err() != nil {
 			return false, result.Err()
@@ -102,7 +64,7 @@ func (ts Talks) GetCurrentTalk() (*Talk, error) {
 
 func (ts Talks) GetNextTalk() (*Talk, error) {
 	if len(ts) == 0 {
-		return nil, fmt.Errorf("Talks is empty")
+		return nil, fmt.Errorf("talks is empty")
 	}
 
 	currentTalk, err := ts.GetCurrentTalk()
@@ -119,12 +81,12 @@ func (ts Talks) GetNextTalk() (*Talk, error) {
 	for i, talk := range ts {
 		if talk.Id == currentTalk.Id {
 			if i+1 == len(ts) {
-				return nil, fmt.Errorf("Current talk is last")
+				return nil, fmt.Errorf("current talk is last")
 			}
 			return &ts[i+1], nil
 		}
 	}
-	return nil, fmt.Errorf("Something Wrong")
+	return nil, fmt.Errorf("something Wrong")
 }
 
 //
@@ -141,10 +103,6 @@ type Talk struct {
 	Type         TalkType
 	StartAt      time.Time
 	EndAt        time.Time
-}
-
-func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
-	return t.convertTalkType(title, presentationMethod)
 }
 
 func (t Talk) GetTalkTypeName() string {
@@ -195,6 +153,10 @@ func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkTyp
 		return TalkType_RecordingSession, nil
 	}
 	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
+}
+
+func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
+	return t.convertTalkType(title, presentationMethod)
 }
 
 //
