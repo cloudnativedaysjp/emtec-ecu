@@ -175,6 +175,17 @@ func TestTalk_WillStartNextTalkSince(t *testing.T) {
 					StartAt:      setTestTime("2022-10-01T12:00:00"),
 					EndAt:        setTestTime("2022-10-01T12:30:00"),
 				},
+				Talk{
+					Id:           4,
+					TalkName:     "talk4",
+					TrackId:      1,
+					TrackName:    "track1",
+					EventAbbr:    "test event",
+					SpeakerNames: []string{"speakerA", "speaker"},
+					Type:         1,
+					StartAt:      setTestTime("2022-10-01T12:30:00"),
+					EndAt:        setTestTime("2022-10-01T13:00:00"),
+				},
 			},
 			want: true,
 		},
@@ -310,17 +321,6 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		},
 		{
 			name: "not found next talk",
-			args: &Talk{
-				Id:           999,
-				TalkName:     "talk999",
-				TrackId:      1,
-				TrackName:    "track1",
-				EventAbbr:    "test event",
-				SpeakerNames: []string{"speakerA", "speaker"},
-				Type:         1,
-				StartAt:      setTestTime("2022-10-01T12:00:00"),
-				EndAt:        setTestTime("2022-10-01T12:30:00"),
-			},
 			talks: Talks{
 				Talk{
 					Id:           1,
@@ -360,17 +360,6 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		},
 		{
 			name: "last talk",
-			args: &Talk{
-				Id:           3,
-				TalkName:     "talk3",
-				TrackId:      1,
-				TrackName:    "track1",
-				EventAbbr:    "test event",
-				SpeakerNames: []string{"speakerA", "speaker"},
-				Type:         1,
-				StartAt:      setTestTime("2022-10-01T12:00:00"),
-				EndAt:        setTestTime("2022-10-01T12:30:00"),
-			},
 			talks: Talks{
 				Talk{
 					Id:           1,
@@ -410,17 +399,6 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		},
 		{
 			name: "found next talk",
-			args: &Talk{
-				Id:           3,
-				TalkName:     "talk3",
-				TrackId:      1,
-				TrackName:    "track1",
-				EventAbbr:    "test event",
-				SpeakerNames: []string{"speakerA", "speaker"},
-				Type:         1,
-				StartAt:      setTestTime("2022-10-01T12:00:00"),
-				EndAt:        setTestTime("2022-10-01T12:30:00"),
-			},
 			talks: Talks{
 				Talk{
 					Id:           1,
@@ -472,7 +450,7 @@ func TestTalk_GetNextTalk(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := tt.talks.GetNextTalk(tt.args)
+			_, err := tt.talks.GetNextTalk()
 			if err == nil && tt.wantErr {
 				t.Errorf("Talk.GetTalkType() wantErr %v", tt.wantErr)
 			}
@@ -524,7 +502,6 @@ func TestTalk_GetActualStartAtAndEndAt(t *testing.T) {
 				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantStatAt = %v, wantEndAt = %v,", err, tt.wantStartAt, tt.wantEndAt)
 				return
 			}
-
 		})
 	}
 }

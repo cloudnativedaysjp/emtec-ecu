@@ -113,12 +113,16 @@ func procedure(ctx context.Context, trackId int32,
 	remainingMilliSecond := t.DurationMilliSecond - t.CursorMilliSecond
 
 	if float64(startPreparetionPeriod/time.Millisecond) < remainingMilliSecond {
-		logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is %ds: continue",
-			startPreparetionPeriod/time.Second))
+		logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is over %ds: continue",
+			startPreparetionPeriod/time.Second),
+			"duration", t.DurationMilliSecond/float64(time.Millisecond),
+			"cursor", t.CursorMilliSecond/float64(time.Millisecond))
 		return nil
 	}
 	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %ds",
-		startPreparetionPeriod/time.Second), "duration", t.DurationMilliSecond, "cursor", t.CursorMilliSecond)
+		startPreparetionPeriod/time.Second),
+		"duration", t.DurationMilliSecond/float64(time.Millisecond),
+		"cursor", t.CursorMilliSecond/float64(time.Millisecond))
 
 	// sleep until MediaInput is finished
 	time.Sleep(time.Duration(remainingMilliSecond) * time.Millisecond)

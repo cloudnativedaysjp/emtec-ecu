@@ -20,24 +20,35 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 	currentTalk := m.Current
 	nextTalk := m.Next
 
-	accessory := make(map[string]interface{})
+	accessory := &slack.Accessory{}
 	if currentTalk.IsOnDemand() || nextTalk.IsOnDemand() {
-		accessory = map[string]interface{}{
-			"action_id": seaman_api.ActIdBroadcast_SceneNext,
-			"type":      "multi_static_select",
-			"placeholder": map[string]interface{}{
-				"text":  "switching",
-				"emoji": true,
-				"type":  "plain_text",
-			},
-			"options": []interface{}{
-				map[string]interface{}{
-					"text": map[string]interface{}{
-						"type":  "plain_text",
-						"text":  "シーンを切り替える",
-						"emoji": true,
+		accessory = &slack.Accessory{
+			ButtonElement: &slack.ButtonBlockElement{
+				Type:     slack.METButton,
+				ActionID: seaman_api.ActIdBroadcast_SceneNext,
+				Value:    seaman_api.Track{Id: m.TrackId(), Name: m.TrackName()}.String(),
+				Text: &slack.TextBlockObject{
+					Type: "plain_text",
+					Text: "Switching",
+				},
+				Style: slack.StylePrimary,
+				Confirm: &slack.ConfirmationBlockObject{
+					Title: &slack.TextBlockObject{
+						Type: "plain_text",
+						Text: "Move to Next Scene",
 					},
-					"value": seaman_api.Track{Id: m.TrackId(), Name: m.TrackName()}.String(),
+					Text: &slack.TextBlockObject{
+						Type: "plain_text",
+						Text: "Are you sure?",
+					},
+					Confirm: &slack.TextBlockObject{
+						Type: "plain_text",
+						Text: "OK",
+					},
+					Deny: &slack.TextBlockObject{
+						Type: "plain_text",
+						Text: "Cancel",
+					},
 				},
 			},
 		}
@@ -46,6 +57,9 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 	return castFromMapToMsg(
 		map[string]interface{}{
 			"blocks": []interface{}{
+				map[string]interface{}{
+					"type": "divider",
+				},
 				map[string]interface{}{
 					"type": "context",
 					"elements": []interface{}{
@@ -143,9 +157,6 @@ func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
 						"text": fmt.Sprintf("Title: <%s/%s/talks/%d|%s>",
 							eventUrlBase, nextTalk.EventAbbr, nextTalk.Id, nextTalk.TalkName),
 					},
-				},
-				map[string]interface{}{
-					"type": "divider",
 				},
 			},
 		},

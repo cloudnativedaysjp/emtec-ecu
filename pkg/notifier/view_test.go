@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
 func Test_viewSession(t *testing.T) {
@@ -13,6 +14,9 @@ func Test_viewSession(t *testing.T) {
 		expectedStr := `
 {
 	"blocks": [
+		{
+			"type": "divider"
+		},
 		{
 			"type": "context",
 			"elements": [
@@ -100,27 +104,33 @@ func Test_viewSession(t *testing.T) {
 				"text": "Title: <https://event.cloudnativedays.jp/cndt2101/talks/10002|さらにものすごい発表>"
 			},
 			"accessory": {
-				"type": "multi_static_select",
-				"placeholder": {
+				"type": "button",
+				"action_id": "broadcast_scenenext",
+				"value": "1__A",
+				"text": {
 					"type": "plain_text",
-					"text": "switching",
-					"emoji": true
+					"text": "Switching"
 				},
-				"options": [
-					{
-						"text": {
-							"type": "plain_text",
-							"text": "シーンを切り替える",
-							"emoji": true
-						},
-						"value": "1__A"
+				"style": "primary",
+				"confirm": {
+					"title": {
+						"type": "plain_text",
+						"text": "Move to Next Scene"
+					},
+					"text": {
+						"type": "plain_text",
+						"text": "Are you sure?"
+					},
+					"confirm": {
+						"type": "plain_text",
+						"text": "OK"
+					},
+					"deny": {
+						"type": "plain_text",
+						"text": "Cancel"
 					}
-				],
-				"action_id": "broadcast_scenenext"
+				}
 			}
-		},
-		{
-			"type": "divider"
 		}
 	]
 }
