@@ -69,7 +69,7 @@ func Run(ctx context.Context, conf Config) error {
 			if err := c.Receive(talk); err != nil {
 				logger.Error(xerrors.Errorf("message: %w", err), "notification failed")
 			}
-			if result := redisClient.Client.Set(ctx, db.NextTalkNotificationKey, db.NextTalkNotificationAlreadySentFlag, db.RedisExpiration); result.Err() != nil {
+			if result := redisClient.Client.Set(ctx, db.NextTalkNotificationKey, db.NextTalkNotificationAlreadySent, db.RedisExpiration); result.Err() != nil {
 				return xerrors.Errorf("message: %w", result.Err())
 			}
 		}

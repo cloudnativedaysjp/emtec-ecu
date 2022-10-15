@@ -98,7 +98,6 @@ func procedure(ctx context.Context,
 	}
 	for _, track := range tracks {
 		logger := rootLogger.WithValues("trackId", track.Id)
-
 		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
@@ -111,22 +110,26 @@ func procedure(ctx context.Context,
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
+		currentTalk, err := track.Talks.GetCurrentTalk()
+		if err != nil {
+			logger.Info("currentTalk is none")
+			continue
+		}
+		nextTalk, err := track.Talks.GetNextTalk()
+		if err != nil {
+			logger.Info("nextTalk is none")
+			continue
+		}
+		if !track.Talks.IsStartNextTalkSoon(howManyMinutesUntilNotify) {
+			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
+			continue
+		}
 		hasNotify, err := track.Talks.HasNotify(ctx, redisClient, howManyMinutesUntilNotify)
 		if err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "talks.HasNotify() was failed")
 			continue
 		}
 		if !hasNotify {
-			currentTalk, err := track.Talks.GetCurrentTalk()
-			if err != nil {
-				logger.Info("currentTalk is none")
-				currentTalk = &model.Talk{}
-			}
-			nextTalk, err := track.Talks.GetNextTalk()
-			if err != nil {
-				logger.Info("nextTalk is none")
-				nextTalk = &model.Talk{}
-			}
 			notificationEventSendChan <- model.CurrentAndNextTalk{
 				Current: *currentTalk, Next: *nextTalk}
 		}

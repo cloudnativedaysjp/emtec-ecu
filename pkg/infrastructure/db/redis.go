@@ -13,9 +13,9 @@ type RedisClient struct {
 }
 
 const (
-	RedisExpiration                     = 10 * time.Minute
-	NextTalkNotificationKey             = "nextTalkNotificationAlreadySentFlag"
-	NextTalkNotificationAlreadySentFlag = true
+	RedisExpiration                 = 10 * time.Minute
+	NextTalkNotificationKey         = "nextTalkNotificationAlreadySentFlag"
+	NextTalkNotificationAlreadySent = true
 )
 
 func NewRedisClient(addr string) (*RedisClient, error) {

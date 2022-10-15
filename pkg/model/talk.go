@@ -26,7 +26,7 @@ const (
 
 type Talks []Talk
 
-func (ts Talks) isStartNextTalkSoon(untilNotify time.Duration) bool {
+func (ts Talks) IsStartNextTalkSoon(untilNotify time.Duration) bool {
 	now := nowFunc()
 	nextTalk, err := ts.GetNextTalk()
 	if err != nil {
@@ -36,15 +36,12 @@ func (ts Talks) isStartNextTalkSoon(untilNotify time.Duration) bool {
 }
 
 func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient, untilNotify time.Duration) (bool, error) {
-	// 次のtalkがもうすぐ始まるか判定し,まだ通知が行われていない場合は通知を行う.
-	if ts.isStartNextTalkSoon(untilNotify) {
-		result := rc.Client.Get(ctx, db.NextTalkNotificationKey)
-		if result.Err() != nil {
-			return false, result.Err()
-		}
-		if result != nil {
-			return false, nil
-		}
+	result := rc.Client.Get(ctx, db.NextTalkNotificationKey)
+	if result.Err() != nil {
+		return false, result.Err()
+	}
+	if result != nil {
+		return false, nil
 	}
 	return true, nil
 }
