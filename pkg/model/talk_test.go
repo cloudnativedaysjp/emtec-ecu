@@ -96,7 +96,6 @@ func TestTalk_HasNotify(t *testing.T) {
 	ctx := context.Background()
 	rcClient, err := db.NewRedisClient("http://localhost:6379")
 	if err != nil {
-		fmt.Errorf("message: %w", err)
 		return
 	}
 	tests := []struct {
