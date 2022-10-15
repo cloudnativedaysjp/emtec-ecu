@@ -23,10 +23,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TrackServiceClient interface {
-	GetTrack(ctx context.Context, in *GetTrackRequest, opts ...grpc.CallOption) (*GetTrackResponse, error)
+	GetTrack(ctx context.Context, in *GetTrackRequest, opts ...grpc.CallOption) (*Track, error)
 	ListTrack(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListTrackResponse, error)
-	EnableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	DisableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	EnableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*Track, error)
+	DisableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*Track, error)
 }
 
 type trackServiceClient struct {
@@ -37,8 +37,8 @@ func NewTrackServiceClient(cc grpc.ClientConnInterface) TrackServiceClient {
 	return &trackServiceClient{cc}
 }
 
-func (c *trackServiceClient) GetTrack(ctx context.Context, in *GetTrackRequest, opts ...grpc.CallOption) (*GetTrackResponse, error) {
-	out := new(GetTrackResponse)
+func (c *trackServiceClient) GetTrack(ctx context.Context, in *GetTrackRequest, opts ...grpc.CallOption) (*Track, error) {
+	out := new(Track)
 	err := c.cc.Invoke(ctx, "/schema.TrackService/GetTrack", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func (c *trackServiceClient) ListTrack(ctx context.Context, in *emptypb.Empty, o
 	return out, nil
 }
 
-func (c *trackServiceClient) EnableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *trackServiceClient) EnableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*Track, error) {
+	out := new(Track)
 	err := c.cc.Invoke(ctx, "/schema.TrackService/EnableAutomation", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (c *trackServiceClient) EnableAutomation(ctx context.Context, in *SwitchAut
 	return out, nil
 }
 
-func (c *trackServiceClient) DisableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *trackServiceClient) DisableAutomation(ctx context.Context, in *SwitchAutomationRequest, opts ...grpc.CallOption) (*Track, error) {
+	out := new(Track)
 	err := c.cc.Invoke(ctx, "/schema.TrackService/DisableAutomation", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -77,10 +77,10 @@ func (c *trackServiceClient) DisableAutomation(ctx context.Context, in *SwitchAu
 // All implementations must embed UnimplementedTrackServiceServer
 // for forward compatibility
 type TrackServiceServer interface {
-	GetTrack(context.Context, *GetTrackRequest) (*GetTrackResponse, error)
+	GetTrack(context.Context, *GetTrackRequest) (*Track, error)
 	ListTrack(context.Context, *emptypb.Empty) (*ListTrackResponse, error)
-	EnableAutomation(context.Context, *SwitchAutomationRequest) (*emptypb.Empty, error)
-	DisableAutomation(context.Context, *SwitchAutomationRequest) (*emptypb.Empty, error)
+	EnableAutomation(context.Context, *SwitchAutomationRequest) (*Track, error)
+	DisableAutomation(context.Context, *SwitchAutomationRequest) (*Track, error)
 	mustEmbedUnimplementedTrackServiceServer()
 }
 
@@ -88,16 +88,16 @@ type TrackServiceServer interface {
 type UnimplementedTrackServiceServer struct {
 }
 
-func (UnimplementedTrackServiceServer) GetTrack(context.Context, *GetTrackRequest) (*GetTrackResponse, error) {
+func (UnimplementedTrackServiceServer) GetTrack(context.Context, *GetTrackRequest) (*Track, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrack not implemented")
 }
 func (UnimplementedTrackServiceServer) ListTrack(context.Context, *emptypb.Empty) (*ListTrackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTrack not implemented")
 }
-func (UnimplementedTrackServiceServer) EnableAutomation(context.Context, *SwitchAutomationRequest) (*emptypb.Empty, error) {
+func (UnimplementedTrackServiceServer) EnableAutomation(context.Context, *SwitchAutomationRequest) (*Track, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnableAutomation not implemented")
 }
-func (UnimplementedTrackServiceServer) DisableAutomation(context.Context, *SwitchAutomationRequest) (*emptypb.Empty, error) {
+func (UnimplementedTrackServiceServer) DisableAutomation(context.Context, *SwitchAutomationRequest) (*Track, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DisableAutomation not implemented")
 }
 func (UnimplementedTrackServiceServer) mustEmbedUnimplementedTrackServiceServer() {}

@@ -11,8 +11,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
@@ -48,7 +48,7 @@ func Run(ctx context.Context, conf Config) error {
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
-	mr := &sharedmem.Reader{UseStorageForTalks: true, UseStorageForDisableAutomation: true}
+	mr := &sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, obs := range conf.Obs {
@@ -69,12 +69,15 @@ func Run(ctx context.Context, conf Config) error {
 }
 
 func watch(ctx context.Context, trackId int32,
-	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
+	obswsClient obsws.Client, mr sharedmem.ReaderIface,
 ) func() error {
 	return func() error {
 		logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
-		tick := time.NewTicker(syncPeriod)
 
+		tick := time.NewTicker(syncPeriod)
+		if err := procedure(ctx, trackId, obswsClient, mr); err != nil {
+			return xerrors.Errorf("message: %w", err)
+		}
 		for {
 			select {
 			case <-ctx.Done():
@@ -90,7 +93,7 @@ func watch(ctx context.Context, trackId int32,
 }
 
 func procedure(ctx context.Context, trackId int32,
-	obswsClient obsws.ClientIface, mr sharedmem.ReaderIface,
+	obswsClient obsws.Client, mr sharedmem.ReaderIface,
 ) error {
 	logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 
@@ -107,15 +110,22 @@ func procedure(ctx context.Context, trackId int32,
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
 		return nil
 	}
-	remainingTime := t.Duration - t.Cursor
-	if float64(startPreparetionPeriod) > remainingTime {
+	remainingMilliSecond := t.DurationMilliSecond - t.CursorMilliSecond
+
+	if float64(startPreparetionPeriod/time.Millisecond) < remainingMilliSecond {
+		logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is over %ds: continue",
+			startPreparetionPeriod/time.Second),
+			"duration", t.DurationMilliSecond/float64(time.Millisecond),
+			"cursor", t.CursorMilliSecond/float64(time.Millisecond))
 		return nil
 	}
-	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %d",
-		startPreparetionPeriod), "duration", t.Duration, "cursor", t.Cursor)
+	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %ds",
+		startPreparetionPeriod/time.Second),
+		"duration", t.DurationMilliSecond/float64(time.Millisecond),
+		"cursor", t.CursorMilliSecond/float64(time.Millisecond))
 
 	// sleep until MediaInput is finished
-	time.Sleep(time.Duration(remainingTime) * time.Second)
+	time.Sleep(time.Duration(remainingMilliSecond) * time.Millisecond)
 	if err := obswsClient.MoveSceneToNext(context.Background()); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.MoveSceneToNext() on automated task was failed")
 		return nil

@@ -9,8 +9,8 @@ import (
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
@@ -20,50 +20,85 @@ type Controller struct {
 	pb.UnimplementedDebugServiceServer
 
 	Logger      logr.Logger
-	ObsWsMap    map[int32]obsws.ClientIface
+	ObsWsMap    map[int32]obsws.Client
 	MemWriter   sharedmem.WriterIface
+	MemReader   sharedmem.ReaderIface
 	MemDebugger sharedmem.DebuggerIface
 }
 
 /* TrackService */
 
-func (c *Controller) GetTrack(ctx context.Context, in *pb.GetTrackRequest) (*pb.GetTrackResponse, error) {
+func (c *Controller) GetTrack(ctx context.Context, in *pb.GetTrackRequest) (*pb.Track, error) {
 	ws, ok := c.ObsWsMap[in.TrackId]
 	if !ok {
 		return nil, fmt.Errorf("no such trackId %d", in.TrackId)
 	}
+	track, err := c.MemReader.Track(in.TrackId)
+	if err != nil {
+		// TODO: not found を返す
+		return nil, err
+	}
+	disabled, err := c.MemReader.DisableAutomation(in.TrackId)
+	if err != nil {
+		return nil, err
+	}
 
-	return &pb.GetTrackResponse{Track: &pb.Track{
-		TrackId: in.TrackId,
-		ObsHost: ws.GetHost(),
-	}}, nil
+	return &pb.Track{
+		TrackId:   in.TrackId,
+		TrackName: track.Name,
+		ObsHost:   ws.GetHost(),
+		Enabled:   !disabled,
+	}, nil
 }
 
 func (c *Controller) ListTrack(ctx context.Context, in *emptypb.Empty) (*pb.ListTrackResponse, error) {
 	var tracks []*pb.Track
 	for trackId, ws := range c.ObsWsMap {
+		track, err := c.MemReader.Track(trackId)
+		if err != nil {
+			// TODO: not found を返す
+			return nil, err
+		}
+		disabled, err := c.MemReader.DisableAutomation(trackId)
+		if err != nil {
+			return nil, err
+		}
 		tracks = append(tracks, &pb.Track{
-			TrackId: trackId,
-			ObsHost: ws.GetHost(),
+			TrackId:   trackId,
+			TrackName: track.Name,
+			ObsHost:   ws.GetHost(),
+			Enabled:   !disabled,
 		})
 	}
 	sort.SliceStable(tracks, func(i, j int) bool { return tracks[i].TrackId < tracks[j].TrackId })
 
-	return &pb.ListTrackResponse{Track: tracks}, nil
+	return &pb.ListTrackResponse{Tracks: tracks}, nil
 }
 
-func (c *Controller) EnableAutomation(ctx context.Context, in *pb.SwitchAutomationRequest) (*emptypb.Empty, error) {
+func (c *Controller) EnableAutomation(ctx context.Context, in *pb.SwitchAutomationRequest) (*pb.Track, error) {
+	resp, err := c.GetTrack(ctx, &pb.GetTrackRequest{TrackId: in.TrackId})
+	if err != nil {
+		// TODO: not found を返す
+		return nil, err
+	}
 	if err := c.MemWriter.SetDisableAutomation(in.TrackId, false); err != nil {
 		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	resp.Enabled = true
+	return resp, nil
 }
 
-func (c *Controller) DisableAutomation(ctx context.Context, in *pb.SwitchAutomationRequest) (*emptypb.Empty, error) {
+func (c *Controller) DisableAutomation(ctx context.Context, in *pb.SwitchAutomationRequest) (*pb.Track, error) {
+	resp, err := c.GetTrack(ctx, &pb.GetTrackRequest{TrackId: in.TrackId})
+	if err != nil {
+		// TODO: not found を返す
+		return nil, err
+	}
 	if err := c.MemWriter.SetDisableAutomation(in.TrackId, true); err != nil {
 		return nil, err
 	}
-	return &emptypb.Empty{}, nil
+	resp.Enabled = false
+	return resp, nil
 }
 
 /* SceneService */

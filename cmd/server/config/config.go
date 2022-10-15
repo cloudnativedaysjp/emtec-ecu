@@ -35,11 +35,12 @@ func LoadConf(filename string) (*Config, error) {
 }
 
 type Config struct {
-	Debug           DebugConfig     `json:"debug"`
-	WsProxyBindAddr string          `json:"bindAddr" default:":20080"`
-	Dreamkast       DreamkastConfig `json:"dreamkast" validate:"required"`
-	Redis           RedisConfig     `json:"redis " validate:"required"`
-	Tracks          []TrackConfig   `json:"tracks" validate:"required"`
+	Debug     DebugConfig     `json:"debug"`
+	WsProxy   WsProxyConfig   `json:"wsProxy" validate:"required"`
+	Metrics   MetricsConfig   `json:"metrics"`
+	Dreamkast DreamkastConfig `json:"dreamkast" validate:"required"`
+	Redis     RedisConfig     `json:"redis " validate:"required"`
+	Tracks    []TrackConfig   `json:"tracks" validate:"required"`
 }
 
 type DebugConfig struct {
@@ -49,6 +50,14 @@ type DebugConfig struct {
 	DisableDkWatcher  bool `json:"disableDkWatcher"`
 	DisableNotifier   bool `json:"disableNotifier"`
 	DisableWsProxy    bool `json:"disableWsProxy"`
+}
+
+type MetricsConfig struct {
+	BindAddr string `json:"bindAddr" default:":20081"`
+}
+
+type WsProxyConfig struct {
+	BindAddr string `json:"bindAddr" default:":20080"`
 }
 
 type DreamkastConfig struct {

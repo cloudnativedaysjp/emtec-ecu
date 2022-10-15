@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/cmd/server/config"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/dkwatcher"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/notifier"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/obswatcher"
@@ -33,7 +34,12 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	eg, ctx := errgroup.WithContext(ctx)
-	talkStream := make(chan model.Talk, 16)
+	talkStream := make(chan model.CurrentAndNextTalk, 16)
+
+	// metrics
+	go func() {
+		_ = metrics.RunCndOperationServer(conf.Metrics.BindAddr)
+	}()
 
 	// obswatcher
 	if !conf.Debug.DisableObsWatcher {
@@ -104,7 +110,7 @@ func main() {
 			return server.Run(ctx, server.Config{
 				Development: conf.Debug.Development,
 				Debug:       conf.Debug.Debug,
-				BindAddr:    conf.WsProxyBindAddr,
+				BindAddr:    conf.WsProxy.BindAddr,
 				Obs:         configObs,
 			})
 		})

@@ -13,8 +13,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
 )
 
@@ -47,7 +47,7 @@ func Run(ctx context.Context, conf Config) error {
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 
-	obswsClientMap := make(map[int32]obsws.ClientIface)
+	obswsClientMap := make(map[int32]obsws.Client)
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
 		if err != nil {
@@ -62,6 +62,7 @@ func Run(ctx context.Context, conf Config) error {
 		Logger:      logger,
 		ObsWsMap:    obswsClientMap,
 		MemWriter:   sharedmem.Writer{UseStorageForDisableAutomation: true},
+		MemReader:   sharedmem.Reader{UseStorageForTrack: true, UseStorageForDisableAutomation: true},
 		MemDebugger: sharedmem.Debugger{},
 	}
 
@@ -75,7 +76,7 @@ func Run(ctx context.Context, conf Config) error {
 	pb.RegisterSceneServiceServer(s, controller)
 	pb.RegisterTrackServiceServer(s, controller)
 	pb.RegisterDebugServiceServer(s, controller)
-	if conf.Debug {
+	if conf.Development {
 		reflection.Register(s)
 	}
 

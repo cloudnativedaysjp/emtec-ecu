@@ -12,4 +12,4 @@ FROM gcr.io/distroless/static-debian11:nonroot
 WORKDIR /
 COPY --from=builder /workspace/server .
 
-ENTRYPOINT ["/cndctl"]
+ENTRYPOINT ["/server"]

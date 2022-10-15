@@ -9,33 +9,33 @@ import (
 	"github.com/andreykaipov/goobs/api/requests/scenes"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/obsws/lib"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws/lib"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
-type ClientIface interface {
+type Client interface {
 	GetHost() string
 	ListScenes(ctx context.Context) ([]Scene, error)
 	MoveSceneToNext(ctx context.Context) error
 	GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationAndCursor, error)
 }
 
-type Client struct {
-	client lib.ObsWsApi
+type ClientImpl struct {
+	client lib.ObsWsClient
 
 	host     string
 	password string
 }
 
-func NewObsWebSocketClient(host, password string) (ClientIface, error) {
+func NewObsWebSocketClient(host, password string) (Client, error) {
 	c := lib.NewClient()
 	if err := c.GenerateClient(host, password); err != nil {
 		return nil, err
 	}
-	return &Client{c, host, password}, nil
+	return &ClientImpl{c, host, password}, nil
 }
 
-func (c *Client) GetHost() string {
+func (c *ClientImpl) GetHost() string {
 	return c.host
 }
 
@@ -46,7 +46,7 @@ type Scene struct {
 }
 
 // ListScenes is output list of scenes. It is sorted order by as shown in OBS.
-func (c *Client) ListScenes(ctx context.Context) ([]Scene, error) {
+func (c *ClientImpl) ListScenes(ctx context.Context) ([]Scene, error) {
 	if err := c.client.GenerateClient(c.host, c.password); err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (c *Client) ListScenes(ctx context.Context) ([]Scene, error) {
 	return scenes, nil
 }
 
-func (c *Client) MoveSceneToNext(ctx context.Context) error {
+func (c *ClientImpl) MoveSceneToNext(ctx context.Context) error {
 	logger := utils.GetLogger(ctx)
 	if err := c.client.GenerateClient(c.host, c.password); err != nil {
 		return err
@@ -100,8 +100,8 @@ func (c *Client) MoveSceneToNext(ctx context.Context) error {
 		}
 	}
 	if currentProgramFlag {
-		logger.Info("current scene is tha last scene.")
-		nextSceneName = _scenes[0].Name
+		logger.Info("current scene is the last scene.")
+		return nil
 	} else if !nextProgramFlag {
 		return fmt.Errorf("CurrentProgram is nothing")
 	}
@@ -116,11 +116,11 @@ func (c *Client) MoveSceneToNext(ctx context.Context) error {
 }
 
 type DurationAndCursor struct {
-	Duration float64
-	Cursor   float64
+	DurationMilliSecond float64
+	CursorMilliSecond   float64
 }
 
-func (c *Client) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationAndCursor, error) {
+func (c *ClientImpl) GetRemainingTimeOnCurrentScene(ctx context.Context) (*DurationAndCursor, error) {
 	_ = utils.GetLogger(ctx)
 	if err := c.client.GenerateClient(c.host, c.password); err != nil {
 		return nil, err

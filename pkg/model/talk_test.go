@@ -10,7 +10,10 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
 )
 
-const ISO8601ExtendedLayout = "2006-01-02T15:04:05"
+const (
+	test_ISO8601ExtendedLayout     = "2006-01-02T15:04:05"
+	test_howManyMinutesUntilNotify = 5 * time.Minute
+)
 
 func TestTalk_GetTalkType(t *testing.T) {
 	talk := &Talk{}
@@ -79,7 +82,7 @@ func TestTalk_GetTalkType(t *testing.T) {
 }
 
 func setTestTime(v string) time.Time {
-	pt, err := time.Parse(ISO8601ExtendedLayout, v)
+	pt, err := time.Parse(test_ISO8601ExtendedLayout, v)
 	if err != nil {
 		panic(err)
 	}
@@ -183,6 +186,17 @@ func TestTalk_HasNotify(t *testing.T) {
 					Type:         1,
 					StartAt:      setTestTime("2022-10-01T12:00:00"),
 					EndAt:        setTestTime("2022-10-01T12:30:00"),
+				},
+				Talk{
+					Id:           4,
+					TalkName:     "talk4",
+					TrackId:      1,
+					TrackName:    "track1",
+					EventAbbr:    "test event",
+					SpeakerNames: []string{"speakerA", "speaker"},
+					Type:         1,
+					StartAt:      setTestTime("2022-10-01T12:30:00"),
+					EndAt:        setTestTime("2022-10-01T13:00:00"),
 				},
 			},
 			want:    true,
@@ -331,17 +345,6 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		},
 		{
 			name: "not found next talk",
-			args: &Talk{
-				Id:           999,
-				TalkName:     "talk999",
-				TrackId:      1,
-				TrackName:    "track1",
-				EventAbbr:    "test event",
-				SpeakerNames: []string{"speakerA", "speaker"},
-				Type:         1,
-				StartAt:      setTestTime("2022-10-01T12:00:00"),
-				EndAt:        setTestTime("2022-10-01T12:30:00"),
-			},
 			talks: Talks{
 				Talk{
 					Id:           1,
@@ -381,17 +384,6 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		},
 		{
 			name: "last talk",
-			args: &Talk{
-				Id:           3,
-				TalkName:     "talk3",
-				TrackId:      1,
-				TrackName:    "track1",
-				EventAbbr:    "test event",
-				SpeakerNames: []string{"speakerA", "speaker"},
-				Type:         1,
-				StartAt:      setTestTime("2022-10-01T12:00:00"),
-				EndAt:        setTestTime("2022-10-01T12:30:00"),
-			},
 			talks: Talks{
 				Talk{
 					Id:           1,
@@ -431,17 +423,6 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		},
 		{
 			name: "found next talk",
-			args: &Talk{
-				Id:           3,
-				TalkName:     "talk3",
-				TrackId:      1,
-				TrackName:    "track1",
-				EventAbbr:    "test event",
-				SpeakerNames: []string{"speakerA", "speaker"},
-				Type:         1,
-				StartAt:      setTestTime("2022-10-01T12:00:00"),
-				EndAt:        setTestTime("2022-10-01T12:30:00"),
-			},
 			talks: Talks{
 				Talk{
 					Id:           1,
@@ -554,6 +535,7 @@ func TestTalk_GetActualStartAtAndEndAt(t *testing.T) {
 				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantStatAt = %v, wantEndAt = %v,", err, tt.wantStartAt, tt.wantEndAt)
 				return
 			}
+
 		})
 	}
 }

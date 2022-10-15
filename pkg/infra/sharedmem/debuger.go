@@ -2,6 +2,8 @@ package sharedmem
 
 import "github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 
+var _ DebuggerIface = (*Debugger)(nil)
+
 type DebuggerIface interface {
 	ListAutomation() map[int32]bool
 	ListTalks() map[int32]model.Talks
@@ -21,10 +23,10 @@ func (d Debugger) ListAutomation() map[int32]bool {
 
 func (d Debugger) ListTalks() map[int32]model.Talks {
 	result := make(map[int32]model.Talks)
-	storageForTalksMutex.RLock()
-	defer storageForTalksMutex.RUnlock()
-	for k, v := range storageForTalks {
-		result[k] = v
+	storageForTrackMutex.RLock()
+	defer storageForTrackMutex.RUnlock()
+	for trackId, track := range storageForTrack {
+		result[trackId] = track.Talks
 	}
 	return result
 }

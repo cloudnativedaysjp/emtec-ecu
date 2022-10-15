@@ -10,11 +10,11 @@ import (
 type StorageForDisableAutomation map[int32]bool
 
 // key is TrackId
-type StorageForTalks map[int32]model.Talk
+type StorageForTrack map[int32]model.Track
 
 var (
-	storageForDisableAutomation      = make(map[int32]bool)
+	storageForDisableAutomation      = make(StorageForDisableAutomation)
 	storageForDisableAutomationMutex sync.RWMutex
-	storageForTalks                  = make(map[int32]model.Talks)
-	storageForTalksMutex             sync.RWMutex
+	storageForTrack                  = make(StorageForTrack)
+	storageForTrackMutex             sync.RWMutex
 )

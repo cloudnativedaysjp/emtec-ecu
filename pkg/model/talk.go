@@ -21,6 +21,10 @@ const (
 	dateLayout = "2006-01-02"
 )
 
+//
+// Talks
+//
+
 type Talks []Talk
 
 func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkType, error) {
@@ -48,15 +52,25 @@ func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, e
 
 func (ts Talks) isStartNextTalkSoon() bool {
 	now := nowFunc()
-	for _, talk := range ts {
-		if now.After(talk.StartAt) {
-			diffTime := time.Duration(talk.EndAt.Sub(now))
-			if 0 < diffTime && diffTime <= utils.HowManyMinutesUntilNotify {
-				return true
-			}
+	nextTalk, err := ts.GetNextTalk()
+	if err != nil {
+		return false
+	}
+	return nextTalk.StartAt.Sub(now) <= untilNotify
+}
+
+func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient) (bool, error) {
+	// 次のtalkがもうすぐ始まるか判定し,まだ通知が行われていない場合は通知を行う.
+	if ts.isStartNextTalkSoon() {
+		result := rc.Client.Get(ctx, db.NextTalkNotificationKey)
+		if result.Err() != nil {
+			return false, result.Err()
+		}
+		if result != nil {
+			return false, nil
 		}
 	}
-	return false
+	return true, nil
 }
 
 func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient) (bool, error) {
@@ -74,6 +88,9 @@ func (ts Talks) HasNotify(ctx context.Context, rc *db.RedisClient) (bool, error)
 }
 
 func (ts Talks) GetCurrentTalk() (*Talk, error) {
+	if len(ts) == 0 {
+		return nil, fmt.Errorf("Talks is empty")
+	}
 	now := nowFunc()
 	for _, talk := range ts {
 		if now.After(talk.StartAt) && now.Before(talk.EndAt) {
@@ -83,16 +100,72 @@ func (ts Talks) GetCurrentTalk() (*Talk, error) {
 	return nil, fmt.Errorf("current talk not found")
 }
 
-func (ts Talks) GetNextTalk(currentTalk *Talk) (*Talk, error) {
+func (ts Talks) GetNextTalk() (*Talk, error) {
+	if len(ts) == 0 {
+		return nil, fmt.Errorf("Talks is empty")
+	}
+
+	currentTalk, err := ts.GetCurrentTalk()
+	if err != nil {
+		// When currentTalk is none,
+		// if now is before event then return Talks[0] else raise an error
+		now := nowFunc()
+		lastTalk := ts[len(ts)-1]
+		if now.After(lastTalk.EndAt) {
+			return nil, fmt.Errorf("talks has already finished")
+		}
+		return &ts[0], nil
+	}
 	for i, talk := range ts {
 		if talk.Id == currentTalk.Id {
 			if i+1 == len(ts) {
-				return nil, fmt.Errorf("this talk is last")
+				return nil, fmt.Errorf("Current talk is last")
 			}
 			return &ts[i+1], nil
 		}
 	}
-	return nil, fmt.Errorf("next talk not found")
+	return nil, fmt.Errorf("Something Wrong")
+}
+
+//
+// Talk
+//
+
+type Talk struct {
+	Id           int32
+	TalkName     string
+	TrackId      int32
+	TrackName    string
+	EventAbbr    string
+	SpeakerNames []string
+	Type         TalkType
+	StartAt      time.Time
+	EndAt        time.Time
+}
+
+func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
+	return t.convertTalkType(title, presentationMethod)
+}
+
+func (t Talk) GetTalkTypeName() string {
+	var typeName string
+	switch t.Type {
+	case TalkType_OnlineSession:
+		typeName = "オンライン登壇"
+	case TalkType_RecordingSession:
+		typeName = "事前収録"
+	case TalkType_Opening:
+		typeName = "Opening"
+	case TalkType_Ending:
+		typeName = "Closing"
+	case TalkType_Commercial:
+		typeName = "CM"
+	}
+	return typeName
+}
+
+func (t Talk) IsOnDemand() bool {
+	return t.Type == TalkType_OnlineSession || t.Type == TalkType_Opening || t.Type == TalkType_Ending
 }
 
 func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
@@ -105,14 +178,44 @@ func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt 
 		nil
 }
 
-type Talk struct {
-	Id           int32
-	TalkName     string
-	TrackId      int32
-	TrackName    string
-	EventAbbr    string
-	SpeakerNames []string
-	Type         TalkType
-	StartAt      time.Time
-	EndAt        time.Time
+func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkType, error) {
+	switch {
+	case presentationMethod == nil:
+		switch title {
+		case "Opening":
+			return TalkType_Opening, nil
+		case "休憩":
+			return TalkType_Commercial, nil
+		case "Closing":
+			return TalkType_Ending, nil
+		}
+	case *presentationMethod == "オンライン登壇":
+		return TalkType_OnlineSession, nil
+	case *presentationMethod == "事前収録":
+		return TalkType_RecordingSession, nil
+	}
+	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
+}
+
+//
+// CurrentAndNextTalk
+//
+
+type CurrentAndNextTalk struct {
+	Current Talk
+	Next    Talk
+}
+
+func (m CurrentAndNextTalk) TrackId() int32 {
+	if m.Current.TrackId != 0 {
+		return m.Current.TrackId
+	}
+	return m.Next.TrackId
+}
+
+func (m CurrentAndNextTalk) TrackName() string {
+	if m.Current.TrackName != "" {
+		return m.Current.TrackName
+	}
+	return m.Next.TrackName
 }

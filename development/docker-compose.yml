@@ -1,0 +1,47 @@
+version: "3.8"
+services:
+  cnd-operation-server:
+    build:
+      context: ..
+      dockerfile: cmd/server/Dockerfile
+    command: --config=/mnt/cnd-operation-server.yaml
+    ports:
+      - 20080:20080
+    volumes:
+      - ./cnd-operation-server.yaml:/mnt/cnd-operation-server.yaml
+    environment:
+      DK_ENDPOINT_URL: http://dk-mock-server:8080/api
+      SWITCHER01_HOST: ${SWITCHER01_HOST}
+      SWITCHER01_PASSWORD: ${SWITCHER01_PASSWORD}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
+      SWITCHER01_SLACK_CHANNEL_ID: ${SWITCHER01_SLACK_CHANNEL_ID}
+
+  seaman:
+    image: public.ecr.aws/f5j9d0q5/seaman:0.0.9
+    command: --config=/mnt/seaman.yaml
+    volumes:
+      - ./seaman.yaml:/mnt/seaman.yaml
+    environment:
+      BROADCAST_ENDPOINT_URL: cnd-operation-server:20080
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
+      SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
+      GITHUB_ACCESS_TOKEN: ${GITHUB_ACCESS_TOKEN}
+
+  dk-mock-server:
+    image: thiht/smocker
+    ports:
+      - 18080:8080
+      - 18081:8081
+
+  dk-mock-server-init:
+    image: curlimages/curl
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sleep 5;
+        curl -s -XPOST --header "Content-Type: application/x-yaml" --data-binary "@/mnt/mock.yaml" dk-mock-server:8081/mocks;
+    volumes:
+      - ./dk-mock-server.yaml:/mnt/mock.yaml
+    depends_on:
+      - dk-mock-server

@@ -5,15 +5,15 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type PrimitiveClient struct {
+type ObsWsClientWrapper struct {
 	client *goobs.Client
 }
 
-func NewClient() ObsWsApi {
-	return &PrimitiveClient{}
+func NewClient() ObsWsClient {
+	return &ObsWsClientWrapper{}
 }
 
-func (c *PrimitiveClient) GenerateClient(host, password string) error {
+func (c *ObsWsClientWrapper) GenerateClient(host, password string) error {
 	if c.client != nil {
 		return nil
 	}
@@ -25,14 +25,14 @@ func (c *PrimitiveClient) GenerateClient(host, password string) error {
 	return nil
 }
 
-func (c *PrimitiveClient) MediaInputs() ObsWsMediaInputsApi {
+func (c *ObsWsClientWrapper) MediaInputs() ObsWsMediaInputsApi {
 	return c.client.MediaInputs
 }
 
-func (c *PrimitiveClient) Scenes() ObsWsScenesApi {
+func (c *ObsWsClientWrapper) Scenes() ObsWsScenesApi {
 	return c.client.Scenes
 }
 
-func (c *PrimitiveClient) SceneItems() ObsWsSceneItemsApi {
+func (c *ObsWsClientWrapper) SceneItems() ObsWsSceneItemsApi {
 	return c.client.SceneItems
 }

@@ -7,19 +7,19 @@ import (
 	"github.com/avast/retry-go"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast/lib"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast/lib"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
-type ClientIface interface {
-	ListTalks(ctx context.Context) ([]model.Talks, error)
+type Client interface {
+	ListTracks(ctx context.Context) ([]model.Track, error)
 	SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error
 	SetNextTalkOnAir(ctx context.Context, trackId int32) error
 }
 
-type Client struct {
-	client lib.DreamkastApi
+type ClientImpl struct {
+	client lib.DreamkastClient
 
 	eventAbbr         string
 	auth0Domain       string
@@ -30,24 +30,24 @@ type Client struct {
 
 func NewClient(eventAbbr, dkEndpointUrl string,
 	auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience string,
-) (ClientIface, error) {
+) (Client, error) {
 	c, err := lib.NewClient(dkEndpointUrl)
 	if err != nil {
 		return nil, err
 	}
-	return &Client{
+	return &ClientImpl{
 		c, eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience,
 	}, nil
 }
 
-func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
+func (c *ClientImpl) ListTracks(ctx context.Context) ([]model.Track, error) {
 	logger := utils.GetLogger(ctx)
 
 	tracks, err := c.client.ListTracks(ctx, c.eventAbbr)
 	if err != nil {
 		return nil, xerrors.Errorf("message: %w", err)
 	}
-	var result []model.Talks
+	var result []model.Track
 	for _, track := range tracks {
 		var talksModel model.Talks
 		talks, err := c.client.ListTalks(ctx, c.eventAbbr, track.ID)
@@ -79,12 +79,16 @@ func (c *Client) ListTalks(ctx context.Context) ([]model.Talks, error) {
 			}
 			talksModel = append(talksModel, t)
 		}
-		result = append(result, talksModel)
+		result = append(result, model.Track{
+			Id:    track.ID,
+			Name:  track.Name,
+			Talks: talksModel,
+		})
 	}
 	return result, nil
 }
 
-func (c *Client) SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
+func (c *ClientImpl) SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
 	// If Auth0Token has been expired, retry only once.
 	err := retry.Do(
 		func() (err error) {
@@ -100,20 +104,20 @@ func (c *Client) SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error 
 	return err
 }
 
-func (c *Client) setSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
+func (c *ClientImpl) setSpecifiedTalkOnAir(ctx context.Context, talkId int32) error {
 	if err := c.client.GenerateAuth0Token(ctx,
 		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
 	); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 
-	if err := c.client.UpdateTalks(ctx, talkId, true); err != nil {
+	if err := c.client.UpdateTalk(ctx, talkId, true); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 	return nil
 }
 
-func (c *Client) SetNextTalkOnAir(ctx context.Context, trackId int32) error {
+func (c *ClientImpl) SetNextTalkOnAir(ctx context.Context, trackId int32) error {
 	// If Auth0Token has been expired, retry only once.
 	err := retry.Do(
 		func() (err error) {
@@ -129,7 +133,7 @@ func (c *Client) SetNextTalkOnAir(ctx context.Context, trackId int32) error {
 	return err
 }
 
-func (c *Client) setNextTalkOnAir(ctx context.Context, trackId int32) error {
+func (c *ClientImpl) setNextTalkOnAir(ctx context.Context, trackId int32) error {
 	if err := c.client.GenerateAuth0Token(ctx,
 		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
 	); err != nil {
@@ -156,7 +160,7 @@ func (c *Client) setNextTalkOnAir(ctx context.Context, trackId int32) error {
 		}
 	}
 
-	if err := c.client.UpdateTalks(ctx, nextTalkId, true); err != nil {
+	if err := c.client.UpdateTalk(ctx, nextTalkId, true); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 	return nil

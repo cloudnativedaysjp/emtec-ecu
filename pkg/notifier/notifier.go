@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/slack"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/slack"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
@@ -20,7 +20,7 @@ type Config struct {
 	Debug                        bool
 	Targets                      []Target
 	RedisHost                    string
-	NotificationEventReceiveChan <-chan model.Talk
+	NotificationEventReceiveChan <-chan model.CurrentAndNextTalk
 }
 
 type Target struct {
@@ -43,7 +43,7 @@ func Run(ctx context.Context, conf Config) error {
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
-	slackClients := make(map[int32]slack.ClientIface)
+	slackClients := make(map[int32]slack.Client)
 	channelIds := make(map[int32]string)
 
 	redisClient, err := db.NewRedisClient(conf.RedisHost)
@@ -53,6 +53,7 @@ func Run(ctx context.Context, conf Config) error {
 	for _, target := range conf.Targets {
 		slackClients[target.TrackId], err = slack.NewClient(target.SlackBotToken)
 		if err != nil {
+			logger.Error(err, "slack.NewClient() was failed")
 			return xerrors.Errorf("message: %w", err)
 		}
 		channelIds[target.TrackId] = target.SlackChannelId

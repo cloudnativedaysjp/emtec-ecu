@@ -1,0 +1,13 @@
+wsProxy:
+  bindAddr: :20080
+dreamkast:
+  eventAbbr: cnsec2022
+  endpointUrl: ${DK_ENDPOINT_URL}
+tracks:
+  - dkTrackId: 29
+    obs:
+      host: ${SWITCHER01_HOST}
+      password: ${SWITCHER01_PASSWORD}
+    slack:
+      botToken: ${SLACK_BOT_TOKEN}
+      channelId: ${SWITCHER01_SLACK_CHANNEL_ID}

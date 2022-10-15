@@ -28,14 +28,14 @@ func TestPrimitiveClient_ListTracks(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		c := &PrimitiveClient{
+		c := &DreamkastClientImpl{
 			client:        http.DefaultClient,
 			dkEndpointUrl: *u,
 		}
 
 		got, err := c.ListTracks(ctx, dkEventAbbr)
 		if err != nil {
-			t.Errorf("PrimitiveClient.ListTracks() error = %v", err)
+			t.Errorf("DreamkastClientImpl.ListTracks() error = %v", err)
 			return
 		}
 		pp.Print(got)

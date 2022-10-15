@@ -9,9 +9,10 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/dreamkast"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
@@ -28,11 +29,12 @@ type Config struct {
 	Auth0ClientSecret         string
 	Auth0ClientAudience       string
 	RedisHost                 string
-	NotificationEventSendChan chan<- model.Talk
+	NotificationEventSendChan chan<- model.CurrentAndNextTalk
 }
 
 const (
-	syncPeriod = 30 * time.Second
+	syncPeriod                = 30 * time.Second
+	howManyMinutesUntilNotify = 5 * time.Minute
 )
 
 func Run(ctx context.Context, conf Config) error {
@@ -48,6 +50,7 @@ func Run(ctx context.Context, conf Config) error {
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
+	ctx = metrics.SetDreamkastMetricsToCtx(ctx, metrics.NewDreamkastMetricsDao(conf.DkEndpointUrl))
 
 	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
 		conf.Auth0Domain, conf.Auth0ClientId, conf.Auth0ClientSecret, conf.Auth0ClientAudience)
@@ -60,10 +63,13 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 
-	mw := sharedmem.Writer{UseStorageForTalks: true}
+	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	tick := time.NewTicker(syncPeriod)
+	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+		return err
+	}
 	for {
 		select {
 		case <-ctx.Done():
@@ -80,26 +86,20 @@ func Run(ctx context.Context, conf Config) error {
 }
 
 func procedure(ctx context.Context,
-	dkClient dreamkast.ClientIface, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.Talk, redisClient *db.RedisClient,
+	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
+	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *db.RedisClient,
 ) error {
-	logger := utils.GetLogger(ctx)
+	rootLogger := utils.GetLogger(ctx)
 
-	talksList, err := dkClient.ListTalks(ctx)
+	tracks, err := dkClient.ListTracks(ctx)
 	if err != nil {
-		logger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
+		rootLogger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
 		return nil
 	}
-	for _, talks := range talksList {
-		currentTalk, err := talks.GetCurrentTalk()
-		if err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "dkClient.GetCurrentTalk was failed")
-			continue
-		}
-		trackId := currentTalk.TrackId
-		logger = logger.WithValues("trackId", trackId)
+	for _, track := range tracks {
+		logger := rootLogger.WithValues("trackId", track.Id)
 
-		if disabled, err := mr.DisableAutomation(trackId); err != nil {
+		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
 		} else if disabled {
@@ -107,8 +107,8 @@ func procedure(ctx context.Context,
 			continue
 		}
 
-		if err := mw.SetTalks(trackId, talks); err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTalks was failed")
+		if err := mw.SetTrack(track); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
 		hasNotify, err := talks.HasNotify(ctx, redisClient)
@@ -119,10 +119,16 @@ func procedure(ctx context.Context,
 		if !hasNotify {
 			nextTalk, err := talks.GetNextTalk(currentTalk)
 			if err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "talks.GetNextTalk was failed")
-				continue
+				logger.Info("currentTalk is none")
+				currentTalk = &model.Talk{}
 			}
-			notificationEventSendChan <- *nextTalk
+			nextTalk, err := track.Talks.GetNextTalk()
+			if err != nil {
+				logger.Info("nextTalk is none")
+				nextTalk = &model.Talk{}
+			}
+			notificationEventSendChan <- model.CurrentAndNextTalk{
+				Current: *currentTalk, Next: *nextTalk}
 		}
 	}
 	return nil
