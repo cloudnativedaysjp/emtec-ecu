@@ -2,9 +2,11 @@ package notifier
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
+	slackgo "github.com/slack-go/slack"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
@@ -16,11 +18,11 @@ import (
 const componentName = "notifier"
 
 type Config struct {
-	Development                  bool
-	Debug                        bool
-	Targets                      []Target
-	RedisHost                    string
-	NotificationEventReceiveChan <-chan model.CurrentAndNextTalk
+	Development          bool
+	Debug                bool
+	Targets              []Target
+	RedisHost            string
+	NotificationRecvChan <-chan model.Notification
 }
 
 type Target struct {
@@ -58,22 +60,49 @@ func Run(ctx context.Context, conf Config) error {
 		}
 		channelIds[target.TrackId] = target.SlackChannelId
 	}
-	c := NewController(logger, slackClients, channelIds)
 
+	notifier := notifier{logger, slackClients, channelIds, *redisClient, conf.NotificationRecvChan}
+	if err := notifier.watch(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
+type notifier struct {
+	logger               logr.Logger
+	slackClients         map[int32]slack.Client
+	channelIds           map[int32]string
+	db                   db.RedisClient
+	notificationRecvChan <-chan model.Notification
+}
+
+func (n *notifier) watch(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info("context was done.")
+			n.logger.Info("context was done.")
 			return nil
-		case talk := <-conf.NotificationEventReceiveChan:
-			if err := c.Receive(talk); err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "notification failed")
+		case notification := <-n.notificationRecvChan:
+			var trackId int32
+			var msg slackgo.Msg
+			switch m := notification.(type) {
+			case *model.NotificationOnDkTimetable:
+				trackId = m.TrackId()
+				msg = ViewNextSessionWillBegin(m)
+			}
+			sc, ok := n.slackClients[trackId]
+			if !ok {
+				n.logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", trackId))
 				return nil
 			}
-			if err := redisClient.SetNextTalkNotification(ctx, int(talk.Next.Id)); err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
+			if err := sc.PostMessage(ctx, n.channelIds[trackId], msg); err != nil {
+				return xerrors.Errorf("message: %w", err)
+			}
+			if err := n.db.SetNextTalkNotification(ctx, int(notification.Next().Id)); err != nil {
+				n.logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
 				return nil
 			}
+
 		}
 	}
 }

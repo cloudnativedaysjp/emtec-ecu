@@ -11,14 +11,14 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 )
 
-func ViewSession(m model.CurrentAndNextTalk) slack.Msg {
-	result, _ := viewSession(m)
+func ViewNextSessionWillBegin(m *model.NotificationOnDkTimetable) slack.Msg {
+	result, _ := viewNextSessionWillBegin(m)
 	return result
 }
 
-func viewSession(m model.CurrentAndNextTalk) (slack.Msg, error) {
-	currentTalk := m.Current
-	nextTalk := m.Next
+func viewNextSessionWillBegin(m *model.NotificationOnDkTimetable) (slack.Msg, error) {
+	currentTalk := m.Current()
+	nextTalk := m.Next()
 
 	accessory := &slack.Accessory{}
 	if currentTalk.IsOnDemand() || nextTalk.IsOnDemand() {

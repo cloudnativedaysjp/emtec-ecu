@@ -20,16 +20,16 @@ import (
 const componentName = "dkwatcher"
 
 type Config struct {
-	Development               bool
-	Debug                     bool
-	EventAbbr                 string
-	DkEndpointUrl             string
-	Auth0Domain               string
-	Auth0ClientId             string
-	Auth0ClientSecret         string
-	Auth0ClientAudience       string
-	RedisHost                 string
-	NotificationEventSendChan chan<- model.CurrentAndNextTalk
+	Development          bool
+	Debug                bool
+	EventAbbr            string
+	DkEndpointUrl        string
+	Auth0Domain          string
+	Auth0ClientId        string
+	Auth0ClientSecret    string
+	Auth0ClientAudience  string
+	RedisHost            string
+	NotificationSendChan chan<- model.Notification
 }
 
 const (
@@ -66,32 +66,44 @@ func Run(ctx context.Context, conf Config) error {
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
+	dkwatcher := dkwatcher{logger, dkClient, mw, mr, *redisClient, conf.NotificationSendChan}
+	if err := dkwatcher.watch(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
+type dkwatcher struct {
+	logger               logr.Logger
+	dkClient             dreamkast.Client
+	mw                   sharedmem.WriterIface
+	mr                   sharedmem.ReaderIface
+	db                   db.RedisClient
+	notificationSendChan chan<- model.Notification
+}
+
+func (w *dkwatcher) watch(ctx context.Context) error {
 	tick := time.NewTicker(syncPeriod)
-	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan, redisClient); err != nil {
+	if err := w.procedure(ctx); err != nil {
 		return err
 	}
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info("context was done.")
+			w.logger.Info("context was done.")
 			return nil
 		case <-tick.C:
-			if err := procedure(ctx, dkClient, mw, mr,
-				conf.NotificationEventSendChan, redisClient,
-			); err != nil {
+			if err := w.procedure(ctx); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func procedure(ctx context.Context,
-	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *db.RedisClient,
-) error {
+func (w *dkwatcher) procedure(ctx context.Context) error {
 	rootLogger := utils.GetLogger(ctx)
 
-	tracks, err := dkClient.ListTracks(ctx)
+	tracks, err := w.dkClient.ListTracks(ctx)
 	if err != nil {
 		rootLogger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
 		return nil
@@ -99,7 +111,7 @@ func procedure(ctx context.Context,
 	for _, track := range tracks {
 		logger := rootLogger.WithValues("trackId", track.Id)
 
-		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
+		if disabled, err := w.mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
 		} else if disabled {
@@ -107,7 +119,7 @@ func procedure(ctx context.Context,
 			continue
 		}
 
-		if err := mw.SetTrack(track); err != nil {
+		if err := w.mw.SetTrack(track); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
@@ -121,7 +133,7 @@ func procedure(ctx context.Context,
 			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
 			continue
 		}
-		if val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
+		if val, err := w.db.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
 			return err
 		} else if val != "" {
@@ -133,8 +145,8 @@ func procedure(ctx context.Context,
 			logger.Info("currentTalk is none")
 			currentTalk = &model.Talk{}
 		}
-		notificationEventSendChan <- model.CurrentAndNextTalk{
-			Current: *currentTalk, Next: *nextTalk}
+		w.notificationSendChan <- model.NewNotificationOnDkTimetable(
+			*currentTalk, *nextTalk)
 	}
 	return nil
 }

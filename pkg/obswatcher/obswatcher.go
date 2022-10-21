@@ -58,7 +58,8 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
-		eg.Go(watch(ctx, obs.DkTrackId, obswsClient, mr))
+		obswatcher := obswatcher{obswsClient, mr}
+		eg.Go(obswatcher.watch(ctx, obs.DkTrackId))
 	}
 	if err := eg.Wait(); err != nil {
 		err := xerrors.Errorf("message: %w", err)
@@ -68,14 +69,17 @@ func Run(ctx context.Context, conf Config) error {
 	return nil
 }
 
-func watch(ctx context.Context, trackId int32,
-	obswsClient obsws.Client, mr sharedmem.ReaderIface,
-) func() error {
+type obswatcher struct {
+	obswsClient obsws.Client
+	mr          sharedmem.ReaderIface
+}
+
+func (w *obswatcher) watch(ctx context.Context, trackId int32) func() error {
 	return func() error {
 		logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 
 		tick := time.NewTicker(syncPeriod)
-		if err := procedure(ctx, trackId, obswsClient, mr); err != nil {
+		if err := w.procedure(ctx, trackId); err != nil {
 			return xerrors.Errorf("message: %w", err)
 		}
 		for {
@@ -84,7 +88,7 @@ func watch(ctx context.Context, trackId int32,
 				logger.Info("context was done.")
 				return nil
 			case <-tick.C:
-				if err := procedure(ctx, trackId, obswsClient, mr); err != nil {
+				if err := w.procedure(ctx, trackId); err != nil {
 					return xerrors.Errorf("message: %w", err)
 				}
 			}
@@ -92,12 +96,10 @@ func watch(ctx context.Context, trackId int32,
 	}
 }
 
-func procedure(ctx context.Context, trackId int32,
-	obswsClient obsws.Client, mr sharedmem.ReaderIface,
-) error {
+func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 	logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
 
-	if disabled, err := mr.DisableAutomation(trackId); err != nil {
+	if disabled, err := w.mr.DisableAutomation(trackId); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 		return nil
 	} else if disabled {
@@ -105,7 +107,7 @@ func procedure(ctx context.Context, trackId int32,
 		return nil
 	}
 
-	t, err := obswsClient.GetRemainingTimeOnCurrentScene(ctx)
+	t, err := w.obswsClient.GetRemainingTimeOnCurrentScene(ctx)
 	if err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
 		return nil
@@ -126,7 +128,7 @@ func procedure(ctx context.Context, trackId int32,
 
 	// sleep until MediaInput is finished
 	time.Sleep(time.Duration(remainingMilliSecond) * time.Millisecond)
-	if err := obswsClient.MoveSceneToNext(context.Background()); err != nil {
+	if err := w.obswsClient.MoveSceneToNext(context.Background()); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.MoveSceneToNext() on automated task was failed")
 		return nil
 	}

@@ -140,8 +140,8 @@ func Test_viewSession(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, err := viewSession(model.CurrentAndNextTalk{
-			Current: model.Talk{
+		got, err := viewNextSessionWillBegin(model.NewNotificationOnDkTimetable(
+			model.Talk{
 				Id:           10001,
 				TalkName:     "ものすごい発表",
 				TrackId:      1,
@@ -152,7 +152,7 @@ func Test_viewSession(t *testing.T) {
 				SpeakerNames: []string{"kanata"},
 				EventAbbr:    "cndt2101",
 			},
-			Next: model.Talk{
+			model.Talk{
 				Id:           10002,
 				TalkName:     "さらにものすごい発表",
 				TrackId:      1,
@@ -163,7 +163,7 @@ func Test_viewSession(t *testing.T) {
 				SpeakerNames: []string{"hoge", "fuga"},
 				EventAbbr:    "cndt2101",
 			},
-		})
+		))
 		if err != nil {
 			t.Errorf("error = %v", err)
 			return
