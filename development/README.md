@@ -32,5 +32,10 @@ SWITCHER01_PASSWORD=...
 * コンテナの起動
 
 ```bash
-docker compose up -d
+sed -e "s/DATE/`date "+%Y-%m-%d/"`" \
+-e "s/TIME1/"2000-01-01T`date "+%H:%M:%S.%3N" -d "1 minute"`+09:00"/" \
+-e "s/TIME2/"2000-01-01T`date "+%H:%M:%S.%3N" -d "4 minute"`+09:00"/" \
+-e "s/TIME3/"2000-01-01T`date "+%H:%M:%S.%3N" -d "7 minute"`+09:00"/" \
+-e "s/TIME4/"2000-01-01T`date "+%H:%M:%S.%3N" -d "9 minute"`+09:00"/" \
+dk-mock-server-base.yaml > dk-mock-server.yaml; docker compose up -d
 ```
