@@ -53,9 +53,10 @@ func main() {
 				})
 			}
 			return obswatcher.Run(ctx, obswatcher.Config{
-				Development: conf.Debug.Development,
-				Debug:       conf.Debug.Debug,
-				Obs:         configObs,
+				Development:          conf.Debug.Development,
+				Debug:                conf.Debug.Debug,
+				Obs:                  configObs,
+				NotificationSendChan: notificationStream,
 			})
 		})
 	}

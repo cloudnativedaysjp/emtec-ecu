@@ -58,6 +58,13 @@ func viewNextSessionWillBegin(m *model.NotificationOnDkTimetable) (slack.Msg, er
 		map[string]interface{}{
 			"blocks": []interface{}{
 				map[string]interface{}{
+					"type": "section",
+					"text": map[string]interface{}{
+						"type": "mrkdwn",
+						"text": "*Next Scene will begin*",
+					},
+				},
+				map[string]interface{}{
 					"type": "divider",
 				},
 				map[string]interface{}{
@@ -152,6 +159,78 @@ func viewNextSessionWillBegin(m *model.NotificationOnDkTimetable) (slack.Msg, er
 				map[string]interface{}{
 					"accessory": accessory,
 					"type":      "section",
+					"text": map[string]interface{}{
+						"type": "mrkdwn",
+						"text": fmt.Sprintf("Title: <%s/%s/talks/%d|%s>",
+							eventUrlBase, nextTalk.EventAbbr, nextTalk.Id, nextTalk.TalkName),
+					},
+				},
+			},
+		},
+	)
+}
+
+func ViewSceneMovedToNext(m *model.NotificationSceneMovedToNext) slack.Msg {
+	result, _ := viewSceneMovedToNext(m)
+	return result
+}
+
+func viewSceneMovedToNext(m *model.NotificationSceneMovedToNext) (slack.Msg, error) {
+	nextTalk := m.Next()
+	return castFromMapToMsg(
+		map[string]interface{}{
+			"blocks": []interface{}{
+				map[string]interface{}{
+					"type": "section",
+					"text": map[string]interface{}{
+						"type": "mrkdwn",
+						"text": "*Scene was moved to next automatically*",
+					},
+				},
+				map[string]interface{}{
+					"type": "divider",
+				},
+				map[string]interface{}{
+					"type": "context",
+					"elements": []interface{}{
+						map[string]interface{}{
+							"emoji": true,
+							"type":  "plain_text",
+							"text":  "Current Talk",
+						},
+					},
+				},
+				map[string]interface{}{
+					"type": "section",
+					"fields": []interface{}{
+						map[string]interface{}{
+							"type":  "plain_text",
+							"text":  fmt.Sprintf("Track %s", nextTalk.TrackName),
+							"emoji": true,
+						},
+						map[string]interface{}{
+							"type": "plain_text",
+							"text": fmt.Sprintf("%s - %s",
+								nextTalk.StartAt.Format("15:04"),
+								nextTalk.EndAt.Format("15:04"),
+							),
+							"emoji": true,
+						},
+						map[string]interface{}{
+							"type":  "plain_text",
+							"text":  fmt.Sprintf("Type: %s", nextTalk.GetTalkTypeName()),
+							"emoji": true,
+						},
+						map[string]interface{}{
+							"emoji": true,
+							"type":  "plain_text",
+							"text": fmt.Sprintf("Speaker: %s",
+								strings.Join(nextTalk.SpeakerNames, ", ")),
+						},
+					},
+				},
+				map[string]interface{}{
+					"type": "section",
 					"text": map[string]interface{}{
 						"type": "mrkdwn",
 						"text": fmt.Sprintf("Title: <%s/%s/talks/%d|%s>",

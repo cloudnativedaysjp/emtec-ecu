@@ -3,6 +3,7 @@ package notifier
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
@@ -89,6 +90,13 @@ func (n *notifier) watch(ctx context.Context) error {
 			case *model.NotificationOnDkTimetable:
 				trackId = m.TrackId()
 				msg = ViewNextSessionWillBegin(m)
+			case *model.NotificationSceneMovedToNext:
+				trackId = m.TrackId()
+				msg = ViewSceneMovedToNext(m)
+			default:
+				n.logger.Error(fmt.Errorf(
+					"unknown Notification type: %v", reflect.TypeOf(m)), "unknown type")
+				continue
 			}
 			sc, ok := n.slackClients[trackId]
 			if !ok {

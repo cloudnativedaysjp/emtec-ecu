@@ -147,6 +147,7 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 		}
 		w.notificationSendChan <- model.NewNotificationOnDkTimetable(
 			*currentTalk, *nextTalk)
+		logger.Info("notified to Slack regarding next talk will begin")
 	}
 	return nil
 }

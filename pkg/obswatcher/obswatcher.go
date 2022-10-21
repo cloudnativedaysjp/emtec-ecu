@@ -13,6 +13,7 @@ import (
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
@@ -23,9 +24,10 @@ const (
 )
 
 type Config struct {
-	Development bool
-	Debug       bool
-	Obs         []ConfigObs
+	Development          bool
+	Debug                bool
+	Obs                  []ConfigObs
+	NotificationSendChan chan<- model.Notification
 }
 
 type ConfigObs struct {
@@ -48,7 +50,8 @@ func Run(ctx context.Context, conf Config) error {
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
 	ctx = logr.NewContext(ctx, logger)
 
-	mr := &sharedmem.Reader{UseStorageForDisableAutomation: true}
+	mr := &sharedmem.Reader{
+		UseStorageForDisableAutomation: true, UseStorageForTrack: true}
 
 	eg, ctx := errgroup.WithContext(ctx)
 	for _, obs := range conf.Obs {
@@ -58,7 +61,7 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
-		obswatcher := obswatcher{obswsClient, mr}
+		obswatcher := obswatcher{obswsClient, mr, conf.NotificationSendChan}
 		eg.Go(obswatcher.watch(ctx, obs.DkTrackId))
 	}
 	if err := eg.Wait(); err != nil {
@@ -70,8 +73,9 @@ func Run(ctx context.Context, conf Config) error {
 }
 
 type obswatcher struct {
-	obswsClient obsws.Client
-	mr          sharedmem.ReaderIface
+	obswsClient          obsws.Client
+	mr                   sharedmem.ReaderIface
+	notificationSendChan chan<- model.Notification
 }
 
 func (w *obswatcher) watch(ctx context.Context, trackId int32) func() error {
@@ -107,6 +111,22 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 		return nil
 	}
 
+	track, err := w.mr.Track(trackId)
+	if err != nil {
+		return xerrors.Errorf("message: %w", err)
+	}
+	currentTalk, err := track.Talks.GetCurrentTalk()
+	if err != nil {
+		logger.Info(fmt.Sprintf("talks.GetCurrentTalk was failed: %v", err))
+		// カンファレンス開始前の場合は処理を続けたいため return しない
+		currentTalk = &model.Talk{}
+	}
+	nextTalk, err := track.Talks.GetNextTalk()
+	if err != nil {
+		logger.Info(fmt.Sprintf("talks.GetNextTalk was failed: %v", err))
+		return nil
+	}
+
 	t, err := w.obswsClient.GetRemainingTimeOnCurrentScene(ctx)
 	if err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
@@ -128,10 +148,14 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 
 	// sleep until MediaInput is finished
 	time.Sleep(time.Duration(remainingMilliSecond) * time.Millisecond)
+
 	if err := w.obswsClient.MoveSceneToNext(context.Background()); err != nil {
 		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.MoveSceneToNext() on automated task was failed")
 		return nil
 	}
-	logger.Info("automated task was completed. Scene should be to next.")
+	logger.Info("automated task was completed. Scene was moved to next.")
+	w.notificationSendChan <- model.NewNotificationSceneMovedToNext(
+		*currentTalk, *nextTalk)
+	logger.Info("notified to Slack regarding Scene was moved to next")
 	return nil
 }
