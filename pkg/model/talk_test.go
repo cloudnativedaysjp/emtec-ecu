@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infrastructure/db"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/infra"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
 )
 
@@ -94,7 +94,7 @@ func TestTalk_HasNotify(t *testing.T) {
 		return time.Date(2022, 10, 01, 12, 27, 00, 0, time.UTC)
 	}
 	ctx := context.Background()
-	rcClient, err := db.NewRedisClient("http://localhost:6379")
+	rcClient, err := infra.NewRedisClient("http://localhost:6379")
 	if err != nil {
 		return
 	}
@@ -214,7 +214,7 @@ func TestTalk_HasNotify(t *testing.T) {
 				return
 			}
 			if got {
-				cmd := rcClient.Client.Get(ctx, db.NextTalkNotificationKey)
+				cmd := rcClient.Client.Get(ctx, infra.NextTalkNotificationKey)
 				fmt.Println(cmd.Bool())
 			}
 		})
