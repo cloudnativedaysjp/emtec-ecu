@@ -113,7 +113,7 @@ func procedure(ctx context.Context,
 		currentTalk, err := track.Talks.GetCurrentTalk()
 		if err != nil {
 			logger.Info("currentTalk is none")
-			continue
+			currentTalk = &model.Talk{}
 		}
 		nextTalk, err := track.Talks.GetNextTalk()
 		if err != nil {
