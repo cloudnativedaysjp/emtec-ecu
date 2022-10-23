@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
@@ -20,15 +18,9 @@ import (
 const componentName = "dkwatcher"
 
 type Config struct {
-	Development          bool
-	Debug                bool
-	EventAbbr            string
-	DkEndpointUrl        string
-	Auth0Domain          string
-	Auth0ClientId        string
-	Auth0ClientSecret    string
-	Auth0ClientAudience  string
-	RedisHost            string
+	Logger               logr.Logger
+	DkClient             dreamkast.Client
+	RedisClient          *db.RedisClient
 	NotificationSendChan chan<- model.Notification
 }
 
@@ -38,33 +30,11 @@ const (
 )
 
 func Run(ctx context.Context, conf Config) error {
-	// setup logger
-	zapConf := zap.NewProductionConfig()
-	if conf.Development {
-		zapConf = zap.NewDevelopmentConfig()
-	}
-	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
-	zapLogger, err := zapConf.Build()
-	if err != nil {
-		return err
-	}
-	logger := zapr.NewLogger(zapLogger).WithName(componentName)
-
-	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
-		conf.Auth0Domain, conf.Auth0ClientId, conf.Auth0ClientSecret, conf.Auth0ClientAudience)
-	if err != nil {
-		return err
-	}
-
-	redisClient, err := db.NewRedisClient(conf.RedisHost)
-	if err != nil {
-		return err
-	}
-
+	logger := conf.Logger.WithName(componentName)
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
-	dkwatcher := dkwatcher{dkClient, mw, mr, *redisClient, conf.NotificationSendChan}
+	dkwatcher := dkwatcher{conf.DkClient, conf.RedisClient, mw, mr, conf.NotificationSendChan}
 	if err := dkwatcher.watch(ctx, logger); err != nil {
 		return err
 	}
@@ -73,9 +43,9 @@ func Run(ctx context.Context, conf Config) error {
 
 type dkwatcher struct {
 	dkClient             dreamkast.Client
+	db                   *db.RedisClient
 	mw                   sharedmem.WriterIface
 	mr                   sharedmem.ReaderIface
-	db                   db.RedisClient
 	notificationSendChan chan<- model.Notification
 }
 
@@ -117,29 +87,32 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 			continue
 		}
 
+		currentTalk, err := track.Talks.GetCurrentTalk()
+		if err != nil {
+			// カンファレンス開始前の場合は処理を続けたいため return しない
+			logger.Info("currentTalk is none")
+			currentTalk = &model.Talk{}
+		}
 		nextTalk, err := track.Talks.GetNextTalk()
 		if err != nil {
 			logger.Info("nextTalk is none")
 			continue
 		}
+		notification := model.NewNotificationOnDkTimetable(
+			*currentTalk, *nextTalk)
+
 		if !track.Talks.IsStartNextTalkSoon(howManyMinutesUntilNotify) {
-			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
+			logger.Info("nextTalk is not start soon")
 			continue
 		}
-		if val, err := w.db.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
+		if notified, err := w.db.HasNextTalkNotificationAlreadyBeenSent(ctx, *notification); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
 			return err
-		} else if val != "" {
-			logger.Info("nextTalkNotification already sent . trackNo:%s", track.Id)
+		} else if notified {
+			logger.Info("nextTalkNotification already sent")
 			continue
 		}
-		currentTalk, err := track.Talks.GetCurrentTalk()
-		if err != nil {
-			logger.Info("currentTalk is none")
-			currentTalk = &model.Talk{}
-		}
-		w.notificationSendChan <- model.NewNotificationOnDkTimetable(
-			*currentTalk, *nextTalk)
+		w.notificationSendChan <- notification
 		logger.Info("notified to Slack regarding next talk will begin")
 	}
 	return nil

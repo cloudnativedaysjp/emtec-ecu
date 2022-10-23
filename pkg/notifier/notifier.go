@@ -6,9 +6,7 @@ import (
 	"reflect"
 
 	"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
 	slackgo "github.com/slack-go/slack"
-	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
@@ -19,10 +17,9 @@ import (
 const componentName = "notifier"
 
 type Config struct {
-	Development          bool
-	Debug                bool
+	Logger               logr.Logger
 	Targets              []Target
-	RedisHost            string
+	RedisClient          *db.RedisClient
 	NotificationRecvChan <-chan model.Notification
 }
 
@@ -33,25 +30,13 @@ type Target struct {
 }
 
 func Run(ctx context.Context, conf Config) error {
-	// setup logger
-	zapConf := zap.NewProductionConfig()
-	if conf.Development {
-		zapConf = zap.NewDevelopmentConfig()
-	}
-	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
-	zapLogger, err := zapConf.Build()
-	if err != nil {
-		return err
-	}
-	logger := zapr.NewLogger(zapLogger).WithName(componentName)
+	logger := conf.Logger.WithName(componentName)
 
 	slackClients := make(map[int32]slack.Client)
 	channelIds := make(map[int32]string)
 
-	redisClient, err := db.NewRedisClient(conf.RedisHost)
-	if err != nil {
-		return err
-	}
+	// TODO(#57): move to cmd/server/main.go
+	var err error
 	for _, target := range conf.Targets {
 		slackClients[target.TrackId], err = slack.NewClient(target.SlackBotToken)
 		if err != nil {
@@ -62,7 +47,7 @@ func Run(ctx context.Context, conf Config) error {
 		channelIds[target.TrackId] = target.SlackChannelId
 	}
 
-	notifier := notifier{slackClients, channelIds, *redisClient, conf.NotificationRecvChan}
+	notifier := notifier{slackClients, channelIds, conf.RedisClient, conf.NotificationRecvChan}
 	if err := notifier.watch(ctx, logger); err != nil {
 		return err
 	}
@@ -72,7 +57,7 @@ func Run(ctx context.Context, conf Config) error {
 type notifier struct {
 	slackClients         map[int32]slack.Client
 	channelIds           map[int32]string
-	db                   db.RedisClient
+	db                   *db.RedisClient
 	notificationRecvChan <-chan model.Notification
 }
 
@@ -84,6 +69,7 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			return nil
 		case notification := <-n.notificationRecvChan:
 			ctx := context.Background()
+			messageWasPosted := false
 
 			var trackId int32
 			var msg slackgo.Msg
@@ -91,6 +77,13 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			case *model.NotificationOnDkTimetable:
 				trackId = m.TrackId()
 				msg = ViewNextSessionWillBegin(m)
+				defer func() {
+					if messageWasPosted {
+						if err := n.db.SetNextTalkNotification(ctx, *m); err != nil {
+							logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
+						}
+					}
+				}()
 			case *model.NotificationSceneMovedToNext:
 				trackId = m.TrackId()
 				msg = ViewSceneMovedToNext(m)
@@ -107,11 +100,7 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			if err := sc.PostMessage(ctx, n.channelIds[trackId], msg); err != nil {
 				return xerrors.Errorf("message: %w", err)
 			}
-			if err := n.db.SetNextTalkNotification(ctx, int(notification.Next().Id)); err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
-				return nil
-			}
-
+			messageWasPosted = true
 		}
 	}
 }

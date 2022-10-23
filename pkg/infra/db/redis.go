@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	redis "github.com/go-redis/redis/v8"
 	"golang.org/x/xerrors"
 )
@@ -14,9 +15,8 @@ type RedisClient struct {
 }
 
 const (
-	RedisExpiration                 = 10 * time.Minute
-	NextTalkNotificationKey         = "nextTalkNotificationAlreadySentFlag:"
-	NextTalkNotificationAlreadySent = true
+	RedisExpiration         = 10 * time.Minute
+	NextTalkNotificationKey = "nextTalkNotificationAlreadySentFlag:"
 )
 
 func NewRedisClient(addr string) (*RedisClient, error) {
@@ -33,10 +33,16 @@ func NewRedisClient(addr string) (*RedisClient, error) {
 	}, nil
 }
 
-func (rc *RedisClient) SetNextTalkNotification(ctx context.Context, id int) error {
-	return rc.Client.Set(ctx, NextTalkNotificationKey+strconv.Itoa(id), NextTalkNotificationAlreadySent, RedisExpiration).Err()
+func (rc *RedisClient) SetNextTalkNotification(ctx context.Context, n model.NotificationOnDkTimetable) error {
+	nextTalkId := int(n.Next().Id)
+	return rc.Client.Set(ctx, NextTalkNotificationKey+strconv.Itoa(nextTalkId), true, RedisExpiration).Err()
 }
 
-func (rc *RedisClient) GetNextTalkNotification(ctx context.Context, id int) (string, error) {
-	return rc.Client.Get(ctx, NextTalkNotificationKey+strconv.Itoa(int(id))).Result()
+func (rc *RedisClient) HasNextTalkNotificationAlreadyBeenSent(ctx context.Context, n model.NotificationOnDkTimetable) (bool, error) {
+	nextTalkId := int(n.Next().Id)
+	result, err := rc.Client.Exists(ctx, NextTalkNotificationKey+strconv.Itoa(nextTalkId)).Result()
+	if err != nil {
+		return false, err
+	}
+	return result == 1, nil
 }
