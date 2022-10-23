@@ -105,6 +105,10 @@ func procedure(ctx context.Context,
 			logger.Info("DisableAutomation was true, skipped")
 			continue
 		}
+		if err := mw.SetTrack(track); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
+			continue
+		}
 		nextTalk, err := track.Talks.GetNextTalk()
 		if err != nil {
 			logger.Info("nextTalk is none")
@@ -114,12 +118,10 @@ func procedure(ctx context.Context,
 			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
 			continue
 		}
-		val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id))
-		if err != nil {
+		if val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
 			return err
-		}
-		if val != "" {
+		} else if val != "" {
 			logger.Info("nextTalkNotification already sent . trackNo:%s", track.Id)
 			continue
 		}
@@ -127,10 +129,6 @@ func procedure(ctx context.Context,
 		if err != nil {
 			logger.Info("currentTalk is none")
 			currentTalk = &model.Talk{}
-		}
-		if err := mw.SetTrack(track); err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
-			continue
 		}
 		notificationEventSendChan <- model.CurrentAndNextTalk{
 			Current: *currentTalk, Next: *nextTalk}
