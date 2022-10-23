@@ -34,7 +34,7 @@ func NewRedisClient(addr string) (*RedisClient, error) {
 }
 
 func (rc *RedisClient) SetNextTalkNotification(ctx context.Context, id int) error {
-	return rc.Client.Set(ctx, NextTalkNotificationKey, NextTalkNotificationAlreadySent, RedisExpiration).Err()
+	return rc.Client.Set(ctx, NextTalkNotificationKey+strconv.Itoa(id), NextTalkNotificationAlreadySent, RedisExpiration).Err()
 }
 
 func (rc *RedisClient) GetNextTalkNotification(ctx context.Context, id int) (string, error) {
