@@ -23,7 +23,7 @@ const (
 
 type Talks []Talk
 
-func (ts Talks) WillStartNextTalkSince(untilNotify time.Duration) bool {
+func (ts Talks) IsStartNextTalkSoon(untilNotify time.Duration) bool {
 	now := nowFunc()
 	nextTalk, err := ts.GetNextTalk()
 	if err != nil {
@@ -42,12 +42,12 @@ func (ts Talks) GetCurrentTalk() (*Talk, error) {
 			return &talk, nil
 		}
 	}
-	return nil, fmt.Errorf("Current talk not found")
+	return nil, fmt.Errorf("current talk not found")
 }
 
 func (ts Talks) GetNextTalk() (*Talk, error) {
 	if len(ts) == 0 {
-		return nil, fmt.Errorf("Talks is empty")
+		return nil, fmt.Errorf("talks is empty")
 	}
 
 	currentTalk, err := ts.GetCurrentTalk()
@@ -64,12 +64,12 @@ func (ts Talks) GetNextTalk() (*Talk, error) {
 	for i, talk := range ts {
 		if talk.Id == currentTalk.Id {
 			if i+1 == len(ts) {
-				return nil, fmt.Errorf("Current talk is last")
+				return nil, fmt.Errorf("current talk is last")
 			}
 			return &ts[i+1], nil
 		}
 	}
-	return nil, fmt.Errorf("Something Wrong")
+	return nil, fmt.Errorf("something Wrong")
 }
 
 //
@@ -86,10 +86,6 @@ type Talk struct {
 	Type         TalkType
 	StartAt      time.Time
 	EndAt        time.Time
-}
-
-func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
-	return t.convertTalkType(title, presentationMethod)
 }
 
 func (t Talk) GetTalkTypeName() string {
@@ -140,6 +136,10 @@ func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkTyp
 		return TalkType_RecordingSession, nil
 	}
 	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
+}
+
+func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
+	return t.convertTalkType(title, presentationMethod)
 }
 
 //

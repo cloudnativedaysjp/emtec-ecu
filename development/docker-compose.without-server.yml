@@ -18,6 +18,13 @@ services:
       - 18080:8080
       - 18081:8081
 
+  redis:
+    image: redis:alpine3.16
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_HOST: localhost:6379
+
   dk-mock-server-init:
     image: curlimages/curl
     entrypoint:

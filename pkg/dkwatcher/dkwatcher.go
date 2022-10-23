@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
@@ -27,6 +28,7 @@ type Config struct {
 	Auth0ClientId             string
 	Auth0ClientSecret         string
 	Auth0ClientAudience       string
+	RedisHost                 string
 	NotificationEventSendChan chan<- model.CurrentAndNextTalk
 }
 
@@ -56,11 +58,16 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 
+	redisClient, err := db.NewRedisClient(conf.RedisHost)
+	if err != nil {
+		return err
+	}
+
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
 	tick := time.NewTicker(syncPeriod)
-	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+	if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan, redisClient); err != nil {
 		return err
 	}
 	for {
@@ -69,7 +76,9 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Info("context was done.")
 			return nil
 		case <-tick.C:
-			if err := procedure(ctx, dkClient, mw, mr, conf.NotificationEventSendChan); err != nil {
+			if err := procedure(ctx, dkClient, mw, mr,
+				conf.NotificationEventSendChan, redisClient,
+			); err != nil {
 				return err
 			}
 		}
@@ -78,7 +87,7 @@ func Run(ctx context.Context, conf Config) error {
 
 func procedure(ctx context.Context,
 	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.CurrentAndNextTalk,
+	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *db.RedisClient,
 ) error {
 	rootLogger := utils.GetLogger(ctx)
 
@@ -102,20 +111,30 @@ func procedure(ctx context.Context,
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
-		if track.Talks.WillStartNextTalkSince(howManyMinutesUntilNotify) {
-			currentTalk, err := track.Talks.GetCurrentTalk()
-			if err != nil {
-				logger.Info("currentTalk is none")
-				currentTalk = &model.Talk{}
-			}
-			nextTalk, err := track.Talks.GetNextTalk()
-			if err != nil {
-				logger.Info("nextTalk is none")
-				nextTalk = &model.Talk{}
-			}
-			notificationEventSendChan <- model.CurrentAndNextTalk{
-				Current: *currentTalk, Next: *nextTalk}
+
+		nextTalk, err := track.Talks.GetNextTalk()
+		if err != nil {
+			logger.Info("nextTalk is none")
+			continue
 		}
+		if !track.Talks.IsStartNextTalkSoon(howManyMinutesUntilNotify) {
+			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
+			continue
+		}
+		if val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
+			return err
+		} else if val != "" {
+			logger.Info("nextTalkNotification already sent . trackNo:%s", track.Id)
+			continue
+		}
+		currentTalk, err := track.Talks.GetCurrentTalk()
+		if err != nil {
+			logger.Info("currentTalk is none")
+			currentTalk = &model.Talk{}
+		}
+		notificationEventSendChan <- model.CurrentAndNextTalk{
+			Current: *currentTalk, Next: *nextTalk}
 	}
 	return nil
 }

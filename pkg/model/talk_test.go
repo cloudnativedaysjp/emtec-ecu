@@ -86,7 +86,7 @@ func setTestTime(v string) time.Time {
 	return pt
 }
 
-func TestTalk_WillStartNextTalkSince(t *testing.T) {
+func TestTalk_IsStartNextTalkSoon(t *testing.T) {
 	nowFunc = func() time.Time {
 		return time.Date(2022, 10, 01, 12, 27, 00, 0, time.UTC)
 	}
@@ -192,9 +192,10 @@ func TestTalk_WillStartNextTalkSince(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.talks.WillStartNextTalkSince(test_howManyMinutesUntilNotify)
+			got := tt.talks.IsStartNextTalkSoon(test_howManyMinutesUntilNotify)
 			if got != tt.want {
-				t.Errorf("Talk.GetTalkType() want %v", tt.want)
+				t.Errorf("Talk.HasNotify() = %v, want %v", got, tt.want)
+				return
 			}
 		})
 	}
@@ -207,6 +208,7 @@ func TestTalk_GetCurrentTalk(t *testing.T) {
 	tests := []struct {
 		name    string
 		talks   Talks
+		wantId  int
 		wantErr bool
 	}{
 		{
@@ -311,6 +313,7 @@ func TestTalk_GetNextTalk(t *testing.T) {
 		name    string
 		args    *Talk
 		talks   Talks
+		wantId  int32
 		wantErr bool
 	}{
 		{
@@ -446,13 +449,22 @@ func TestTalk_GetNextTalk(t *testing.T) {
 				},
 			},
 			wantErr: false,
+			wantId:  4,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := tt.talks.GetNextTalk()
-			if err == nil && tt.wantErr {
+			got, err := tt.talks.GetNextTalk()
+			if (err == nil && tt.wantErr) || (err != nil && !tt.wantErr) {
 				t.Errorf("Talk.GetTalkType() wantErr %v", tt.wantErr)
+				return
+			}
+			if err != nil {
+				return
+			}
+			if got.Id != int32(tt.wantId) {
+				t.Errorf("Talk.GetTalkType() wantId %v", tt.wantId)
+				return
 			}
 		})
 	}
@@ -490,18 +502,19 @@ func TestTalk_GetActualStartAtAndEndAt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			startAt, endAt, err := talk.GetActualStartAtAndEndAt(tt.conferenceDayDate, tt.startAt, tt.endAt)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
+			gotStartAt, gotEndAt, err := talk.GetActualStartAtAndEndAt(tt.conferenceDayDate, tt.startAt, tt.endAt)
+			if (err == nil && tt.wantErr) || (err != nil && !tt.wantErr) {
+				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if err != nil || startAt.Equal(tt.startAt) || endAt.Equal(tt.endAt) {
+			if err != nil {
+				return
+			}
+			if !gotStartAt.Equal(tt.wantStartAt) || !gotEndAt.Equal(tt.wantEndAt) {
 				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantStatAt = %v, wantEndAt = %v,", err, tt.wantStartAt, tt.wantEndAt)
 				return
 			}
+
 		})
 	}
 }

@@ -14,8 +14,7 @@ import (
 type Controller struct {
 	logger       logr.Logger
 	slackClients map[int32]slack.Client
-
-	channelIds map[int32]string
+	channelIds   map[int32]string
 }
 
 func NewController(logger logr.Logger,
