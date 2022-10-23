@@ -20,6 +20,6 @@ func RunCndOperationServer(addr string) error {
 }
 
 func RegisterCndOperationServer(registry prometheus.Registerer) {
-	const subsystem = "server"
-	registerDreamkast(registry, subsystem)
+	const namespace = "ecu"
+	registerDreamkast(registry, namespace)
 }

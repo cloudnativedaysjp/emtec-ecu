@@ -13,6 +13,7 @@ import (
 )
 
 type Client interface {
+	EndpointUrl() string
 	ListTracks(ctx context.Context) ([]model.Track, error)
 	SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error
 	SetNextTalkOnAir(ctx context.Context, trackId int32) error
@@ -21,6 +22,7 @@ type Client interface {
 type ClientImpl struct {
 	client lib.DreamkastClient
 
+	endpointUrl       string
 	eventAbbr         string
 	auth0Domain       string
 	auth0ClientId     string
@@ -36,10 +38,14 @@ func NewClient(eventAbbr, dkEndpointUrl string,
 		return nil, err
 	}
 	return &ClientImpl{
-		c, eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience,
+		c, dkEndpointUrl,
+		eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience,
 	}, nil
 }
 
+func (c *ClientImpl) EndpointUrl() string {
+	return c.endpointUrl
+}
 func (c *ClientImpl) ListTracks(ctx context.Context) ([]model.Track, error) {
 	logger := utils.GetLogger(ctx)
 

@@ -24,13 +24,11 @@ type OnAirTalk struct {
 	VideoFileData *string   `json:"video_file_data"`
 }
 
-type ListTalksResp []struct {
-	GetTalksResp `json:""`
-	ConferenceID int32 `json:"conference_id"`
-}
+type ListTalksResp []GetTalksResp
 
 type GetTalksResp struct {
 	ID                 int32       `json:"id"`
+	ConferenceID       int32       `json:"conference_id"`
 	TrackID            int32       `json:"trackID"`
 	VideoPlatform      interface{} `json:"videoPlatform"`
 	VideoID            string      `json:"videoID"`

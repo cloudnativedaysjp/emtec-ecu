@@ -44,7 +44,6 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
-	ctx = logr.NewContext(ctx, logger)
 
 	slackClients := make(map[int32]slack.Client)
 	channelIds := make(map[int32]string)
@@ -56,34 +55,36 @@ func Run(ctx context.Context, conf Config) error {
 	for _, target := range conf.Targets {
 		slackClients[target.TrackId], err = slack.NewClient(target.SlackBotToken)
 		if err != nil {
-			logger.Error(err, "slack.NewClient() was failed")
-			return xerrors.Errorf("message: %w", err)
+			msg := "slack.NewClient() was failed"
+			logger.Error(err, msg)
+			return xerrors.Errorf("%s: %w", msg, err)
 		}
 		channelIds[target.TrackId] = target.SlackChannelId
 	}
 
-	notifier := notifier{logger, slackClients, channelIds, *redisClient, conf.NotificationRecvChan}
-	if err := notifier.watch(ctx); err != nil {
+	notifier := notifier{slackClients, channelIds, *redisClient, conf.NotificationRecvChan}
+	if err := notifier.watch(ctx, logger); err != nil {
 		return err
 	}
 	return nil
 }
 
 type notifier struct {
-	logger               logr.Logger
 	slackClients         map[int32]slack.Client
 	channelIds           map[int32]string
 	db                   db.RedisClient
 	notificationRecvChan <-chan model.Notification
 }
 
-func (n *notifier) watch(ctx context.Context) error {
+func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 	for {
 		select {
 		case <-ctx.Done():
-			n.logger.Info("context was done.")
+			logger.Info("context was done.")
 			return nil
 		case notification := <-n.notificationRecvChan:
+			ctx := context.Background()
+
 			var trackId int32
 			var msg slackgo.Msg
 			switch m := notification.(type) {
@@ -94,20 +95,20 @@ func (n *notifier) watch(ctx context.Context) error {
 				trackId = m.TrackId()
 				msg = ViewSceneMovedToNext(m)
 			default:
-				n.logger.Error(fmt.Errorf(
+				logger.Error(fmt.Errorf(
 					"unknown Notification type: %v", reflect.TypeOf(m)), "unknown type")
 				continue
 			}
 			sc, ok := n.slackClients[trackId]
 			if !ok {
-				n.logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", trackId))
+				logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", trackId))
 				return nil
 			}
 			if err := sc.PostMessage(ctx, n.channelIds[trackId], msg); err != nil {
 				return xerrors.Errorf("message: %w", err)
 			}
 			if err := n.db.SetNextTalkNotification(ctx, int(notification.Next().Id)); err != nil {
-				n.logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
+				logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
 				return nil
 			}
 

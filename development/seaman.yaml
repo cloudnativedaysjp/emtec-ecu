@@ -4,7 +4,7 @@ slack:
   appToken: ${SLACK_APP_TOKEN}
 github:
   username: ShotaKitazawa
-  accessToken: ${GITHUB_ACCESS_TOKEN}
+  accessToken: dummy
 release:
   targets: []
 broadcast:
