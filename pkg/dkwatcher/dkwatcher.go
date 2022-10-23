@@ -98,6 +98,7 @@ func procedure(ctx context.Context,
 	}
 	for _, track := range tracks {
 		logger := rootLogger.WithValues("trackId", track.Id)
+
 		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
@@ -105,6 +106,12 @@ func procedure(ctx context.Context,
 			logger.Info("DisableAutomation was true, skipped")
 			continue
 		}
+
+		if err := mw.SetTrack(track); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
+			continue
+		}
+
 		nextTalk, err := track.Talks.GetNextTalk()
 		if err != nil {
 			logger.Info("nextTalk is none")
@@ -127,10 +134,6 @@ func procedure(ctx context.Context,
 		if err != nil {
 			logger.Info("currentTalk is none")
 			currentTalk = &model.Talk{}
-		}
-		if err := mw.SetTrack(track); err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
-			continue
 		}
 		notificationEventSendChan <- model.CurrentAndNextTalk{
 			Current: *currentTalk, Next: *nextTalk}
