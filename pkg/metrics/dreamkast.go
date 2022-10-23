@@ -15,11 +15,11 @@ var (
 	dreamkastRequestSummaryVec prometheus.SummaryVec
 )
 
-func registerDreamkast(registry prometheus.Registerer, subsystem string) {
+func registerDreamkast(registry prometheus.Registerer, namespace string) {
 	dreamkastRequestSummaryVec = *prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace: namespace,
-		Subsystem: subsystem,
-		Name:      "request",
+		Subsystem: "dreamkast",
+		Name:      "request_second_total",
 	}, []string{"endpointUrl", "kind"})
 }
 
@@ -47,17 +47,17 @@ func NewDreamkastMetricsDao(endpointUrl string) *DreamkastMetricsDao {
 
 func (dao DreamkastMetricsDao) ListTracks(d time.Duration) {
 	dreamkastRequestSummaryVec.
-		WithLabelValues(dao.endpointUrl, "listTracks").Observe(float64(d))
+		WithLabelValues(dao.endpointUrl, "listTracks").Observe(float64(d / time.Second))
 }
 
 func (dao DreamkastMetricsDao) ListTalks(d time.Duration) {
 	dreamkastRequestSummaryVec.
-		WithLabelValues(dao.endpointUrl, "listTalks").Observe(float64(d))
+		WithLabelValues(dao.endpointUrl, "listTalks").Observe(float64(d / time.Second))
 }
 
 func (dao DreamkastMetricsDao) UpdateTalk(d time.Duration) {
 	dreamkastRequestSummaryVec.
-		WithLabelValues(dao.endpointUrl, "updateTalk").Observe(float64(d))
+		WithLabelValues(dao.endpointUrl, "updateTalk").Observe(float64(d / time.Second))
 }
 
 //
@@ -74,7 +74,9 @@ func (DreamkastMetricsFake) UpdateTalk(time.Duration) {}
 // Utilities
 //
 
-var ctxKeyDreamkastMetrics = contextKey{}
+type contextKeyDreamkastMetrics struct{}
+
+var ctxKeyDreamkastMetrics = contextKeyDreamkastMetrics{}
 
 func SetDreamkastMetricsToCtx(ctx context.Context, m DreamkastMetricsIface) context.Context {
 	return context.WithValue(ctx, ctxKeyDreamkastMetrics, m)
