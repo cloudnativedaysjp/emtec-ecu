@@ -117,29 +117,32 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 			continue
 		}
 
+		currentTalk, err := track.Talks.GetCurrentTalk()
+		if err != nil {
+			// カンファレンス開始前の場合は処理を続けたいため return しない
+			logger.Info("currentTalk is none")
+			currentTalk = &model.Talk{}
+		}
 		nextTalk, err := track.Talks.GetNextTalk()
 		if err != nil {
 			logger.Info("nextTalk is none")
 			continue
 		}
+		notification := model.NewNotificationOnDkTimetable(
+			*currentTalk, *nextTalk)
+
 		if !track.Talks.IsStartNextTalkSoon(howManyMinutesUntilNotify) {
 			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
 			continue
 		}
-		if val, err := w.db.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
+		if notified, err := w.db.HasNextTalkNotificationAlreadyBeenSent(ctx, *notification); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
 			return err
-		} else if val != "" {
+		} else if notified {
 			logger.Info("nextTalkNotification already sent . trackNo:%s", track.Id)
 			continue
 		}
-		currentTalk, err := track.Talks.GetCurrentTalk()
-		if err != nil {
-			logger.Info("currentTalk is none")
-			currentTalk = &model.Talk{}
-		}
-		w.notificationSendChan <- model.NewNotificationOnDkTimetable(
-			*currentTalk, *nextTalk)
+		w.notificationSendChan <- notification
 		logger.Info("notified to Slack regarding next talk will begin")
 	}
 	return nil

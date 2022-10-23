@@ -84,6 +84,7 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			return nil
 		case notification := <-n.notificationRecvChan:
 			ctx := context.Background()
+			messageWasPosted := false
 
 			var trackId int32
 			var msg slackgo.Msg
@@ -91,6 +92,13 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			case *model.NotificationOnDkTimetable:
 				trackId = m.TrackId()
 				msg = ViewNextSessionWillBegin(m)
+				defer func() {
+					if messageWasPosted {
+						if err := n.db.SetNextTalkNotification(ctx, *m); err != nil {
+							logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
+						}
+					}
+				}()
 			case *model.NotificationSceneMovedToNext:
 				trackId = m.TrackId()
 				msg = ViewSceneMovedToNext(m)
@@ -107,11 +115,7 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			if err := sc.PostMessage(ctx, n.channelIds[trackId], msg); err != nil {
 				return xerrors.Errorf("message: %w", err)
 			}
-			if err := n.db.SetNextTalkNotification(ctx, int(notification.Next().Id)); err != nil {
-				logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
-				return nil
-			}
-
+			messageWasPosted = true
 		}
 	}
 }
