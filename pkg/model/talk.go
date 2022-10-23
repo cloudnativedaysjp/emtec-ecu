@@ -1,11 +1,8 @@
 package model
 
 import (
-	"context"
 	"fmt"
 	"time"
-
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/infra"
 )
 
 type TalkType int32
@@ -33,17 +30,6 @@ func (ts Talks) IsStartNextTalkSoon(untilNotify time.Duration) bool {
 		return false
 	}
 	return nextTalk.StartAt.Sub(now) <= untilNotify
-}
-
-func (ts Talks) HasNotify(ctx context.Context, rc *infra.RedisClient, untilNotify time.Duration) (bool, error) {
-	result := rc.Client.Get(ctx, infra.NextTalkNotificationKey)
-	if result.Err() != nil {
-		return false, result.Err()
-	}
-	if result != nil {
-		return false, nil
-	}
-	return true, nil
 }
 
 func (ts Talks) GetCurrentTalk() (*Talk, error) {

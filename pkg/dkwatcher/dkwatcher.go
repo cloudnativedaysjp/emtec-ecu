@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
+	infra "github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/infra"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
@@ -105,7 +105,6 @@ func procedure(ctx context.Context,
 			logger.Info("DisableAutomation was true, skipped")
 			continue
 		}
-
 		if err := mw.SetTrack(track); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
@@ -124,15 +123,17 @@ func procedure(ctx context.Context,
 			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
 			continue
 		}
-		hasNotify, err := track.Talks.HasNotify(ctx, redisClient, howManyMinutesUntilNotify)
+		val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id))
 		if err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "talks.HasNotify() was failed")
+			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
+			return err
+		}
+		if val != "" {
+			logger.Info("nextTalkNotification already sent . trackNo:%s", track.Id)
 			continue
 		}
-		if !hasNotify {
-			notificationEventSendChan <- model.CurrentAndNextTalk{
-				Current: *currentTalk, Next: *nextTalk}
-		}
+		notificationEventSendChan <- model.CurrentAndNextTalk{
+			Current: *currentTalk, Next: *nextTalk}
 	}
 	return nil
 }

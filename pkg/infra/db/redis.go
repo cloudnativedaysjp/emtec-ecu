@@ -1,7 +1,8 @@
-package infra
+package db
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -14,7 +15,7 @@ type RedisClient struct {
 
 const (
 	RedisExpiration                 = 10 * time.Minute
-	NextTalkNotificationKey         = "nextTalkNotificationAlreadySentFlag"
+	NextTalkNotificationKey         = "nextTalkNotificationAlreadySentFlag:"
 	NextTalkNotificationAlreadySent = true
 )
 
@@ -30,4 +31,12 @@ func NewRedisClient(addr string) (*RedisClient, error) {
 	return &RedisClient{
 		Client: client,
 	}, nil
+}
+
+func (rc *RedisClient) SetNextTalkNotification(ctx context.Context, id int) error {
+	return rc.Client.Set(ctx, NextTalkNotificationKey, NextTalkNotificationAlreadySent, RedisExpiration).Err()
+}
+
+func (rc *RedisClient) GetNextTalkNotification(ctx context.Context, id int) (string, error) {
+	return rc.Client.Get(ctx, NextTalkNotificationKey+strconv.Itoa(int(id))).Result()
 }
