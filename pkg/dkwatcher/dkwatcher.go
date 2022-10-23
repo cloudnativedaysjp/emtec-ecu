@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
-	infra "github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
@@ -58,7 +58,7 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 
-	redisClient, err := infra.NewRedisClient(conf.RedisHost)
+	redisClient, err := db.NewRedisClient(conf.RedisHost)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func Run(ctx context.Context, conf Config) error {
 
 func procedure(ctx context.Context,
 	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *infra.RedisClient,
+	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *db.RedisClient,
 ) error {
 	rootLogger := utils.GetLogger(ctx)
 
@@ -98,6 +98,7 @@ func procedure(ctx context.Context,
 	}
 	for _, track := range tracks {
 		logger := rootLogger.WithValues("trackId", track.Id)
+
 		if disabled, err := mr.DisableAutomation(track.Id); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
 			return nil
@@ -105,10 +106,12 @@ func procedure(ctx context.Context,
 			logger.Info("DisableAutomation was true, skipped")
 			continue
 		}
+
 		if err := mw.SetTrack(track); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")
 			continue
 		}
+
 		nextTalk, err := track.Talks.GetNextTalk()
 		if err != nil {
 			logger.Info("nextTalk is none")
