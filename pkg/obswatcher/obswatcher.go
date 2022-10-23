@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
@@ -24,8 +22,7 @@ const (
 )
 
 type Config struct {
-	Development          bool
-	Debug                bool
+	Logger               logr.Logger
 	Obs                  []ConfigObs
 	NotificationSendChan chan<- model.Notification
 }
@@ -37,22 +34,13 @@ type ConfigObs struct {
 }
 
 func Run(ctx context.Context, conf Config) error {
-	// setup logger
-	zapConf := zap.NewProductionConfig()
-	if conf.Development {
-		zapConf = zap.NewDevelopmentConfig()
-	}
-	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
-	zapLogger, err := zapConf.Build()
-	if err != nil {
-		return err
-	}
-	logger := zapr.NewLogger(zapLogger).WithName(componentName)
+	logger := conf.Logger.WithName(componentName)
 
 	mr := &sharedmem.Reader{
 		UseStorageForDisableAutomation: true, UseStorageForTrack: true}
 
 	eg, ctx := errgroup.WithContext(ctx)
+	// TODO(#57): move to cmd/server/main.go
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
 		if err != nil {

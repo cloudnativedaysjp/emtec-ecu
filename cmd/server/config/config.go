@@ -39,7 +39,7 @@ type Config struct {
 	WsProxy   WsProxyConfig   `json:"wsProxy" validate:"required"`
 	Metrics   MetricsConfig   `json:"metrics"`
 	Dreamkast DreamkastConfig `json:"dreamkast" validate:"required"`
-	Redis     RedisConfig     `json:"redis " validate:"required"`
+	Redis     RedisConfig     `json:"redis" validate:"required"`
 	Tracks    []TrackConfig   `json:"tracks" validate:"required"`
 }
 

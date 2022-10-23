@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"github.com/go-logr/zapr"
+	"github.com/go-logr/logr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
@@ -22,7 +22,8 @@ const componentName = "ws-proxy"
 
 type Config struct {
 	Development bool
-	Debug       bool
+	Logger      logr.Logger
+	ZapLogger   *zap.Logger
 	BindAddr    string
 	Obs         []ConfigObs
 }
@@ -34,19 +35,9 @@ type ConfigObs struct {
 }
 
 func Run(ctx context.Context, conf Config) error {
-	// setup logger
-	zapConf := zap.NewProductionConfig()
-	if conf.Development {
-		zapConf = zap.NewDevelopmentConfig()
-	}
+	logger := conf.Logger.WithName(componentName)
 
-	zapConf.DisableStacktrace = true // due to output wrapped error in errorVerbose
-	zapLogger, err := zapConf.Build()
-	if err != nil {
-		return err
-	}
-	logger := zapr.NewLogger(zapLogger).WithName(componentName)
-
+	// TODO(#57): move to cmd/server/main.go
 	obswsClientMap := make(map[int32]obsws.Client)
 	for _, obs := range conf.Obs {
 		obswsClient, err := obsws.NewObsWebSocketClient(obs.Host, obs.Password)
@@ -70,7 +61,7 @@ func Run(ctx context.Context, conf Config) error {
 	s := grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
-			grpc_zap.UnaryServerInterceptor(zapLogger.Named(componentName)),
+			grpc_zap.UnaryServerInterceptor(conf.ZapLogger.Named(componentName)),
 		),
 	)
 	pb.RegisterSceneServiceServer(s, controller)
