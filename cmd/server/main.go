@@ -34,7 +34,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	eg, ctx := errgroup.WithContext(ctx)
-	talkStream := make(chan model.CurrentAndNextTalk, 16)
+	notificationStream := make(chan model.Notification, 16)
 
 	// metrics
 	go func() {
@@ -53,9 +53,10 @@ func main() {
 				})
 			}
 			return obswatcher.Run(ctx, obswatcher.Config{
-				Development: conf.Debug.Development,
-				Debug:       conf.Debug.Debug,
-				Obs:         configObs,
+				Development:          conf.Debug.Development,
+				Debug:                conf.Debug.Debug,
+				Obs:                  configObs,
+				NotificationSendChan: notificationStream,
 			})
 		})
 	}
@@ -63,16 +64,16 @@ func main() {
 	if !conf.Debug.DisableDkWatcher {
 		eg.Go(func() error {
 			return dkwatcher.Run(ctx, dkwatcher.Config{
-				Development:               conf.Debug.Development,
-				Debug:                     conf.Debug.Debug,
-				EventAbbr:                 conf.Dreamkast.EventAbbr,
-				DkEndpointUrl:             conf.Dreamkast.EndpointUrl,
-				Auth0Domain:               conf.Dreamkast.Auth0Domain,
-				Auth0ClientId:             conf.Dreamkast.Auth0ClientId,
-				Auth0ClientSecret:         conf.Dreamkast.Auth0ClientSecret,
-				Auth0ClientAudience:       conf.Dreamkast.Auth0ClientAudience,
-				RedisHost:                 conf.Redis.Host,
-				NotificationEventSendChan: talkStream,
+				Development:          conf.Debug.Development,
+				Debug:                conf.Debug.Debug,
+				EventAbbr:            conf.Dreamkast.EventAbbr,
+				DkEndpointUrl:        conf.Dreamkast.EndpointUrl,
+				Auth0Domain:          conf.Dreamkast.Auth0Domain,
+				Auth0ClientId:        conf.Dreamkast.Auth0ClientId,
+				Auth0ClientSecret:    conf.Dreamkast.Auth0ClientSecret,
+				Auth0ClientAudience:  conf.Dreamkast.Auth0ClientAudience,
+				RedisHost:            conf.Redis.Host,
+				NotificationSendChan: notificationStream,
 			})
 		})
 	}
@@ -88,11 +89,11 @@ func main() {
 		}
 		eg.Go(func() error {
 			return notifier.Run(ctx, notifier.Config{
-				Development:                  conf.Debug.Development,
-				Debug:                        conf.Debug.Debug,
-				RedisHost:                    conf.Redis.Host,
-				Targets:                      targets,
-				NotificationEventReceiveChan: talkStream,
+				Development:          conf.Debug.Development,
+				Debug:                conf.Debug.Debug,
+				Targets:              targets,
+				RedisHost:            conf.Redis.Host,
+				NotificationRecvChan: notificationStream,
 			})
 		})
 	}

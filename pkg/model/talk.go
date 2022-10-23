@@ -141,26 +141,3 @@ func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkTyp
 func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
 	return t.convertTalkType(title, presentationMethod)
 }
-
-//
-// CurrentAndNextTalk
-//
-
-type CurrentAndNextTalk struct {
-	Current Talk
-	Next    Talk
-}
-
-func (m CurrentAndNextTalk) TrackId() int32 {
-	if m.Current.TrackId != 0 {
-		return m.Current.TrackId
-	}
-	return m.Next.TrackId
-}
-
-func (m CurrentAndNextTalk) TrackName() string {
-	if m.Current.TrackName != "" {
-		return m.Current.TrackName
-	}
-	return m.Next.TrackName
-}
