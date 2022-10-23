@@ -14,6 +14,7 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/dkwatcher"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/notifier"
@@ -81,6 +82,21 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	//
+	// Initialize
+	//
+	mw := sharedmem.Writer{UseStorageForDisableAutomation: true}
+	for _, track := range conf.Tracks {
+		if err := mw.SetDisableAutomation(track.DkTrackId, false); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	//
+	// Run components
+	//
 
 	// obswatcher
 	if !conf.Debug.DisableObsWatcher {
