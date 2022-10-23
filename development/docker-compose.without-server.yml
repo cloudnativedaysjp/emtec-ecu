@@ -10,7 +10,6 @@ services:
       BROADCAST_ENDPOINT_URL: localhost:20080
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
-      GITHUB_ACCESS_TOKEN: ${GITHUB_ACCESS_TOKEN}
 
   dk-mock-server:
     image: thiht/smocker
