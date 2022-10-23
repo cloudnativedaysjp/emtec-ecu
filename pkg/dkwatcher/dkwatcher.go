@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 
-	infra "github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
+	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
@@ -58,7 +58,7 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 
-	redisClient, err := infra.NewRedisClient(conf.RedisHost)
+	redisClient, err := db.NewRedisClient(conf.RedisHost)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func Run(ctx context.Context, conf Config) error {
 
 func procedure(ctx context.Context,
 	dkClient dreamkast.Client, mw sharedmem.WriterIface, mr sharedmem.ReaderIface,
-	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *infra.RedisClient,
+	notificationEventSendChan chan<- model.CurrentAndNextTalk, redisClient *db.RedisClient,
 ) error {
 	rootLogger := utils.GetLogger(ctx)
 
@@ -121,12 +121,10 @@ func procedure(ctx context.Context,
 			logger.Info("nextTalk is not start soon. trackNo:%s", track.Id)
 			continue
 		}
-		val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id))
-		if err != nil {
+		if val, err := redisClient.GetNextTalkNotification(ctx, int(nextTalk.Id)); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
 			return err
-		}
-		if val != "" {
+		} else if val != "" {
 			logger.Info("nextTalkNotification already sent . trackNo:%s", track.Id)
 			continue
 		}
