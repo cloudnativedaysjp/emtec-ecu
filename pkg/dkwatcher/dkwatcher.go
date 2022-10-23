@@ -49,8 +49,6 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
-	ctx = logr.NewContext(ctx, logger)
-	ctx = metrics.SetDreamkastMetricsToCtx(ctx, metrics.NewDreamkastMetricsDao(conf.DkEndpointUrl))
 
 	dkClient, err := dreamkast.NewClient(conf.EventAbbr, conf.DkEndpointUrl,
 		conf.Auth0Domain, conf.Auth0ClientId, conf.Auth0ClientSecret, conf.Auth0ClientAudience)
@@ -66,15 +64,14 @@ func Run(ctx context.Context, conf Config) error {
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
-	dkwatcher := dkwatcher{logger, dkClient, mw, mr, *redisClient, conf.NotificationSendChan}
-	if err := dkwatcher.watch(ctx); err != nil {
+	dkwatcher := dkwatcher{dkClient, mw, mr, *redisClient, conf.NotificationSendChan}
+	if err := dkwatcher.watch(ctx, logger); err != nil {
 		return err
 	}
 	return nil
 }
 
 type dkwatcher struct {
-	logger               logr.Logger
 	dkClient             dreamkast.Client
 	mw                   sharedmem.WriterIface
 	mr                   sharedmem.ReaderIface
@@ -82,7 +79,7 @@ type dkwatcher struct {
 	notificationSendChan chan<- model.Notification
 }
 
-func (w *dkwatcher) watch(ctx context.Context) error {
+func (w *dkwatcher) watch(ctx context.Context, logger logr.Logger) error {
 	tick := time.NewTicker(syncPeriod)
 	if err := w.procedure(ctx); err != nil {
 		return err
@@ -90,9 +87,13 @@ func (w *dkwatcher) watch(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			w.logger.Info("context was done.")
+			logger.Info("context was done.")
 			return nil
 		case <-tick.C:
+			ctx := context.Background()
+			ctx = logr.NewContext(ctx, logger)
+			ctx = metrics.SetDreamkastMetricsToCtx(ctx,
+				metrics.NewDreamkastMetricsDao(w.dkClient.EndpointUrl()))
 			if err := w.procedure(ctx); err != nil {
 				return err
 			}
@@ -110,14 +111,6 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 	}
 	for _, track := range tracks {
 		logger := rootLogger.WithValues("trackId", track.Id)
-
-		if disabled, err := w.mr.DisableAutomation(track.Id); err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
-			return nil
-		} else if disabled {
-			logger.Info("DisableAutomation was true, skipped")
-			continue
-		}
 
 		if err := w.mw.SetTrack(track); err != nil {
 			logger.Error(xerrors.Errorf("message: %w", err), "mw.SetTrack was failed")

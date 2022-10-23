@@ -114,8 +114,14 @@ func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt 
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
-	return cDate.Add(time.Duration(startAt.Hour()*int(time.Hour) + startAt.Minute()*int(time.Minute) + startAt.Second()*int(time.Second))),
-		cDate.Add(time.Duration(endAt.Hour()*int(time.Hour) + endAt.Minute()*int(time.Minute) + endAt.Second()*int(time.Second))),
+	return time.Date(
+			cDate.Year(), cDate.Month(), cDate.Day(),
+			startAt.Hour(), startAt.Minute(), startAt.Second(), startAt.Nanosecond(), startAt.Location(),
+		),
+		time.Date(
+			cDate.Year(), cDate.Month(), cDate.Day(),
+			endAt.Hour(), endAt.Minute(), endAt.Second(), endAt.Nanosecond(), endAt.Location(),
+		),
 		nil
 }
 

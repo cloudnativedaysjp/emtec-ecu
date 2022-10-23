@@ -48,7 +48,6 @@ func Run(ctx context.Context, conf Config) error {
 		return err
 	}
 	logger := zapr.NewLogger(zapLogger).WithName(componentName)
-	ctx = logr.NewContext(ctx, logger)
 
 	mr := &sharedmem.Reader{
 		UseStorageForDisableAutomation: true, UseStorageForTrack: true}
@@ -62,7 +61,7 @@ func Run(ctx context.Context, conf Config) error {
 			return err
 		}
 		obswatcher := obswatcher{obswsClient, mr, conf.NotificationSendChan}
-		eg.Go(obswatcher.watch(ctx, obs.DkTrackId))
+		eg.Go(obswatcher.watch(ctx, logger, obs.DkTrackId))
 	}
 	if err := eg.Wait(); err != nil {
 		err := xerrors.Errorf("message: %w", err)
@@ -78,9 +77,9 @@ type obswatcher struct {
 	notificationSendChan chan<- model.Notification
 }
 
-func (w *obswatcher) watch(ctx context.Context, trackId int32) func() error {
+func (w *obswatcher) watch(ctx context.Context, logger logr.Logger, trackId int32) func() error {
 	return func() error {
-		logger := utils.GetLogger(ctx).WithValues("trackId", trackId)
+		logger := logger.WithValues("trackId", trackId)
 
 		tick := time.NewTicker(syncPeriod)
 		if err := w.procedure(ctx, trackId); err != nil {
@@ -92,6 +91,8 @@ func (w *obswatcher) watch(ctx context.Context, trackId int32) func() error {
 				logger.Info("context was done.")
 				return nil
 			case <-tick.C:
+				ctx := context.Background()
+				ctx = logr.NewContext(ctx, logger)
 				if err := w.procedure(ctx, trackId); err != nil {
 					return xerrors.Errorf("message: %w", err)
 				}
@@ -113,7 +114,8 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 
 	track, err := w.mr.Track(trackId)
 	if err != nil {
-		return xerrors.Errorf("message: %w", err)
+		logger.Info(err.Error(), "trackId", trackId)
+		return nil
 	}
 	currentTalk, err := track.Talks.GetCurrentTalk()
 	if err != nil {
