@@ -12,4 +12,4 @@ tracks:
       botToken: ${SLACK_BOT_TOKEN}
       channelId: ${SWITCHER01_SLACK_CHANNEL_ID}
 redis:
-  host: localhost:6379
+  host: ${REDIS_HOST}
