@@ -15,7 +15,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/labstack/echo/v4 v4.9.1
-	github.com/prometheus/client_golang v1.13.0
+	github.com/prometheus/client_golang v1.13.1
 	github.com/slack-go/slack v0.11.3
 	github.com/spf13/cobra v1.6.1
 	go.uber.org/zap v1.23.0
