@@ -83,7 +83,7 @@ func (c *ClientImpl) ListTracks(ctx context.Context) ([]model.Track, error) {
 			if err != nil {
 				return nil, xerrors.Errorf("message: %w", err)
 			}
-			talksModel = append(talksModel, t)
+			talksModel = talksModel.AppendAndSort(t)
 		}
 		result = append(result, model.Track{
 			Id:    track.ID,

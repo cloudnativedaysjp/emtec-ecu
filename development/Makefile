@@ -13,10 +13,15 @@ rebuild:
 	docker compose build --no-cache
 
 dk-mock-server.yaml: dk-mock-server-base.yaml
-	sed -e "s/DATE/$(shell date "+%Y-%m-%d/")" \
-		-e "s/TIME1/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "1 minute")+09:00"/" \
-		-e "s/TIME2/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "3 minute")+09:00"/" \
-		-e "s/TIME3/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "5 minute")+09:00"/" \
-		-e "s/TIME4/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "7 minute")+09:00"/" \
+	sed -e "s/__DATE__/$(shell date "+%Y-%m-%d/")" \
+		-e "s/__TIME0__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "1 minute")+09:00"/" \
+		-e "s/__TIME1__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "2 minute")+09:00"/" \
+		-e "s/__TIME2__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "4 minute")+09:00"/" \
+		-e "s/__TIME3__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "6 minute")+09:00"/" \
+		-e "s/__TIME4__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "8 minute")+09:00"/" \
+		-e "s/__TIME5__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "10 minute")+09:00"/" \
+		-e "s/__TIME6__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "12 minute")+09:00"/" \
+		-e "s/__TIME7__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "14 minute")+09:00"/" \
+		-e "s/__TIME8__/"2000-01-01T$(shell date "+%H:%M:%S.%3N" -d "16 minute")+09:00"/" \
 		dk-mock-server-base.yaml > dk-mock-server.yaml
 

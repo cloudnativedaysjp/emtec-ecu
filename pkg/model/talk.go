@@ -2,14 +2,17 @@ package model
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
 type TalkType int32
 
 const (
-	TalkType_OnlineSession TalkType = iota + 1
+	TalkType_Unknown TalkType = iota
+	TalkType_OnlineSession
 	TalkType_RecordingSession
+	TalkType_PreOpen
 	TalkType_Opening
 	TalkType_Ending
 	TalkType_Commercial
@@ -22,6 +25,12 @@ const (
 //
 
 type Talks []Talk
+
+func (ts Talks) AppendAndSort(talk Talk) Talks {
+	ts = append(ts, talk)
+	sort.SliceStable(ts, func(i, j int) bool { return ts[i].StartAt.Unix() < ts[j].StartAt.Unix() })
+	return ts
+}
 
 func (ts Talks) IsStartNextTalkSoon(untilNotify time.Duration) bool {
 	now := nowFunc()
@@ -129,19 +138,24 @@ func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkTyp
 	switch {
 	case presentationMethod == nil:
 		switch title {
+		case "開始までお待ちください":
+			return TalkType_PreOpen, nil
 		case "Opening":
 			return TalkType_Opening, nil
 		case "休憩":
 			return TalkType_Commercial, nil
 		case "Closing":
 			return TalkType_Ending, nil
+		default:
+			return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: nil", title)
 		}
 	case *presentationMethod == "オンライン登壇":
 		return TalkType_OnlineSession, nil
 	case *presentationMethod == "事前収録":
 		return TalkType_RecordingSession, nil
+	default:
+		return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
 	}
-	return 0, fmt.Errorf("model.convertTalkType not found. title: %s, presentationMethod: %s", title, *presentationMethod)
 }
 
 func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
