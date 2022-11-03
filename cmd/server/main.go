@@ -124,7 +124,6 @@ func main() {
 			return dkwatcher.Run(ctx, dkwatcher.Config{
 				Logger:                           logger,
 				DkClient:                         dkClient,
-				RedisClient:                      redisClient,
 				NotificationSendChan:             notificationStream,
 				SyncPeriodSeconds:                conf.Watcher.DkWatcher.SyncPeriodSeconds,
 				HowManyMinutesBeforeNotification: conf.Watcher.DkWatcher.HowManyMinutesBeforeNotification,

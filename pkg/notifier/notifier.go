@@ -83,6 +83,21 @@ func (n *notifier) notify(logger logr.Logger, notification model.Notification) e
 	var msg slackgo.Msg
 	switch m := notification.(type) {
 	case *model.NotificationOnDkTimetable:
+		//
+		// Check message has already been sent
+		//
+		if notified, err := n.db.HasNextTalkNotificationAlreadyBeenSent(ctx, *m); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
+			return nil
+		} else if notified {
+			logger.Info("nextTalkNotification already sent")
+			return nil
+		}
+		logger.Info("notified to Slack regarding next talk will begin")
+
+		//
+		// Create view of message
+		//
 		trackId = m.TrackId()
 		msg = ViewNextSessionWillBegin(m)
 		defer func() {
@@ -92,13 +107,22 @@ func (n *notifier) notify(logger logr.Logger, notification model.Notification) e
 				}
 			}
 		}()
+
 	case *model.NotificationSceneMovedToNext:
+		//
+		// Create view of message
+		//
 		trackId = m.TrackId()
 		msg = ViewSceneMovedToNext(m)
+
 	default:
 		logger.Error(fmt.Errorf(
 			"unknown Notification type: %v", reflect.TypeOf(m)), "unknown type")
 	}
+
+	//
+	// Send message to Slack
+	//
 	sc, ok := n.slackClients[trackId]
 	if !ok {
 		logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", trackId))

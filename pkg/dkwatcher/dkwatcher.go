@@ -7,7 +7,6 @@ import (
 	"github.com/go-logr/logr"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
@@ -20,7 +19,6 @@ const componentName = "dkwatcher"
 type Config struct {
 	Logger                           logr.Logger
 	DkClient                         dreamkast.Client
-	RedisClient                      *db.RedisClient
 	NotificationSendChan             chan<- model.Notification
 	SyncPeriodSeconds                int
 	HowManyMinutesBeforeNotification int
@@ -31,7 +29,7 @@ func Run(ctx context.Context, conf Config) error {
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
-	dkwatcher := dkwatcher{conf.DkClient, conf.RedisClient, mw, mr,
+	dkwatcher := dkwatcher{conf.DkClient, mw, mr,
 		conf.NotificationSendChan, time.Minute * time.Duration(conf.HowManyMinutesBeforeNotification)}
 	if err := dkwatcher.watch(ctx, logger, time.NewTicker(
 		time.Second*time.Duration(conf.SyncPeriodSeconds)),
@@ -43,7 +41,6 @@ func Run(ctx context.Context, conf Config) error {
 
 type dkwatcher struct {
 	dkClient             dreamkast.Client
-	db                   *db.RedisClient
 	mw                   sharedmem.WriterIface
 	mr                   sharedmem.ReaderIface
 	notificationSendChan chan<- model.Notification
@@ -106,15 +103,7 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 			logger.Info("nextTalk is not start soon")
 			continue
 		}
-		if notified, err := w.db.HasNextTalkNotificationAlreadyBeenSent(ctx, *notification); err != nil {
-			logger.Error(xerrors.Errorf("message: %w", err), "db.GetNextTalkNotification() was failed")
-			return err
-		} else if notified {
-			logger.Info("nextTalkNotification already sent")
-			continue
-		}
 		w.notificationSendChan <- notification
-		logger.Info("notified to Slack regarding next talk will begin")
 	}
 	return nil
 }
