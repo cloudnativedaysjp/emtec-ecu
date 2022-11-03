@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
+	pb "github.com/cloudnativedaysjp/emtec-ecu/pkg/ws-proxy/schema"
 )
 
 // trackCmd represents the track command
 var trackCmd = &cobra.Command{
 	Use:   "track",
-	Short: "about OBS Studios which cnd-operation-server connects to",
+	Short: "about OBS Studios which emtec-ecu connects to",
 }
 
 // trackListCmd represents the "track list" command

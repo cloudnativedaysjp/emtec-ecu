@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 	redis "github.com/go-redis/redis/v8"
 	"golang.org/x/xerrors"
 )

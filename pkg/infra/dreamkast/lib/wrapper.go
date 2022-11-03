@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/metrics"
 	"golang.org/x/xerrors"
 )
 

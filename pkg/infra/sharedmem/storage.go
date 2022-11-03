@@ -3,7 +3,7 @@ package sharedmem
 import (
 	"sync"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 )
 
 // key is TrackId

@@ -9,9 +9,9 @@ import (
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/sharedmem"
+	pb "github.com/cloudnativedaysjp/emtec-ecu/pkg/ws-proxy/schema"
 )
 
 type Controller struct {

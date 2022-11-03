@@ -1,4 +1,4 @@
-module github.com/cloudnativedaysjp/cnd-operation-server
+module github.com/cloudnativedaysjp/emtec-ecu
 
 go 1.19
 

@@ -1,6 +1,6 @@
 package sharedmem
 
-import "github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+import "github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 
 var _ DebuggerIface = (*Debugger)(nil)
 

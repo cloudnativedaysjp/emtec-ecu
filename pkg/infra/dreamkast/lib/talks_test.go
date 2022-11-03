@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/testutils"
 	"github.com/k0kubun/pp"
 )
 

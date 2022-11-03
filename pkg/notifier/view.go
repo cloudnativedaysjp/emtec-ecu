@@ -9,7 +9,7 @@ import (
 
 	seaman_api "github.com/cloudnativedaysjp/seaman/seaman/api"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 )
 
 func ViewNextSessionWillBegin(m *model.NotificationOnDkTimetable) slack.Msg {

@@ -7,11 +7,11 @@ import (
 	"github.com/go-logr/logr"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/metrics"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/dreamkast"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/sharedmem"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/metrics"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/utils"
 )
 
 const componentName = "dkwatcher"

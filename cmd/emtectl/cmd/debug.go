@@ -13,7 +13,7 @@ import (
 // debugCmd represents the track command
 var debugCmd = &cobra.Command{
 	Use:   "debug",
-	Short: "debug for cnd-operation-server",
+	Short: "debug for emtec-ecu",
 }
 
 // debugListLocalmemCmd represents the "track list" command
