@@ -8,8 +8,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/obsws"
+	pb "github.com/cloudnativedaysjp/emtec-ecu/pkg/ws-proxy/schema"
 )
 
 // sceneCmd represents the "scene" command
@@ -51,7 +51,7 @@ var sceneListCmd = &cobra.Command{
 			}
 		} else {
 			//
-			// via cnd-operation-server
+			// via emtec-ecu
 			//
 			if err := createClient(cndOperationServerAddress); err != nil {
 				logger.Error(err, "createClient was failed")
@@ -101,7 +101,7 @@ var sceneNextCmd = &cobra.Command{
 			}
 		} else {
 			//
-			// via cnd-operation-server
+			// via emtec-ecu
 			//
 			if err := createClient(cndOperationServerAddress); err != nil {
 				logger.Error(err, "createClient was failed")

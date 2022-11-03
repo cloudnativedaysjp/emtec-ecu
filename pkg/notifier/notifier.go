@@ -9,9 +9,9 @@ import (
 	slackgo "github.com/slack-go/slack"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/db"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/slack"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/db"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/slack"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 )
 
 const componentName = "notifier"

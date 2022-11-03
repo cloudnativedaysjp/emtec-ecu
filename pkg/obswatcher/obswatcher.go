@@ -9,10 +9,10 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/sharedmem"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/utils"
 )
 
 const componentName = "obswatcher"

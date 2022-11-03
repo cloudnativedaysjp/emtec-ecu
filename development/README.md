@@ -16,7 +16,7 @@ TBW
 
 ## 検証環境の起動
 
-Docker Compose を用い、cnd-operation-server, seaman (SlackBot), dk-mock-server (Dreamkast API の Mock Server) を立ち上げます。
+Docker Compose を用い、emtec-ecu, seaman (SlackBot), dk-mock-server (Dreamkast API の Mock Server) を立ち上げます。
 
 * `.env` ファイルの作成
 

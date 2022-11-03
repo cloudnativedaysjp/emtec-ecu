@@ -13,9 +13,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/sharedmem"
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/obsws"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/sharedmem"
+	pb "github.com/cloudnativedaysjp/emtec-ecu/pkg/ws-proxy/schema"
 )
 
 const componentName = "ws-proxy"

@@ -1,14 +1,14 @@
 version: "3.8"
 services:
-  cnd-operation-server:
+  emtec-ecu:
     build:
       context: ..
       dockerfile: cmd/server/Dockerfile
-    command: --config=/mnt/cnd-operation-server.yaml
+    command: --config=/mnt/emtec-ecu.yaml
     ports:
       - 20080:20080
     volumes:
-      - ./cnd-operation-server.yaml:/mnt/cnd-operation-server.yaml
+      - ./emtec-ecu.yaml:/mnt/emtec-ecu.yaml
     environment:
       DK_ENDPOINT_URL: http://dk-mock-server:8080/api
       SWITCHER01_HOST: ${SWITCHER01_HOST}
@@ -28,7 +28,7 @@ services:
     volumes:
       - ./seaman.yaml:/mnt/seaman.yaml
     environment:
-      BROADCAST_ENDPOINT_URL: cnd-operation-server:20080
+      BROADCAST_ENDPOINT_URL: emtec-ecu:20080
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
 

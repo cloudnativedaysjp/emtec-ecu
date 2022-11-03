@@ -3,7 +3,7 @@ package sharedmem
 import (
 	"fmt"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 )
 
 var _ ReaderIface = (*Reader)(nil)

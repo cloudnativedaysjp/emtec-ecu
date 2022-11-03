@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/utils"
 )
 
 type DreamkastClient interface {

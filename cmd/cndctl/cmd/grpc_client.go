@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/cloudnativedaysjp/cnd-operation-server/pkg/ws-proxy/schema"
+	pb "github.com/cloudnativedaysjp/emtec-ecu/pkg/ws-proxy/schema"
 )
 
 var (

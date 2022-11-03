@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/testutils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/testutils"
 )
 
 const (

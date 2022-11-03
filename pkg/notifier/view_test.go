@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
 )
 
 func Test_viewNextSessionWillBegin(t *testing.T) {

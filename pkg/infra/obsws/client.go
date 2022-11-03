@@ -9,8 +9,8 @@ import (
 	"github.com/andreykaipov/goobs/api/requests/scenes"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/obsws/lib"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/obsws/lib"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/utils"
 )
 
 type Client interface {

@@ -7,9 +7,9 @@ import (
 	"github.com/avast/retry-go"
 	"golang.org/x/xerrors"
 
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/infra/dreamkast/lib"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/model"
-	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/dreamkast/lib"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/utils"
 )
 
 type Client interface {
