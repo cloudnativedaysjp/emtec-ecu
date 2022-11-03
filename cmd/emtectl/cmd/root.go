@@ -8,7 +8,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cndctl",
+	Use:   "emtectl",
 	Short: "CLI tool for control OBS using WebSocket",
 }
 
