@@ -118,6 +118,10 @@ func (t Talk) IsOnDemand() bool {
 	return t.Type == TalkType_OnlineSession || t.Type == TalkType_Opening || t.Type == TalkType_Ending
 }
 
+func (t Talk) IsRepeatedConent() bool {
+	return t.Type == TalkType_Commercial
+}
+
 func (t Talk) GetActualStartAtAndEndAt(conferenceDayDate string, startAt, endAt time.Time) (time.Time, time.Time, error) {
 	cDate, err := time.Parse(dateLayout, conferenceDayDate)
 	if err != nil {
@@ -160,4 +164,9 @@ func (t Talk) convertTalkType(title string, presentationMethod *string) (TalkTyp
 
 func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, error) {
 	return t.convertTalkType(title, presentationMethod)
+}
+
+func (t Talk) RemainingDurationUntilStart() time.Duration {
+	now := nowFunc()
+	return t.StartAt.Sub(now)
 }
