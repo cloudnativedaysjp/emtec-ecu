@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ["server", "cndctl"]
+        app: ["server", "emtectl"]
     steps:
       - uses: actions/checkout@v3
 
@@ -33,7 +33,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: public.ecr.aws/f5j9d0q5/cnd-operation-server/${{ matrix.app }}
+          images: public.ecr.aws/f5j9d0q5/emtec-ecu/${{ matrix.app }}
           tags: |
             type=sha,prefix=,format=long
             type=ref,event=branch
