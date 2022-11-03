@@ -7,10 +7,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func RunCndOperationServer(addr string) error {
+func RunForServer(addr string) error {
 	m := echo.New()
 	reg := prometheus.NewRegistry()
-	RegisterCndOperationServer(reg)
+	RegisterForServer(reg)
 	m.GET("/metrics",
 		echo.WrapHandler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{})))
 	if err := m.Start(addr); err != nil {
@@ -19,7 +19,7 @@ func RunCndOperationServer(addr string) error {
 	return nil
 }
 
-func RegisterCndOperationServer(registry prometheus.Registerer) {
+func RegisterForServer(registry prometheus.Registerer) {
 	const namespace = "ecu"
 	registerDreamkast(registry, namespace)
 }

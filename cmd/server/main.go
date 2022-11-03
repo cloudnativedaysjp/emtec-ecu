@@ -56,7 +56,7 @@ func main() {
 
 	// metrics
 	go func() {
-		_ = metrics.RunCndOperationServer(conf.Metrics.BindAddr)
+		_ = metrics.RunForServer(conf.Metrics.BindAddr)
 	}()
 
 	// channels
