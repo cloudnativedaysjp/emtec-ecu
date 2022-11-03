@@ -119,24 +119,40 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 		return nil
 	}
 
-	t, err := w.obswsClient.GetRemainingTimeOnCurrentScene(ctx)
-	if err != nil {
-		logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
+	// currentTalk と nextTalk のどちらかがオンデマンドなセッションの場合、obswatcher からは何もする必要が無いため return する
+	if currentTalk.IsOnDemand() || nextTalk.IsOnDemand() {
 		return nil
 	}
-	remainingMilliSecond := t.DurationMilliSecond - t.CursorMilliSecond
+
+	var remainingMilliSecond float64
+	if currentTalk.IsRepeatedConent() {
+
+		// currentTalk が繰り返し流れるコンテンツ (cf. CM) の場合、タイムテーブルをもとに待ち時間を計算する
+		remainingMilliSecond = float64(nextTalk.RemainingDurationUntilStart().Milliseconds())
+
+	} else {
+
+		// currentTalk が recording session の場合、動画の残り時間を取得してその時間だけ待つ
+		t, err := w.obswsClient.GetRemainingTimeOnCurrentScene(ctx)
+		if err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "obswsClient.GetRemainingTimeOnCurrentScene() was failed")
+			return nil
+		}
+		remainingMilliSecond = t.DurationMilliSecond - t.CursorMilliSecond
+		logger = logger.WithValues(
+			"duration", t.DurationMilliSecond/float64(time.Millisecond),
+			"cursor", t.CursorMilliSecond/float64(time.Millisecond),
+		)
+
+	}
 
 	if float64(w.StartPreparationPeriod/time.Millisecond) < remainingMilliSecond {
 		logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is over %ds: continue",
-			w.StartPreparationPeriod/time.Second),
-			"duration", t.DurationMilliSecond/float64(time.Millisecond),
-			"cursor", t.CursorMilliSecond/float64(time.Millisecond))
+			w.StartPreparationPeriod/time.Second))
 		return nil
 	}
 	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %ds",
-		w.StartPreparationPeriod/time.Second),
-		"duration", t.DurationMilliSecond/float64(time.Millisecond),
-		"cursor", t.CursorMilliSecond/float64(time.Millisecond))
+		w.StartPreparationPeriod/time.Second))
 
 	// sleep until MediaInput is finished
 	time.Sleep(time.Duration(remainingMilliSecond) * time.Millisecond)
