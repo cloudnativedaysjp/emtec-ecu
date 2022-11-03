@@ -15,16 +15,14 @@ import (
 	"github.com/cloudnativedaysjp/cnd-operation-server/pkg/utils"
 )
 
-const (
-	componentName          = "obswatcher"
-	syncPeriod             = 10 * time.Second
-	startPreparetionPeriod = 60 * time.Second
-)
+const componentName = "obswatcher"
 
 type Config struct {
-	Logger               logr.Logger
-	Obs                  []ConfigObs
-	NotificationSendChan chan<- model.Notification
+	Logger                        logr.Logger
+	Obs                           []ConfigObs
+	NotificationSendChan          chan<- model.Notification
+	SyncPeriodSeconds             int
+	StartPreparationPeriodSeconds int
 }
 
 type ConfigObs struct {
@@ -48,8 +46,9 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
-		obswatcher := obswatcher{obswsClient, mr, conf.NotificationSendChan}
-		eg.Go(obswatcher.watch(ctx, logger, obs.DkTrackId))
+		obswatcher := obswatcher{obswsClient, mr, conf.NotificationSendChan,
+			time.Minute * time.Duration(conf.StartPreparationPeriodSeconds)}
+		eg.Go(obswatcher.watch(ctx, logger, time.NewTicker(time.Second*time.Duration(conf.SyncPeriodSeconds)), obs.DkTrackId))
 	}
 	if err := eg.Wait(); err != nil {
 		err := xerrors.Errorf("message: %w", err)
@@ -63,13 +62,16 @@ type obswatcher struct {
 	obswsClient          obsws.Client
 	mr                   sharedmem.ReaderIface
 	notificationSendChan chan<- model.Notification
+	// const variables
+	StartPreparationPeriod time.Duration
 }
 
-func (w *obswatcher) watch(ctx context.Context, logger logr.Logger, trackId int32) func() error {
+func (w *obswatcher) watch(ctx context.Context,
+	logger logr.Logger, ticker *time.Ticker, trackId int32,
+) func() error {
 	return func() error {
 		logger := logger.WithValues("trackId", trackId)
 
-		tick := time.NewTicker(syncPeriod)
 		if err := w.procedure(ctx, trackId); err != nil {
 			return xerrors.Errorf("message: %w", err)
 		}
@@ -78,7 +80,7 @@ func (w *obswatcher) watch(ctx context.Context, logger logr.Logger, trackId int3
 			case <-ctx.Done():
 				logger.Info("context was done.")
 				return nil
-			case <-tick.C:
+			case <-ticker.C:
 				ctx := context.Background()
 				ctx = logr.NewContext(ctx, logger)
 				if err := w.procedure(ctx, trackId); err != nil {
@@ -124,15 +126,15 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 	}
 	remainingMilliSecond := t.DurationMilliSecond - t.CursorMilliSecond
 
-	if float64(startPreparetionPeriod/time.Millisecond) < remainingMilliSecond {
+	if float64(w.StartPreparationPeriod/time.Millisecond) < remainingMilliSecond {
 		logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is over %ds: continue",
-			startPreparetionPeriod/time.Second),
+			w.StartPreparationPeriod/time.Second),
 			"duration", t.DurationMilliSecond/float64(time.Millisecond),
 			"cursor", t.CursorMilliSecond/float64(time.Millisecond))
 		return nil
 	}
 	logger.Info(fmt.Sprintf("remainingTime on current Scene's MediaInput is within %ds",
-		startPreparetionPeriod/time.Second),
+		w.StartPreparationPeriod/time.Second),
 		"duration", t.DurationMilliSecond/float64(time.Millisecond),
 		"cursor", t.CursorMilliSecond/float64(time.Millisecond))
 

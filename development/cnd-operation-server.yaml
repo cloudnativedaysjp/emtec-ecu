@@ -13,3 +13,6 @@ tracks:
       channelId: ${SWITCHER01_SLACK_CHANNEL_ID}
 redis:
   host: ${REDIS_HOST}
+watcher:
+  dkWatcher:
+    howManyMinutesBeforeNotification: 1

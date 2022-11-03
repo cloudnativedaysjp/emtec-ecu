@@ -18,24 +18,24 @@ import (
 const componentName = "dkwatcher"
 
 type Config struct {
-	Logger               logr.Logger
-	DkClient             dreamkast.Client
-	RedisClient          *db.RedisClient
-	NotificationSendChan chan<- model.Notification
+	Logger                           logr.Logger
+	DkClient                         dreamkast.Client
+	RedisClient                      *db.RedisClient
+	NotificationSendChan             chan<- model.Notification
+	SyncPeriodSeconds                int
+	HowManyMinutesBeforeNotification int
 }
-
-const (
-	syncPeriod                = 30 * time.Second
-	howManyMinutesUntilNotify = 5 * time.Minute
-)
 
 func Run(ctx context.Context, conf Config) error {
 	logger := conf.Logger.WithName(componentName)
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
-	dkwatcher := dkwatcher{conf.DkClient, conf.RedisClient, mw, mr, conf.NotificationSendChan}
-	if err := dkwatcher.watch(ctx, logger); err != nil {
+	dkwatcher := dkwatcher{conf.DkClient, conf.RedisClient, mw, mr,
+		conf.NotificationSendChan, time.Minute * time.Duration(conf.HowManyMinutesBeforeNotification)}
+	if err := dkwatcher.watch(ctx, logger, time.NewTicker(
+		time.Second*time.Duration(conf.SyncPeriodSeconds)),
+	); err != nil {
 		return err
 	}
 	return nil
@@ -47,10 +47,11 @@ type dkwatcher struct {
 	mw                   sharedmem.WriterIface
 	mr                   sharedmem.ReaderIface
 	notificationSendChan chan<- model.Notification
+	// const variables
+	HowManyDurationBeforeNotification time.Duration
 }
 
-func (w *dkwatcher) watch(ctx context.Context, logger logr.Logger) error {
-	tick := time.NewTicker(syncPeriod)
+func (w *dkwatcher) watch(ctx context.Context, logger logr.Logger, ticker *time.Ticker) error {
 	if err := w.procedure(ctx); err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (w *dkwatcher) watch(ctx context.Context, logger logr.Logger) error {
 		case <-ctx.Done():
 			logger.Info("context was done.")
 			return nil
-		case <-tick.C:
+		case <-ticker.C:
 			ctx := context.Background()
 			ctx = logr.NewContext(ctx, logger)
 			ctx = metrics.SetDreamkastMetricsToCtx(ctx,
@@ -101,7 +102,7 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 		notification := model.NewNotificationOnDkTimetable(
 			*currentTalk, *nextTalk)
 
-		if !track.Talks.IsStartNextTalkSoon(howManyMinutesUntilNotify) {
+		if !track.Talks.IsStartNextTalkSoon(w.HowManyDurationBeforeNotification) {
 			logger.Info("nextTalk is not start soon")
 			continue
 		}

@@ -68,39 +68,46 @@ func (n *notifier) watch(ctx context.Context, logger logr.Logger) error {
 			logger.Info("context was done.")
 			return nil
 		case notification := <-n.notificationRecvChan:
-			ctx := context.Background()
-			messageWasPosted := false
-
-			var trackId int32
-			var msg slackgo.Msg
-			switch m := notification.(type) {
-			case *model.NotificationOnDkTimetable:
-				trackId = m.TrackId()
-				msg = ViewNextSessionWillBegin(m)
-				defer func() {
-					if messageWasPosted {
-						if err := n.db.SetNextTalkNotification(ctx, *m); err != nil {
-							logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
-						}
-					}
-				}()
-			case *model.NotificationSceneMovedToNext:
-				trackId = m.TrackId()
-				msg = ViewSceneMovedToNext(m)
-			default:
-				logger.Error(fmt.Errorf(
-					"unknown Notification type: %v", reflect.TypeOf(m)), "unknown type")
-				continue
+			if err := n.notify(logger, notification); err != nil {
+				return err
 			}
-			sc, ok := n.slackClients[trackId]
-			if !ok {
-				logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", trackId))
-				return nil
-			}
-			if err := sc.PostMessage(ctx, n.channelIds[trackId], msg); err != nil {
-				return xerrors.Errorf("message: %w", err)
-			}
-			messageWasPosted = true
 		}
 	}
+}
+
+func (n *notifier) notify(logger logr.Logger, notification model.Notification) error {
+	ctx := context.Background()
+	messageWasPosted := false
+
+	var trackId int32
+	var msg slackgo.Msg
+	switch m := notification.(type) {
+	case *model.NotificationOnDkTimetable:
+		trackId = m.TrackId()
+		msg = ViewNextSessionWillBegin(m)
+		defer func() {
+			if messageWasPosted {
+				if err := n.db.SetNextTalkNotification(ctx, *m); err != nil {
+					logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
+				}
+			}
+		}()
+	case *model.NotificationSceneMovedToNext:
+		trackId = m.TrackId()
+		msg = ViewSceneMovedToNext(m)
+	default:
+		logger.Error(fmt.Errorf(
+			"unknown Notification type: %v", reflect.TypeOf(m)), "unknown type")
+	}
+	sc, ok := n.slackClients[trackId]
+	if !ok {
+		logger.Info(fmt.Sprintf("notifier is disabled on trackId %d", trackId))
+		return nil
+	}
+	if err := sc.PostMessage(ctx, n.channelIds[trackId], msg); err != nil {
+		logger.Error(err, "PostMessage was failed")
+		return nil
+	}
+	messageWasPosted = true
+	return nil
 }

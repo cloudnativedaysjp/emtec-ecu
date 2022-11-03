@@ -41,6 +41,7 @@ type Config struct {
 	Dreamkast DreamkastConfig `json:"dreamkast" validate:"required"`
 	Redis     RedisConfig     `json:"redis" validate:"required"`
 	Tracks    []TrackConfig   `json:"tracks" validate:"required"`
+	Watcher   WatcherConfig   `json:"watcher" validate:"required"`
 }
 
 type DebugConfig struct {
@@ -69,6 +70,10 @@ type DreamkastConfig struct {
 	Auth0ClientAudience string `json:"auth0ClientAudience" default:"https://event.cloudnativedays.jp/"`
 }
 
+type RedisConfig struct {
+	Host string `json:"host" validate:"required"`
+}
+
 type TrackConfig struct {
 	DkTrackId int32       `json:"dkTrackId" validate:"required"`
 	Obs       ObsConfig   `json:"obs" validate:"required"`
@@ -85,6 +90,17 @@ type SlackConfig struct {
 	ChannelId string `json:"channelId" validate:"required"`
 }
 
-type RedisConfig struct {
-	Host string `json:"host" validate:"required"`
+type WatcherConfig struct {
+	ObsWatcher ObsWatcherConfig `json:"obsWatcher"`
+	DkWatcher  DkWatcherConfig  `json:"dkWatcher"`
+}
+
+type ObsWatcherConfig struct {
+	SyncPeriodSeconds             int `json:"syncPeriodSeconds" default:"10"`
+	StartPreparationPeriodSeconds int `json:"startPreparationPeriodSeconds" default:"60"`
+}
+
+type DkWatcherConfig struct {
+	SyncPeriodSeconds                int `json:"syncPeriodSeconds" default:"30"`
+	HowManyMinutesBeforeNotification int `json:"howManyMinutesUntilNotify" default:"5"`
 }

@@ -110,9 +110,11 @@ func main() {
 				})
 			}
 			return obswatcher.Run(ctx, obswatcher.Config{
-				Logger:               logger,
-				Obs:                  configObs,
-				NotificationSendChan: notificationStream,
+				Logger:                        logger,
+				Obs:                           configObs,
+				NotificationSendChan:          notificationStream,
+				SyncPeriodSeconds:             conf.Watcher.ObsWatcher.SyncPeriodSeconds,
+				StartPreparationPeriodSeconds: conf.Watcher.ObsWatcher.StartPreparationPeriodSeconds,
 			})
 		})
 	}
@@ -120,10 +122,12 @@ func main() {
 	if !conf.Debug.DisableDkWatcher {
 		eg.Go(func() error {
 			return dkwatcher.Run(ctx, dkwatcher.Config{
-				Logger:               logger,
-				DkClient:             dkClient,
-				RedisClient:          redisClient,
-				NotificationSendChan: notificationStream,
+				Logger:                           logger,
+				DkClient:                         dkClient,
+				RedisClient:                      redisClient,
+				NotificationSendChan:             notificationStream,
+				SyncPeriodSeconds:                conf.Watcher.DkWatcher.SyncPeriodSeconds,
+				HowManyMinutesBeforeNotification: conf.Watcher.DkWatcher.HowManyMinutesBeforeNotification,
 			})
 		})
 	}
