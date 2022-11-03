@@ -96,11 +96,11 @@ type WatcherConfig struct {
 }
 
 type ObsWatcherConfig struct {
-	SyncPeriodSeconds             int `json:"syncPeriodSeconds" default:"10"`
-	StartPreparationPeriodSeconds int `json:"startPreparationPeriodSeconds" default:"60"`
+	SyncPeriodSeconds             int `json:"syncPeriodSeconds" default:"5"`
+	StartPreparationPeriodSeconds int `json:"startPreparationPeriodSeconds" default:"30"`
 }
 
 type DkWatcherConfig struct {
-	SyncPeriodSeconds                int `json:"syncPeriodSeconds" default:"30"`
+	SyncPeriodSeconds                int `json:"syncPeriodSeconds" default:"10"`
 	HowManyMinutesBeforeNotification int `json:"howManyMinutesUntilNotify" default:"5"`
 }
