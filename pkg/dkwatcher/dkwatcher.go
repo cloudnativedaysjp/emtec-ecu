@@ -85,6 +85,14 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 			continue
 		}
 
+		if disabled, err := w.mr.DisableAutomation(track.Id); err != nil {
+			logger.Error(xerrors.Errorf("message: %w", err), "mr.DisableAutomation() was failed")
+			return nil
+		} else if disabled {
+			logger.Info("DisableAutomation was true, skipped")
+			return nil
+		}
+
 		currentTalk, err := track.Talks.GetCurrentTalk()
 		if err != nil {
 			// カンファレンス開始前の場合は処理を続けたいため return しない
