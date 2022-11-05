@@ -112,7 +112,7 @@ func Test_viewNextSessionWillBegin(t *testing.T) {
 			},
 			"accessory": {
 				"type": "button",
-				"action_id": "broadcast_scenenext",
+				"action_id": "emtec_scenenext",
 				"value": "1__A",
 				"text": {
 					"type": "plain_text",
