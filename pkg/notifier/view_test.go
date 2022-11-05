@@ -201,7 +201,52 @@ func Test_viewScenemovedToNext(t *testing.T) {
 			"elements": [
 				{
 					"type": "plain_text",
-					"text": "Current Talk",
+					"text": "Previous Talk",
+					"emoji": true
+				}
+			]
+		},
+		{
+			"type": "section",
+			"fields": [
+				{
+					"type": "plain_text",
+					"text": "Track A",
+					"emoji": true
+				},
+				{
+					"type": "plain_text",
+					"text": "10:00 - 11:00",
+					"emoji": true
+				},
+				{
+					"type": "plain_text",
+					"text": "Type: オンライン登壇",
+					"emoji": true
+				},
+				{
+					"type": "plain_text",
+					"text": "Speaker: kanata",
+					"emoji": true
+				}
+			]
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Title: <https://event.cloudnativedays.jp/cndt2101/talks/10001|ものすごい発表>"
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": "Next Talk",
 					"emoji": true
 				}
 			]
