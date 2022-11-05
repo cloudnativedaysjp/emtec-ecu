@@ -112,6 +112,7 @@ func main() {
 			return obswatcher.Run(ctx, obswatcher.Config{
 				Logger:                        logger,
 				Obs:                           configObs,
+				RedisClient:                   redisClient,
 				NotificationSendChan:          notificationStream,
 				SyncPeriodSeconds:             conf.Watcher.ObsWatcher.SyncPeriodSeconds,
 				StartPreparationPeriodSeconds: conf.Watcher.ObsWatcher.StartPreparationPeriodSeconds,

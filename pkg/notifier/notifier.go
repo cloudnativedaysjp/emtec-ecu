@@ -102,7 +102,7 @@ func (n *notifier) notify(logger logr.Logger, notification model.Notification) e
 		msg = ViewNextSessionWillBegin(m)
 		defer func() {
 			if messageWasPosted {
-				if err := n.db.SetNextTalkNotification(ctx, *m); err != nil {
+				if err := n.db.NextTalkNotificationJustWasSent(ctx, *m); err != nil {
 					logger.Error(xerrors.Errorf("message: %w", err), "set value to redis failed")
 				}
 			}
@@ -114,6 +114,7 @@ func (n *notifier) notify(logger logr.Logger, notification model.Notification) e
 		//
 		trackId = m.TrackId()
 		msg = ViewSceneMovedToNext(m)
+		logger.Info("notified to Slack regarding Scene was moved to next")
 
 	default:
 		logger.Error(fmt.Errorf(

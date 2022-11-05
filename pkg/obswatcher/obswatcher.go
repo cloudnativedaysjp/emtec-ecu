@@ -9,6 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 
+	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/db"
 	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/obsws"
 	"github.com/cloudnativedaysjp/emtec-ecu/pkg/infra/sharedmem"
 	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
@@ -20,6 +21,7 @@ const componentName = "obswatcher"
 type Config struct {
 	Logger                        logr.Logger
 	Obs                           []ConfigObs
+	RedisClient                   *db.RedisClient
 	NotificationSendChan          chan<- model.Notification
 	SyncPeriodSeconds             int
 	StartPreparationPeriodSeconds int
@@ -46,7 +48,7 @@ func Run(ctx context.Context, conf Config) error {
 			logger.Error(err, "obsws.NewObsWebSocketClient() was failed")
 			return err
 		}
-		obswatcher := obswatcher{obswsClient, mr, conf.NotificationSendChan,
+		obswatcher := obswatcher{obswsClient, conf.RedisClient, mr, conf.NotificationSendChan,
 			time.Minute * time.Duration(conf.StartPreparationPeriodSeconds)}
 		eg.Go(obswatcher.watch(ctx, logger, time.NewTicker(time.Second*time.Duration(conf.SyncPeriodSeconds)), obs.DkTrackId))
 	}
@@ -60,6 +62,7 @@ func Run(ctx context.Context, conf Config) error {
 
 type obswatcher struct {
 	obswsClient          obsws.Client
+	db                   *db.RedisClient
 	mr                   sharedmem.ReaderIface
 	notificationSendChan chan<- model.Notification
 	// const variables
@@ -118,9 +121,22 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 		logger.Info(fmt.Sprintf("talks.GetNextTalk was failed: %v", err))
 		return nil
 	}
+	logger = logger.WithValues(
+		"currentTalkId", currentTalk.Id,
+		"nextTalkId", nextTalk.Id,
+	)
 
 	// currentTalk と nextTalk のどちらかがオンデマンドなセッションの場合、obswatcher からは何もする必要が無いため return する
 	if currentTalk.IsOnDemand() || nextTalk.IsOnDemand() {
+		return nil
+	}
+
+	// 既に 1 度同じ currentTalk, nextTalk における自動遷移を行っている場合、何もしない
+	if exist, err := w.db.HasMoveToNextSceneBeenDone(ctx, *nextTalk); err != nil {
+		logger.Error(xerrors.Errorf("message: %w", err), "failed to connect to DB")
+		return nil
+	} else if exist {
+		logger.Info("MoveToNextScene has already been done")
 		return nil
 	}
 
@@ -160,6 +176,13 @@ func (w *obswatcher) procedure(ctx context.Context, trackId int32) error {
 	logger.Info("automated task was completed. Scene was moved to next.")
 	w.notificationSendChan <- model.NewNotificationSceneMovedToNext(
 		*currentTalk, *nextTalk)
-	logger.Info("notified to Slack regarding Scene was moved to next")
+
+	// 同じ currentTalk, nextTalk における自動遷移を 2 回以上行わないよう DB に保存
+	if err := w.db.MoveToNextSceneJustWasDone(ctx, *nextTalk); err != nil {
+		msg := "failed to connect to DB"
+		logger.Error(xerrors.Errorf("%s: %w", msg, err), msg)
+		return nil
+	}
+
 	return nil
 }
