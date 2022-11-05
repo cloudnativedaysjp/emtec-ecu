@@ -1,13 +1,13 @@
 version: "3.8"
 services:
   seaman:
-    image: public.ecr.aws/f5j9d0q5/seaman:0.0.9
+    image: public.ecr.aws/f5j9d0q5/seaman:main
     command: --config=/mnt/seaman.yaml
     network_mode: host # for connecting to local emtec-ecu
     volumes:
       - ./seaman.yaml:/mnt/seaman.yaml
     environment:
-      BROADCAST_ENDPOINT_URL: localhost:20080
+      EMTEC_ECU_ENDPOINT_URL: localhost:20080
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
 

@@ -7,5 +7,5 @@ github:
   accessToken: dummy
 release:
   targets: []
-broadcast:
-  endpointUrl: ${BROADCAST_ENDPOINT_URL}
+emtec:
+  endpointUrl: ${EMTEC_ECU_ENDPOINT_URL}

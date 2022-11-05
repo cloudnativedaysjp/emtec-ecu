@@ -23,12 +23,12 @@ services:
       - "6379:6379"
 
   seaman:
-    image: public.ecr.aws/f5j9d0q5/seaman:0.0.9
+    image: public.ecr.aws/f5j9d0q5/seaman:main
     command: --config=/mnt/seaman.yaml
     volumes:
       - ./seaman.yaml:/mnt/seaman.yaml
     environment:
-      BROADCAST_ENDPOINT_URL: emtec-ecu:20080
+      EMTEC_ECU_ENDPOINT_URL: emtec-ecu:20080
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
 
