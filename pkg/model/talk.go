@@ -17,7 +17,8 @@ const (
 	TalkType_Ending
 	TalkType_Commercial
 
-	dateLayout = "2006-01-02"
+	dateLayout        = "2006-01-02"
+	countdownDuration = 1 * time.Minute
 )
 
 //
@@ -167,6 +168,12 @@ func (t Talk) GetTalkType(title string, presentationMethod *string) (TalkType, e
 }
 
 func (t Talk) RemainingDurationUntilStart() time.Duration {
+	startAt := t.StartAt
+	if t.Type == TalkType_RecordingSession {
+		// 遷移先の動画が recording の場合カウントダウン動画が存在するため、
+		// それを考慮して startAt を ${COUNTDOWN_DURATION} だけ前倒しする
+		startAt = startAt.Add(-1 * countdownDuration)
+	}
 	now := nowFunc()
-	return t.StartAt.Sub(now)
+	return startAt.Sub(now)
 }
