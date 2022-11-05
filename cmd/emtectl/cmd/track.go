@@ -98,6 +98,8 @@ var trackDisableCmd = &cobra.Command{
 func init() {
 	trackEnableCmd.PersistentFlags().Int32VarP(&trackId, "track-id", "t", 0, "Track ID on Dreamkast")
 	_ = trackEnableCmd.MarkPersistentFlagRequired("track-id")
+	trackDisableCmd.PersistentFlags().Int32VarP(&trackId, "track-id", "t", 0, "Track ID on Dreamkast")
+	_ = trackDisableCmd.MarkPersistentFlagRequired("track-id")
 
 	trackCmd.AddCommand(trackListCmd)
 	trackCmd.AddCommand(trackEnableCmd)
