@@ -90,7 +90,7 @@ func viewNextSessionWillBegin(m *model.NotificationOnDkTimetable) (slack.Msg, er
 		accessory = &slack.Accessory{
 			ButtonElement: &slack.ButtonBlockElement{
 				Type:     slack.METButton,
-				ActionID: seaman_api.ActIdBroadcast_SceneNext,
+				ActionID: seaman_api.ActIdEmtec_SceneNext,
 				Value:    seaman_api.Track{Id: m.TrackId(), Name: m.TrackName()}.String(),
 				Text: &slack.TextBlockObject{
 					Type: "plain_text",
