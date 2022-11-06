@@ -21,6 +21,7 @@ type Config struct {
 	DkClient                         dreamkast.Client
 	NotificationSendChan             chan<- model.Notification
 	SyncPeriodSeconds                int
+	EventAbbr                        string
 	HowManyMinutesBeforeNotification int
 }
 
@@ -29,8 +30,8 @@ func Run(ctx context.Context, conf Config) error {
 	mw := sharedmem.Writer{UseStorageForTrack: true}
 	mr := sharedmem.Reader{UseStorageForDisableAutomation: true}
 
-	dkwatcher := dkwatcher{conf.DkClient, mw, mr,
-		conf.NotificationSendChan, time.Minute * time.Duration(conf.HowManyMinutesBeforeNotification)}
+	dkwatcher := dkwatcher{conf.DkClient, mw, mr, conf.NotificationSendChan,
+		conf.EventAbbr, time.Minute * time.Duration(conf.HowManyMinutesBeforeNotification)}
 	if err := dkwatcher.watch(ctx, logger, time.NewTicker(
 		time.Second*time.Duration(conf.SyncPeriodSeconds)),
 	); err != nil {
@@ -45,7 +46,8 @@ type dkwatcher struct {
 	mr                   sharedmem.ReaderIface
 	notificationSendChan chan<- model.Notification
 	// const variables
-	HowManyDurationBeforeNotification time.Duration
+	eventAbbr                         string
+	howManyDurationBeforeNotification time.Duration
 }
 
 func (w *dkwatcher) watch(ctx context.Context, logger logr.Logger, ticker *time.Ticker) error {
@@ -72,7 +74,7 @@ func (w *dkwatcher) watch(ctx context.Context, logger logr.Logger, ticker *time.
 func (w *dkwatcher) procedure(ctx context.Context) error {
 	rootLogger := utils.GetLogger(ctx)
 
-	tracks, err := w.dkClient.ListTracks(ctx)
+	tracks, err := w.dkClient.ListTracks(ctx, w.eventAbbr)
 	if err != nil {
 		rootLogger.Error(xerrors.Errorf("message: %w", err), "dkClient.ListTalks was failed")
 		return nil
@@ -107,7 +109,7 @@ func (w *dkwatcher) procedure(ctx context.Context) error {
 		notification := model.NewNotificationOnDkTimetable(
 			*currentTalk, *nextTalk)
 
-		if !track.Talks.IsStartNextTalkSoon(w.HowManyDurationBeforeNotification) {
+		if !track.Talks.IsStartNextTalkSoon(w.howManyDurationBeforeNotification) {
 			logger.Info("nextTalk is not start soon")
 			continue
 		}

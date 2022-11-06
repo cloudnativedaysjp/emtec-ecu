@@ -67,14 +67,14 @@ func main() {
 	//
 
 	// dreamkast client
-	dkClient, err := dreamkast.NewClient(
-		conf.Dreamkast.EventAbbr, conf.Dreamkast.EndpointUrl,
-		conf.Dreamkast.Auth0Domain, conf.Dreamkast.Auth0ClientId,
-		conf.Dreamkast.Auth0ClientSecret, conf.Dreamkast.Auth0ClientAudience)
+	dkClient, err := dreamkast.NewClient(conf.Dreamkast.EndpointUrl)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	dkClient = dkClient.WithCredential(
+		conf.Dreamkast.Auth0Domain, conf.Dreamkast.Auth0ClientId,
+		conf.Dreamkast.Auth0ClientSecret, conf.Dreamkast.Auth0ClientAudience)
 
 	// redis client
 	redisClient, err := db.NewRedisClient(conf.Redis.Host)
@@ -127,6 +127,7 @@ func main() {
 				DkClient:                         dkClient,
 				NotificationSendChan:             notificationStream,
 				SyncPeriodSeconds:                conf.Watcher.DkWatcher.SyncPeriodSeconds,
+				EventAbbr:                        conf.Dreamkast.EventAbbr,
 				HowManyMinutesBeforeNotification: conf.Watcher.DkWatcher.HowManyMinutesBeforeNotification,
 			})
 		})

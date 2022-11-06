@@ -13,50 +13,53 @@ import (
 )
 
 type Client interface {
+	WithCredential(auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience string) Client
 	EndpointUrl() string
-	ListTracks(ctx context.Context) ([]model.Track, error)
+	ListTracks(ctx context.Context, eventAbbr string) ([]model.Track, error)
 	SetSpecifiedTalkOnAir(ctx context.Context, talkId int32) error
-	SetNextTalkOnAir(ctx context.Context, trackId int32) error
+	SetNextTalkOnAir(ctx context.Context, eventAbbr string, trackId int32) error
 }
 
 type ClientImpl struct {
-	client lib.DreamkastClient
-
+	client            lib.DreamkastClient
 	endpointUrl       string
-	eventAbbr         string
 	auth0Domain       string
 	auth0ClientId     string
 	auth0ClientSecret string
 	auth0Audience     string
 }
 
-func NewClient(eventAbbr, dkEndpointUrl string,
-	auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience string,
-) (Client, error) {
+func NewClient(dkEndpointUrl string) (Client, error) {
 	c, err := lib.NewClient(dkEndpointUrl)
 	if err != nil {
 		return nil, err
 	}
-	return &ClientImpl{
-		c, dkEndpointUrl,
-		eventAbbr, auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience,
-	}, nil
+	return &ClientImpl{client: c, endpointUrl: dkEndpointUrl}, nil
+}
+
+func (c ClientImpl) WithCredential(auth0Domain, auth0ClientId, auth0ClientSecret, auth0Audience string) Client {
+	c.auth0Domain = auth0Domain
+	c.auth0ClientId = auth0ClientId
+	c.auth0ClientSecret = auth0ClientSecret
+	c.auth0Audience = auth0Audience
+	return &c
 }
 
 func (c *ClientImpl) EndpointUrl() string {
 	return c.endpointUrl
 }
-func (c *ClientImpl) ListTracks(ctx context.Context) ([]model.Track, error) {
+
+func (c *ClientImpl) ListTracks(ctx context.Context, eventAbbr string) ([]model.Track, error) {
 	logger := utils.GetLogger(ctx)
 
-	tracks, err := c.client.ListTracks(ctx, c.eventAbbr)
+	tracks, err := c.client.ListTracks(ctx, eventAbbr)
 	if err != nil {
 		return nil, xerrors.Errorf("message: %w", err)
 	}
 	var result []model.Track
 	for _, track := range tracks {
 		var talksModel model.Talks
-		talks, err := c.client.ListTalks(ctx, c.eventAbbr, track.ID)
+		talks, err := c.client.ListTalks(ctx, eventAbbr, track.ID)
 		if err != nil {
 			return nil, xerrors.Errorf("message: %w", err)
 		}
@@ -66,7 +69,7 @@ func (c *ClientImpl) ListTracks(ctx context.Context) ([]model.Track, error) {
 				TalkName:  talk.Title,
 				TrackId:   track.ID,
 				TrackName: track.Name,
-				EventAbbr: c.eventAbbr,
+				EventAbbr: eventAbbr,
 			}
 			talkType, err := t.GetTalkType(talk.Title, talk.PresentationMethod)
 			if err != nil {
@@ -123,11 +126,11 @@ func (c *ClientImpl) setSpecifiedTalkOnAir(ctx context.Context, talkId int32) er
 	return nil
 }
 
-func (c *ClientImpl) SetNextTalkOnAir(ctx context.Context, trackId int32) error {
+func (c *ClientImpl) SetNextTalkOnAir(ctx context.Context, eventAbbr string, trackId int32) error {
 	// If Auth0Token has been expired, retry only once.
 	err := retry.Do(
 		func() (err error) {
-			err = c.setNextTalkOnAir(ctx, trackId)
+			err = c.setNextTalkOnAir(ctx, eventAbbr, trackId)
 			return
 		},
 		retry.RetryIf(func(err error) bool {
@@ -139,14 +142,14 @@ func (c *ClientImpl) SetNextTalkOnAir(ctx context.Context, trackId int32) error 
 	return err
 }
 
-func (c *ClientImpl) setNextTalkOnAir(ctx context.Context, trackId int32) error {
+func (c *ClientImpl) setNextTalkOnAir(ctx context.Context, eventAbbr string, trackId int32) error {
 	if err := c.client.GenerateAuth0Token(ctx,
 		c.auth0Domain, c.auth0ClientId, c.auth0ClientSecret, c.auth0Audience,
 	); err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
 
-	talks, err := c.client.ListTalks(ctx, c.eventAbbr, trackId)
+	talks, err := c.client.ListTalks(ctx, eventAbbr, trackId)
 	if err != nil {
 		return xerrors.Errorf("message: %w", err)
 	}
