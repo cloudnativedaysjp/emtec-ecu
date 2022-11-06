@@ -11,7 +11,7 @@ import (
 
 func (c *DreamkastClientImpl) ListTalks(ctx context.Context, eventAbbr string, trackId int32) (ListTalksResp, error) {
 	url := c.dkEndpointUrl
-	url.Path = filepath.Join(url.Path, "/v1/talks")
+	url.Path = filepath.Join(url.Path, "/api/v1/talks")
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (c *DreamkastClientImpl) ListTalks(ctx context.Context, eventAbbr string, t
 // TODO: write test
 func (c *DreamkastClientImpl) UpdateTalk(ctx context.Context, talkId int32, onAir bool) error {
 	url := c.dkEndpointUrl
-	url.Path = filepath.Join(url.Path, "/v1/talks", strconv.Itoa(int(talkId)))
+	url.Path = filepath.Join(url.Path, "/api/v1/talks", strconv.Itoa(int(talkId)))
 	reqBody, err := json.Marshal(&UpdateTalksReq{OnAir: onAir})
 	if err != nil {
 		return err

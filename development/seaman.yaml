@@ -9,3 +9,9 @@ release:
   targets: []
 emtec:
   endpointUrl: ${EMTEC_ECU_ENDPOINT_URL}
+  dreamkast:
+    endpointUrl: ${DK_ENDPOINT_URL}
+    auth0Domain: ${DK_AUTH0_DOMAIN}
+    auth0ClientId: ${DK_AUTH0_CLIENT_ID}
+    auth0ClientSecret: ${DK_AUTH0_CLIENT_SECRET}
+
