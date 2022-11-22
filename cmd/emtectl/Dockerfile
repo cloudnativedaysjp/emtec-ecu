@@ -8,7 +8,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags osusergo,netgo -a -o emtectl ./cmd/emtectl
 
 ### runner ###
-FROM alpine:3.16.2
+FROM alpine:3.17.0
 WORKDIR /
 COPY --from=builder /workspace/emtectl .
 
