@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/andreykaipov/goobs v0.12.0
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/cloudnativedaysjp/seaman v0.1.0
+	github.com/cloudnativedaysjp/seaman v0.2.0
 	github.com/creasty/defaults v1.7.0
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.3
@@ -57,9 +57,9 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
