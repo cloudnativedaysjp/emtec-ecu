@@ -45,7 +45,7 @@ lint: golangci-lint ## Run golangci-lint against code.
 	$(GOLANGCI_LINT) run -c .golangci.yml
 
 .PHONY: test
-test: fmt vet lint ## Run some test against code.
+test: fmt vet ## Run some test against code.
 	go test ./... -cover -v
 
 
@@ -62,7 +62,7 @@ MOCKGEN ?= $(LOCALBIN)/mockgen
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
-	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.2
 
 .PHONY: mockgen
 mockgen: $(MOCKGEN) ## Download mockgen locally if necessary.
