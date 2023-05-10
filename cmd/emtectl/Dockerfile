@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
   -ldflags "-s -w" -tags osusergo,netgo -a -o emtectl ./cmd/emtectl
 
 ### runner ###
-FROM alpine:3.17
+FROM alpine:3.18
 
 LABEL org.opencontainers.image.authors="Shota Kitazawa, Kohei Ota"
 LABEL org.opencontainers.image.url="https://github.com/cloudnativedaysjp/emtec-ecu"
