@@ -5,7 +5,6 @@ import (
 	"net"
 
 	"github.com/go-logr/logr"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"go.uber.org/zap"
@@ -59,7 +58,7 @@ func Run(ctx context.Context, conf Config) error {
 
 	// Initialize gRPC server
 	s := grpc.NewServer(
-		grpc_middleware.WithUnaryServerChain(
+		grpc.ChainUnaryInterceptor(
 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_zap.UnaryServerInterceptor(conf.ZapLogger.Named(componentName)),
 		),
