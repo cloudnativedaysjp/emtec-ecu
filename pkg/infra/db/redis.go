@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/cloudnativedaysjp/emtec-ecu/pkg/model"
-	redis "github.com/go-redis/redis/v8"
+	redis "github.com/redis/go-redis/v9"
 	"golang.org/x/xerrors"
 )
 
