@@ -52,5 +52,4 @@ func (w DreamkastClientWrapper) UpdateTalk(ctx context.Context, talkId int32, on
 	err := w.c.UpdateTalk(ctx, talkId, onAir)
 	metricsDao.UpdateTalk(w.nowFunc().Sub(now))
 	return err
-
 }

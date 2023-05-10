@@ -10,13 +10,13 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// debugCmd represents the track command
+// debugCmd represents the track command.
 var debugCmd = &cobra.Command{
 	Use:   "debug",
 	Short: "debug for emtec-ecu",
 }
 
-// debugListLocalmemCmd represents the "track list" command
+// debugListLocalmemCmd represents the "track list" command.
 var debugListLocalmemCmd = &cobra.Command{
 	Use: "list-localmem",
 	Run: func(cmd *cobra.Command, args []string) {

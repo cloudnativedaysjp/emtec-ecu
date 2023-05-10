@@ -514,7 +514,6 @@ func TestTalk_GetActualStartAtAndEndAt(t *testing.T) {
 				t.Errorf("Talk.GetActualStartAtAndEndAt() error = %v, wantStatAt = %v, wantEndAt = %v,", err, tt.wantStartAt, tt.wantEndAt)
 				return
 			}
-
 		})
 	}
 }

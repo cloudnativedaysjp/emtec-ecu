@@ -1,6 +1,6 @@
 module github.com/cloudnativedaysjp/emtec-ecu
 
-go 1.19
+go 1.20
 
 require (
 	github.com/andreykaipov/goobs v0.10.0
