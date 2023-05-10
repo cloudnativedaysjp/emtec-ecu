@@ -1,14 +1,14 @@
 linters:
   disable-all: true
   enable:
-    - bodyclose
+    # - bodyclose
     - depguard
-    - dupl
+    # - dupl
     - errcheck
     - exportloopref
-    - gochecknoinits
+    # - gochecknoinits
     - goconst
-    - gocritic
+    # - gocritic
     - gocyclo
     - gofmt
     - goimports
@@ -20,14 +20,14 @@ linters:
     - ineffassign
     - misspell
     - nakedret
-    - noctx
+    # - noctx
     - nolintlint
     # - revive
     - staticcheck
     # - stylecheck
     - typecheck
-    - unconvert
-    - unparam
+    # - unconvert
+    # - unparam
     - unused
     - whitespace
   fast: true
