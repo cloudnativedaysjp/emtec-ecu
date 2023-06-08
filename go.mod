@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/andreykaipov/goobs v0.12.0
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/cloudnativedaysjp/seaman v0.2.0
+	github.com/cloudnativedaysjp/seaman v1.0.4
 	github.com/creasty/defaults v1.7.0
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.3
